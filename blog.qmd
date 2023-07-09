@@ -1,0 +1,12 @@
+---
+title: Blog
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  categories: true
+---
+
+I'm still maintaining my [digital garden](https://joelhooks.com/digital-garden/) in a non-public manner[^1], but from time to time I encounter an idea which I'd just love to share with others or I am asked frequently about to make it a topic of a separate post.
+
+[^1]: Sometimes my ideas are just silly and need more time before I decide whether they are useful at all or they are just noise. Sometimes it's joint work with other people and I can't share their intellectual property without approval. And I still haven't figured out how to integrate [Obsidian](https://obsidian.md/) with [Quarto](https://quarto.org/), which are wonderful tools.

@@ -1,0 +1,86 @@
+[
+  {
+    "objectID": "posts/board-games-monte-carlo.html",
+    "href": "posts/board-games-monte-carlo.html",
+    "title": "Understanding board games with Monte Carlo simulations",
+    "section": "",
+    "text": "I like playing board games, but I never remember the probabilities of different interesting events. Let’s code a very simple Monte Carlo simulation to evaluate probabilities used in them, so I can revisit to this website and use it to (maybe eventually) win."
+  },
+  {
+    "objectID": "posts/board-games-monte-carlo.html#fight-or-flight",
+    "href": "posts/board-games-monte-carlo.html#fight-or-flight",
+    "title": "Understanding board games with Monte Carlo simulations",
+    "section": "Fight or flight?",
+    "text": "Fight or flight?\nIn the rare days when I find time to play Runebound, I find myself in situations fighting monsters and trying to decide whether I should try to fight them or escape. I know a monster’s strength (high), I know my strength (low), but I don’t know how likely it is that the difference can be compensated by throwing two ten-sided dice.\nLet’s estimate the chances of getting at least \\(X\\) points due to the dice throw.\n\n\nCode\nimport numpy as np\n\nn_simulations: int = 100_000\ndice: int = 10\n\nrng = np.random.default_rng(42)\noccurrences = np.zeros(2 * dice + 1, dtype=float)\n\nthrows = rng.integers(1, dice, endpoint=True, size=(n_simulations, 2))\ntotal = throws.sum(axis=1)\n\nfor t in total:\n    occurrences[:t+1] += 1\n\noccurrences /= n_simulations\n\nfor i, p in enumerate(occurrences):\n    if i &lt; 1:\n        continue\n    print(f\"{i}: {100*p:.1f}%\")\n\n\n1: 100.0%\n2: 100.0%\n3: 99.0%\n4: 97.0%\n5: 94.0%\n6: 90.1%\n7: 85.2%\n8: 79.2%\n9: 72.2%\n10: 64.1%\n11: 55.1%\n12: 45.2%\n13: 36.0%\n14: 28.0%\n15: 21.1%\n16: 15.1%\n17: 10.0%\n18: 6.0%\n19: 3.0%\n20: 1.0%\n\n\nIn this case it’s also very easy to actually calculate the probabilities without Monte Carlo simulation:\n\n\nCode\nprobabilities = np.zeros(2*dice + 1, dtype=float)\n\nfor result1 in range(1, dice + 1):\n    for result2 in range(1, dice + 1):\n        total = result1 + result2\n        probabilities[:total + 1] += 1/dice**2\n\nfor i, p in enumerate(occurrences):\n    if i &lt; 1:\n        continue\n    print(f\"{i}: {100*p:.1f}%\")\n\n\n1: 100.0%\n2: 100.0%\n3: 99.0%\n4: 97.0%\n5: 94.0%\n6: 90.1%\n7: 85.2%\n8: 79.2%\n9: 72.2%\n10: 64.1%\n11: 55.1%\n12: 45.2%\n13: 36.0%\n14: 28.0%\n15: 21.1%\n16: 15.1%\n17: 10.0%\n18: 6.0%\n19: 3.0%\n20: 1.0%\n\n\nThe exact solution requires \\(O(K^2)\\) operations, where one uses two dice with \\(K\\) sides1. For a larger number of dice this solution may not be as tractable, so Monte Carlo approximations may shine."
+  },
+  {
+    "objectID": "posts/board-games-monte-carlo.html#where-should-my-cheese-be",
+    "href": "posts/board-games-monte-carlo.html#where-should-my-cheese-be",
+    "title": "Understanding board games with Monte Carlo simulations",
+    "section": "Where should my cheese be?",
+    "text": "Where should my cheese be?\nIn Cashflow one way to win the end-game is to quickly get to the tile with a cheese-shaped token. As this token can be placed in advance, I was wondering what the optimal location of it should be.\nIf I put the token on the first tile, I need to throw exactly one in my first throw or I will need to travel across the whole board to close the loop and have another chance (or try to win the game in another way).\nLet’s use Monte Carlo simulation to estimate where I should put the token so I can win in at most five moves:\n\n\nCode\nimport numpy as np \n\nN_SIMULATIONS: int = 100_000\nN_THROWS: int = 5\nDICE: int = 6  # Number of sides on the dice\nrng = np.random.default_rng(101)\n\nvisitations = np.zeros(N_THROWS * DICE + 1)\n\nfor simulation in range(N_SIMULATIONS):\n    position = 0\n    for throw_index in range(N_THROWS):\n        result = rng.integers(1, DICE, endpoint=True)\n        position += result\n        visitations[position] += 1\n\nfor i in range(N_THROWS * DICE + 1):\n    percentage = 100 * visitations[i] / N_SIMULATIONS\n    print(f\"{i}: {percentage:.1f}\")\n\n\n0: 0.0\n1: 16.5\n2: 19.3\n3: 22.8\n4: 26.4\n5: 30.8\n6: 36.2\n7: 25.2\n8: 26.8\n9: 28.1\n10: 28.6\n11: 28.4\n12: 27.9\n13: 25.8\n14: 25.1\n15: 24.0\n16: 21.8\n17: 19.6\n18: 16.5\n19: 13.9\n20: 11.2\n21: 8.5\n22: 6.2\n23: 4.3\n24: 2.7\n25: 1.6\n26: 0.9\n27: 0.5\n28: 0.2\n29: 0.1\n30: 0.0\n\n\nAgain, we could do this in the exact fashion — for example, for 30 we know that the probability is exactly \\(6^{-5}\\approx 0.013\\%\\), but it’s quite clear that the sixth tile gives decent chances of winning in the first few moves."
+  },
+  {
+    "objectID": "posts/board-games-monte-carlo.html#footnotes",
+    "href": "posts/board-games-monte-carlo.html#footnotes",
+    "title": "Understanding board games with Monte Carlo simulations",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nThe implemented solution works in \\(O(K^3)\\) due to the probabilities[:total + 1] operation. If the performance did really matter here, we could store the occurrences and then calculate cumulative sums only once in the end.↩︎"
+  },
+  {
+    "objectID": "posts/expectations-student-mentorship.html",
+    "href": "posts/expectations-student-mentorship.html",
+    "title": "Student mentorship: expectations document",
+    "section": "",
+    "text": "Welcome! This document is supposed to explain my general mentoring style and act as a skeleton around we can build the collaboration and mentorship rules.\nPlease, note:"
+  },
+  {
+    "objectID": "posts/expectations-student-mentorship.html#mission-statement",
+    "href": "posts/expectations-student-mentorship.html#mission-statement",
+    "title": "Student mentorship: expectations document",
+    "section": "Mission statement",
+    "text": "Mission statement\nWhen I advise on a project I try to keep the following in mind:\n\nI want you to learn and become a better researcher and engineer at the end of the project.\nIt’s more important that we understand each other and are happy with the mentorship, rather than we get an additional feature."
+  },
+  {
+    "objectID": "posts/expectations-student-mentorship.html#expectations",
+    "href": "posts/expectations-student-mentorship.html#expectations",
+    "title": "Student mentorship: expectations document",
+    "section": "Expectations",
+    "text": "Expectations\n\nWhat you can expect from me\n\nI’ll find regular time to meet with you and advise on the steps which may be worth taking. While I will be more “hands-on” and have more precise ideas when you start, I want you to become an independent thinker with a good knowledge on the topic – it’s also likely that you’ll know more about the topic than me by the end of your project!\nI’ll advise you on your code and writing, to make sure that your skills improve.\n\nI’ll keep an open mindset to your comments and suggestions. If you encounter any issues, let me know and we’ll work together on resolving them.\n\n\n\nWhat I’d like to expect from you\n\nHonesty. If something doesn’t work for you (e.g., the expectations and the workload are too high), I said something ridiculously wrong, or the experiments fail, let’s discuss. I’m still learning both how to be a good mentor and a good scientist.\nConforming to use good research and coding practices. We will work on open-source projects and I expect you to write good code (with documentation and tests) and run reproducible experiments. Developing these skills takes time and we will work together to make sure that your research and programming skills are improving.\nTaking the ownership of conforming to the university rules. You should remind me when your thesis is due three months before submitting it, so we can discuss the outline, and send me the first draft three weeks before the deadline, so I can review it.\n\n\n\nConflict resolution\nIn case of a conflict with an academic or a student, please contact me and we will work together to resolve the conflict. If you feel that you do not want me to be involved (e.g., the conflict is between you and me), I encourage you to contact my mentor, Professor Niko Beerenwinkel or ETH’s Ombudspersons.\n\n\nMisc\nI’m not an established researcher in the field (and I don’t have a PhD!). Apart from the fact that I may be wrong in different aspects (happy to learn!), the reference letters written by me are unlikely to be accepted e.g., if you apply for a PhD. If you need a reference letter at the end of the project, I’d suggest to ask Professor Niko Beerenwinkel (and CC me) whether he could provide one."
+  },
+  {
+    "objectID": "posts/expectations-student-mentorship.html#general-research-advice",
+    "href": "posts/expectations-student-mentorship.html#general-research-advice",
+    "title": "Student mentorship: expectations document",
+    "section": "General research advice",
+    "text": "General research advice\nAlthough I will supply you with an initial reading list tailored to your project, I’d like to share below some general advice on research, knowledge work, and learning. (Remember – if you see that some of these do not work you, feel free to replace them with better practices. I’d also be grateful if you could share them with me, so I can update this document).\n\nResearch notes and journal\nI’d strongly encourage you to book some time at the start and the end of every working day to work on your research notes and write your observations in a journal.\nThis serves multple purposes: - I believe it will help you to improve your understanding of the domain. - At some point you will need to write your thesis. You will see that it is much easier to edit a series of connected research notes into a first draft, rather than starting with an empty page. - By practicing this over the duration of the project, you will end up with a skill which is useful regardless whether you decide to move into industry or stay in academia.\nTo start writing research notes, read an Andy Matuschak’s note or watch Martin Adams’ video. Popular software includes Obsidian and Zettlr (and you can use them for the journal as well).\nFor your research journal, you may find this blog post useful. Journal can also be helpful to track your feelings and attitude towards the project, so we can adjust the workload or troubleshoot the process – see this post.\n\n\nReading scientific literature\n\nI’d suggest to read this Andy Matuschak’s note and this short P.N. Edwards’ article.\nThis is also a skill which takes time to master, so I’d suggest to practice it regularly and go back and refresh the principles of effective reading.\nYou will see that there is always too much literature to read than the time permits, so it’s critical to think what you want to learn from a paper.\n\nAre there specific questions I want to have the answer to by reading this paper? (It’s always good to read papers with several questions in mind.)\nIs this some maths or statistics which is crucial to deeply understand for the project? If so, several hours may be required and there is nothing to be done.\nIs this a paper which main conclusion can be quickly understood just by looking at one figure and the abstract or conclusions?\nIs this a paper which is potentially useful if problem X arises? If so, it’s probably good to say in a research problem on topic X that this paper may be useful to deeply understand it then.\n\nI like to use Connected Papers to find papers related to the paper of interest. Another strategy is to use Google Scholar to find papers which cited the paper of interest or see what the superstars are doing.\nSpeaking of superstars, Twitter has become a place where new research results are often announced and have short “tl;dr” threads. I would suggest to create a recurrent task (e.g., half an hour every two weeks) and check what the superstars have been doing. (Note that the temptation to procrastinate can be huge. This is why I recommend to set only a specific time to check it.)\n\n\n\nFinding a sustainable working style\n\nAs Bastian Rieck advises, it’s crucial that you find a sustainable workflow. Working on a project over a few months is a long time and “it’s rather a marathon than a sprint”.\nI’m interested in seeing that your expertise grows and that work you produce is of good quality, rather than in counting the hours you put into the work:\n\nIf you think that my expectations are unrealistic, just talk to me – we don’t need to rush and the scope of the thesis can always be adjusted to be more realistic.\nMake sure that you prioritize your mental health and well-being.\nPlease, please, please, no work on weekends and holidays.\n\nYou will see that different people have different working styles. This is fine – they are also working on different projects, have different backgrounds, and have different goals. Don’t compare yourself with them and embrace your way of working as well as theirs.\n\n\n\nProgramming\n\nWe will use Git version control and GitHub. Please, make sure that you have an account and send me your username, so I can add you to the project.\nIf you had not worked with Git before, I recommend (a) Creating a “sandbox” repository and playing with different commands. R. Dudler’s “The simple guide” is a nice way to get started.\nLearning good software practices is like learning a new language – working with a dictionary won’t make one proficient in one day, but using it regularly can help to avoid common errors. I recommend Google Style Guide and (to know what should be avoided) Python anti-patterns.\n\n\n\nMisc\n\nIf you want to become a researcher, R. Hamming’s “You and your research” talk is a classic.\nPatrick Kidger and Andrej Karpathy also wrote on this topic."
+  },
+  {
+    "objectID": "posts/expectations-student-mentorship.html#references",
+    "href": "posts/expectations-student-mentorship.html#references",
+    "title": "Student mentorship: expectations document",
+    "section": "References",
+    "text": "References\nI used the following resources to draft the document above. However, all the mistakes (scientific, mentoring, grammar) are to blame on myself.\n\nK.S. Masters and P.K. Kreeger’s “Ten Simple Rules” article\nYinghzhen Li’s blogpost\nThe document issued by Niko Beerenwinkel to his PhD students."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Welcome!",
+    "section": "",
+    "text": "My name is Paweł Czyż and I am a data scientist interested in modelling complex biological data using techniques originating in probabilistic machine learning and applied Bayesian statistics.\nCurrently I am a Doctoral Fellow of the ETH AI Center working in Computational Biology Group and Computational Cancer Genomics Laboratory.\nPrior to starting my PhD I was an AI Resident at Microsoft Research Cambridge and studied mathematical physics at University of Oxford."
+  },
+  {
+    "objectID": "blog.html",
+    "href": "blog.html",
+    "title": "Blog",
+    "section": "",
+    "text": "I’m still maintaining my digital garden in a non-public manner1, but from time to time I encounter an idea which I’d just love to share with others or I am asked frequently about to make it a topic of a separate post."
+  },
+  {
+    "objectID": "blog.html#footnotes",
+    "href": "blog.html#footnotes",
+    "title": "Blog",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nSometimes my ideas are just silly and need more time before I decide whether they are useful at all or they are just noise. Sometimes it’s joint work with other people and I can’t share their intellectual property without approval. And I still haven’t figured out how to integrate Obsidian with Quarto, which are wonderful tools.↩︎"
+  }
+]

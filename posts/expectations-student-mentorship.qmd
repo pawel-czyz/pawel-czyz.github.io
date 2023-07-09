@@ -1,0 +1,98 @@
+---
+title: "Student mentorship: expectations document"
+description: "I learned from one of my mentors that it's important to discuss the mutual expectations of the mentorship, be it a PhD thesis or a lab rotation. This document serves as a template, which we can further discuss and adjust."
+author: "Paweł Czyż"
+date: "7/8/2023"
+categories:
+  - Mentorship
+---
+
+Welcome! This document is supposed to explain my general mentoring style and act as a skeleton around we can build the collaboration and mentorship rules. 
+
+Please, note:
+
+- The ETH rules and regulations supersede anything in this document. In case of any conflict, follow them rather than this document (I'd be also grateful to learn about them and adjust this document).
+- This document can be adjusted to your needs. Let me know what you think does not work for you and we can adjust it to reach a consensus. We need to find a way to work together so that everybody is happy.
+- I will suggest various things related to learning new things and doing research. Let me know what you think (e.g., what works, what does not, what good alternatives exist) – I'm happy to learn and update this document!
+
+## Mission statement
+When I advise on a project I try to keep the following in mind:
+
+- I want you to learn and become a better researcher and engineer at the end of the project.
+- It's more important that we understand each other and are happy with the mentorship, rather than we get an additional feature.
+
+## Expectations
+
+### What you can expect from me
+
+- I'll find regular time to meet with you and advise on the steps which may be worth taking. While I will be more "hands-on" and have more precise ideas when you start, I want you to become an independent thinker with a good knowledge on the topic – it's also likely that you'll know more about the topic than me by the end of your project!
+- I'll advise you on your code and writing, to make sure that your skills improve.  
+- I'll keep an open mindset to your comments and suggestions. If you encounter any issues, let me know and we'll work together on resolving them.
+
+### What I'd like to expect from you
+
+- Honesty. If something doesn't work for you (e.g., the expectations and the workload are too high), I said something ridiculously wrong, or the experiments fail, let's discuss. I'm still learning both how to be a good mentor and a good scientist.
+- Conforming to use good research and coding practices. We will work on open-source projects and I expect you to write good code (with documentation and tests) and run reproducible experiments. Developing these skills takes time and we will work together to make sure that your research and programming skills are improving.
+- Taking the ownership of conforming to the university rules. You should remind me when your thesis is due three months before submitting it, so we can discuss the outline, and send me the first draft three weeks before the deadline, so I can review it.
+
+### Conflict resolution
+In case of a conflict with an academic or a student, please contact me and we will work together to resolve the conflict. If you feel that you do not want me to be involved (e.g., the conflict is between you and me), I encourage you to contact my mentor, Professor Niko Beerenwinkel or [ETH's Ombudspersons](https://ethz.ch/en/the-eth-zurich/organisation/ombudspersons-and-trusted-intermediaries.html).
+
+### Misc
+
+I'm not an established researcher in the field (and I don't have a PhD!). Apart from the fact that I may be wrong in different aspects (happy to learn!), the reference letters written by me are unlikely to be accepted e.g., if you apply for a PhD. If you need a reference letter at the end of the project, I'd suggest to ask Professor Niko Beerenwinkel (and CC me) whether he could provide one.
+
+## General research advice
+
+Although I will supply you with an initial reading list tailored to your project, I'd like to share below some general advice on research, knowledge work, and learning.
+(Remember – if you see that some of these do not work you, feel free to replace them with better practices. I'd also be grateful if you could share them with me, so I can update this document).
+
+### Research notes and journal
+
+I'd strongly encourage you to book some time at the start and the end of every working day to work on your research notes and write your observations in a journal.
+
+This serves multple purposes:
+- I believe it will help you to improve your understanding of the domain.
+- At some point you will need to write your thesis. You will see that it is much easier to edit a series of connected research notes into a first draft, rather than starting with an empty page.
+- By practicing this over the duration of the project, you will end up with a skill which is useful regardless whether you decide to move into industry or stay in academia.
+
+To start writing research notes, read [an Andy Matuschak's note](https://notes.andymatuschak.org/Evergreen_notes) or watch [Martin Adams' video](https://youtu.be/ziE6UExsOrs). Popular software includes [Obsidian](https://obsidian.md) and [Zettlr](https://www.zettlr.com/) (and you can use them for the journal as well).
+
+For your research journal, you may find [this blog post](https://anujacabraal.com/2013/07/03/keep-a-research-journal-it-is-important/) useful. Journal can also be helpful to track your feelings and attitude towards the project, so we can adjust the workload or troubleshoot the process – see [this post](https://ahappyphd.org/posts/journaling-tips/). 
+
+### Reading scientific literature
+- I'd suggest to read [this Andy Matuschak's note](https://notes.andymatuschak.org/Skillful_reading_is_generally_non-linear) and [this short P.N. Edwards' article](https://pne.people.si.umich.edu/PDF/howtoread.pdf).
+- This is also a skill which takes time to master, so I'd suggest to practice it regularly and go back and refresh the principles of effective reading.
+- You will see that there is always too much literature to read than the time permits, so it's critical to think what you want to learn from a paper.
+	- Are there specific questions I want to have the answer to by reading this paper? (It's always good to read papers with several questions in mind.)
+	- Is this some maths or statistics which is crucial to deeply understand for the project? If so, several hours may be required and there is nothing to be done.
+	- Is this a paper which main conclusion can be quickly understood just by looking at one figure and the abstract or conclusions?
+	- Is this a paper which is potentially useful if problem X arises? If so, it's probably good to say in a research problem on topic X that this paper may be useful to deeply understand it then. 
+- I like to use [Connected Papers](https://www.connectedpapers.com/) to find papers related to the paper of interest. Another strategy is to use [Google Scholar](https://scholar.google.com/) to find papers which cited the paper of interest or see what the superstars are doing.
+- Speaking of superstars, Twitter has become a place where new research results are often announced and have short "tl;dr" threads. I would suggest to create a recurrent task (e.g., half an hour every two weeks) and check what the superstars have been doing. (Note that the temptation to procrastinate can be huge. This is why I recommend to set only a specific time to check it.)
+
+### Finding a sustainable working style
+
+- As [Bastian Rieck advises](https://bastian.rieck.me/blog/posts/2022/sustainable/), it's crucial that you find a sustainable workflow. Working on a project over a few months is a long time and "it's rather a marathon than a sprint".
+- I'm interested in seeing that your expertise grows and that work you produce is of good quality, rather than in counting the hours you put into the work:
+	- If you think that my expectations are unrealistic, just talk to me – we don't need to rush and the scope of the thesis can always be adjusted to be more realistic.
+	- Make sure that you prioritize your mental health and well-being.
+	- Please, please, please, no work on weekends and holidays.
+- You will see that different people have different working styles. This is fine – they are also working on different projects, have different backgrounds, and have different goals. Don't compare yourself with them and embrace your way of working as well as theirs.
+
+### Programming
+
+- We will use Git version control and [GitHub](https://github.com/). Please, make sure that you have an account and send me your username, so I can add you to the project.
+- If you had not worked with Git before, I recommend (a) Creating a "sandbox" repository and playing with different commands. [R. Dudler's "The simple guide"](https://rogerdudler.github.io/git-guide/) is a nice way to get started.
+- Learning good software practices is like learning a new language – working with a dictionary won't make one proficient in one day, but using it regularly can help to avoid common errors. I recommend [Google Style Guide](https://google.github.io/styleguide/pyguide.html) and (to know what should be avoided) [Python anti-patterns](https://docs.quantifiedcode.com/python-anti-patterns/).
+
+### Misc
+- If you want to become a researcher, [R. Hamming's "You and your research" talk](https://www.cs.virginia.edu/~robins/YouAndYourResearch.html) is a classic.
+- [Patrick Kidger](https://kidger.site/thoughts/just-know-stuff/) and [Andrej Karpathy](http://karpathy.github.io/2016/09/07/phd/) also wrote on this topic.
+
+## References
+I used the following resources to draft the document above. However, all the mistakes (scientific, mentoring, grammar) are to blame on myself.
+
+- [K.S. Masters and P.K. Kreeger's "Ten Simple Rules" article](https://doi.org/10.1371/journal.pcbi.1005709)
+- [Yinghzhen Li's blogpost](http://yingzhenli.net/home/en/?page_id=1083) 
+- The document issued by Niko Beerenwinkel to his PhD students.

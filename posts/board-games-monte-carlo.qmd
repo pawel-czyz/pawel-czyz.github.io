@@ -1,0 +1,94 @@
+---
+title: "Understanding board games with Monte Carlo simulations"
+description: "We look at several simple situations occurring in board games and analyse them with Monte Carlo simulations."
+author: "Paweł Czyż"
+date: "7/9/2023"
+categories:
+  - Monte Carlo
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+I like playing board games, but I never remember the probabilities of different interesting events. Let's code a very simple [Monte Carlo simulation](https://en.wikipedia.org/wiki/Monte_Carlo_method) to evaluate probabilities used in them, so I can revisit to this website and use it to (maybe eventually) win.
+
+## Fight or flight?
+
+In the rare days when I find time to play [Runebound](https://boardgamegeek.com/boardgame/21523/runebound-second-edition), I find myself in situations fighting monsters and trying to decide whether I should try to fight them or escape. I know a monster's strength (high), I know my strength (low), but I don't know how likely it is that the difference can be compensated by throwing two ten-sided dice. 
+
+Let's estimate the chances of getting *at least* $X$ points due to the dice throw.
+
+```{python}
+import numpy as np
+
+n_simulations: int = 100_000
+dice: int = 10
+
+rng = np.random.default_rng(42)
+occurrences = np.zeros(2 * dice + 1, dtype=float)
+
+throws = rng.integers(1, dice, endpoint=True, size=(n_simulations, 2))
+total = throws.sum(axis=1)
+
+for t in total:
+    occurrences[:t+1] += 1
+
+occurrences /= n_simulations
+
+for i, p in enumerate(occurrences):
+    if i < 1:
+        continue
+    print(f"{i}: {100*p:.1f}%")
+```
+
+In this case it's also very easy to actually calculate the probabilities without Monte Carlo simulation:
+```{python}
+probabilities = np.zeros(2*dice + 1, dtype=float)
+
+for result1 in range(1, dice + 1):
+    for result2 in range(1, dice + 1):
+        total = result1 + result2
+        probabilities[:total + 1] += 1/dice**2
+
+for i, p in enumerate(occurrences):
+    if i < 1:
+        continue
+    print(f"{i}: {100*p:.1f}%")
+```
+
+The exact solution requires $O(K^2)$ operations, where one uses two dice with $K$ sides[^1]. For a larger number of dice this solution may not be as tractable, so Monte Carlo approximations may shine.
+
+[^1]: The implemented solution works in $O(K^3)$ due to the `probabilities[:total + 1]` operation. If the performance did really matter here, we could store the occurrences and then calculate cumulative sums only once in the end.
+
+## Where should my cheese be?
+
+In [Cashflow](https://boardgamegeek.com/boardgame/6552/cashflow-101) one way to win the end-game is to quickly get to the tile with a cheese-shaped token. As this token can be placed in advance, I was wondering what the optimal location of it should be.
+
+If I put the token on the first tile, I need to throw *exactly one* in my first throw or I will need to travel across the whole board to close the loop and have another chance (or try to win the game in another way).
+
+Let's use Monte Carlo simulation to estimate where I should put the token so I can win in at most five moves:
+
+```{python}
+import numpy as np 
+
+N_SIMULATIONS: int = 100_000
+N_THROWS: int = 5
+DICE: int = 6  # Number of sides on the dice
+rng = np.random.default_rng(101)
+
+visitations = np.zeros(N_THROWS * DICE + 1)
+
+for simulation in range(N_SIMULATIONS):
+    position = 0
+    for throw_index in range(N_THROWS):
+        result = rng.integers(1, DICE, endpoint=True)
+        position += result
+        visitations[position] += 1
+
+for i in range(N_THROWS * DICE + 1):
+    percentage = 100 * visitations[i] / N_SIMULATIONS
+    print(f"{i}: {percentage:.1f}")
+```
+
+Again, we could do this in the exact fashion --- for example, for 30 we know that the probability is exactly $6^{-5}\approx 0.013\%$, but it's quite clear that the sixth tile gives decent chances of winning in the first few moves.

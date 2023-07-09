@@ -1,0 +1,25 @@
+---
+title: "Welcome!"
+about:
+  template: jolla
+  image: profile.jpg
+  links:
+    - icon: github
+      text: GitHub
+      href: https://github.com/pawel-czyz
+    - icon: stack-overflow
+      text: StackExchange
+      href: https://math.stackexchange.com/users/551592/pawe%C5%82-czy%C5%BC
+    - icon: file-person
+      text: Scholar
+      href: https://scholar.google.com/citations?user=7rzyLvYAAAAJ
+    - icon: send
+      text: Contact
+      href: mailto:pczyz@protonmail.com
+---
+
+My name is Paweł Czyż and I am a data scientist interested in modelling complex biological data using techniques originating in probabilistic machine learning and applied Bayesian statistics.
+
+Currently I am a Doctoral Fellow of the [ETH AI Center](https://ai.ethz.ch/) working in [Computational Biology Group](https://bsse.ethz.ch/cbg) and [Computational Cancer Genomics Laboratory](http://boevalab.inf.ethz.ch/).
+
+Prior to starting my PhD I was an AI Resident at Microsoft Research Cambridge and studied [mathematical physics](https://en.wikipedia.org/wiki/Mathematical_physics) at University of Oxford.
