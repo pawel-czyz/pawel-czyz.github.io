@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Paweł Czyż">
-<meta name="dcterms.date" content="2023-07-10">
-<meta name="description" content="TODO">
+<meta name="dcterms.date" content="2023-07-11">
+<meta name="description" content="In an informal fashion we introduce several constructions of the Dirichlet process.">
 
 <title>Paweł Czyż - The Dirichlet process</title>
 <style>
@@ -23,41 +23,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
 }
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
 }
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
 }
-</style>
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -143,7 +128,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#a-clustering-problem" id="toc-a-clustering-problem" class="nav-link active" data-scroll-target="#a-clustering-problem">A clustering problem</a></li>
+  <li><a href="#finite-dimensional-dirichlet-prior" id="toc-finite-dimensional-dirichlet-prior" class="nav-link active" data-scroll-target="#finite-dimensional-dirichlet-prior">Finite-dimensional Dirichlet prior</a>
+  <ul class="collapse">
+  <li><a href="#another-point-of-view" id="toc-another-point-of-view" class="nav-link" data-scroll-target="#another-point-of-view">Another point of view</a></li>
+  </ul></li>
+  <li><a href="#dirichlet-process-prior" id="toc-dirichlet-process-prior" class="nav-link" data-scroll-target="#dirichlet-process-prior">Dirichlet process prior</a>
+  <ul class="collapse">
+  <li><a href="#stick-breaking-construction" id="toc-stick-breaking-construction" class="nav-link" data-scroll-target="#stick-breaking-construction">Stick-breaking construction</a></li>
+  <li><a href="#infinite-limit" id="toc-infinite-limit" class="nav-link" data-scroll-target="#infinite-limit">Infinite limit</a></li>
+  <li><a href="#defining-property" id="toc-defining-property" class="nav-link" data-scroll-target="#defining-property">Defining property</a></li>
+  <li><a href="#pólya-urn-scheme" id="toc-pólya-urn-scheme" class="nav-link" data-scroll-target="#pólya-urn-scheme">Pólya urn scheme</a></li>
+  <li><a href="#chinese-restaurant-process" id="toc-chinese-restaurant-process" class="nav-link" data-scroll-target="#chinese-restaurant-process">Chinese restaurant process</a></li>
+  </ul></li>
+  <li><a href="#a-final-word" id="toc-a-final-word" class="nav-link" data-scroll-target="#a-final-word">A final word</a></li>
   </ul>
 </nav>
     </div>
@@ -154,7 +151,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="quarto-title">
 <h1 class="title">The Dirichlet process</h1>
   <div class="quarto-categories">
-    <div class="quarto-category">Probabilistic models</div>
     <div class="quarto-category">Bayesian nonparametrics</div>
     <div class="quarto-category">Clustering</div>
   </div>
@@ -162,7 +158,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    TODO
+    In an informal fashion we introduce several constructions of the Dirichlet process.
   </div>
 </div>
 
@@ -179,7 +175,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">July 10, 2023</p>
+      <p class="date">July 11, 2023</p>
     </div>
   </div>
   
@@ -189,41 +185,119 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<section id="a-clustering-problem" class="level2">
-<h2 class="anchored" data-anchor-id="a-clustering-problem">A clustering problem</h2>
-<p>Statistically speaking, clustering is a very ill-defined problem: how many clusters are needed? Are clusters even real or should we use some other abstraction (e.g., combinations of different features)? How to validate such models? Are there robust to misspecification?</p>
-<p>On the other hand, sometimes clustering can provide useful information about the problem, so let’s see some strategies how it can be approached.</p>
-<p>We will consider the true model in which there are two normal distributions on real numbers <span class="math inline">\(P_i = \mathcal N(\mu_1, \sigma_1^2)\)</span> for <span class="math inline">\(i\in \{0,1\}\)</span> and that with probability <span class="math inline">\(\pi\)</span> we draw samples from <span class="math inline">\(P_1\)</span> and with <span class="math inline">\(1-\pi\)</span> from <span class="math inline">\(P_0\)</span>:</p>
-<div class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n_points: <span class="bu">int</span> <span class="op">=</span> <span class="dv">250</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> rng.binomial(<span class="dv">1</span>, p<span class="op">=</span><span class="fl">0.6</span>, size<span class="op">=</span>n_points)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>mus <span class="op">=</span> np.asarray([<span class="fl">0.0</span>, <span class="fl">3.5</span>])</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>sigmas <span class="op">=</span> np.asarray([<span class="fl">1.0</span>, <span class="fl">0.8</span>])</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> rng.normal(size<span class="op">=</span>n_points)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> mus[z] <span class="op">+</span> sigmas[z] <span class="op">*</span> eps</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots()</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>ax.hist(x, bins<span class="op">=</span>n_points <span class="op">//</span> <span class="dv">8</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Histogram of $X$"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>Text(0.5, 1.0, 'Histogram of $X$')</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<p><img src="dirichlet-process_files/figure-html/cell-2-output-2.png" width="566" height="432"></p>
-</div>
-</div>
-<p>In other words, the conditional distribution is <span class="math display">\[X_n\mid \{\mu_i\}, \{\sigma_i\} Z_n = z_n \sim \mathcal N(\mu_{z_n}, \sigma_{z_n}^2)\]</span> while the marginal distribution is <span class="math display">\[X_n \sim (1-\pi)\, \mathcal N(\mu_0, \sigma_0^2) + \pi\, \mathcal N(\mu_1, \sigma_1^2)\]</span></p>
+<p>In this post we will quickly review different constructions of the Dirichlet process, following <span class="citation" data-cites="Yee_Whye_Teh_2006-Hierarchical_Dirichlet_Process">Teh et al. (<a href="#ref-Yee_Whye_Teh_2006-Hierarchical_Dirichlet_Process" role="doc-biblioref">2006</a>)</span> and <span class="citation" data-cites="Gelman2013bayesian-data-analysis">Gelman et al. (<a href="#ref-Gelman2013bayesian-data-analysis" role="doc-biblioref">2013, chap. 23</a>)</span>.</p>
+<section id="finite-dimensional-dirichlet-prior" class="level2">
+<h2 class="anchored" data-anchor-id="finite-dimensional-dirichlet-prior">Finite-dimensional Dirichlet prior</h2>
+<p>Consider the simplest Gaussian mixture model: there are several normal distributions with unit variance <span class="math inline">\(\mathcal N(\mu_k, 1)\)</span> for <span class="math inline">\(k\in \{1, \dotsc, K\}\)</span> and mixture proportions vector <span class="math inline">\(\pi = (\pi_1, \dotsc, \pi_K)\)</span> with <span class="math inline">\(\pi_k\ge 0\)</span> and <span class="math inline">\(\sum_k \pi_k=1\)</span>.</p>
+<p>A convenient prior for <span class="math inline">\(\pi\)</span> is the Dirichlet distribution. We put some <span class="math inline">\(F_0\)</span> prior on the parameters <span class="math inline">\(\{\mu_k\}\)</span> of the model, so the generative process looks like: <span class="math display">\[\begin{align*}
+  \pi \mid \alpha &amp;\sim \mathrm{Dirichlet}(\alpha_1, \dotsc, \alpha_K)\\
+  \mu_k \mid F_0 &amp;\sim F_0, &amp; k=1, \dotsc, K\\
+  Z_n \mid \pi &amp;\sim \mathrm{Categorical}(\pi_1, \dotsc, \pi_K), &amp; n=1, \dotsc, N\\
+  X_n\mid Z_n=z_n, \{\mu_k\} &amp;\sim \mathcal N(\mu_{z_n}, 1),\quad &amp; n=1, \dotsc, N.
+\end{align*}\]</span></p>
+<section id="another-point-of-view" class="level3">
+<h3 class="anchored" data-anchor-id="another-point-of-view">Another point of view</h3>
+<p>Rather than using <em>individual</em> random variables <span class="math inline">\(Z_n\)</span> and a <em>shared</em> set of parameters <span class="math inline">\(\{\mu_k\}\)</span> we could reparametrize the model to use individual means <span class="math inline">\(\tilde \mu_n = \mu_{Z_n}\)</span>. In other words, we could consider a probability measure with atoms ${_k}$ given by <span class="math display">\[F = \sum_{k=1}^K \pi_k \delta_{\mu_k}.\]</span></p>
+<p>If we only know the Dirichlet weights vector <span class="math inline">\((\alpha_1, \dotsc, \alpha_K)\)</span> and the base measure <span class="math inline">\(F_0\)</span> we can think of <span class="math inline">\(F\)</span> as of a <em>random</em> probability measure generated according to <span class="math display">\[\begin{align*}
+  \pi \mid \alpha &amp;\sim \mathrm{Dirichlet}(\alpha_1, \dotsc, \alpha_K)\\
+  \mu_k &amp;\sim F_0, \quad k = 1, \dotsc, K\\
+  F &amp;:= \sum_{k=1}^K \pi_k \delta_{\mu_k}.
+\end{align*}\]</span></p>
+<p>Then sampling individual data points amounts to the following model with <span class="math inline">\(n=1, \dotsc, N\)</span>: <span class="math display">\[\begin{align*}
+  F\mid \alpha, F_0 &amp;\sim \text{the procedure above}\\
+  \theta_n \mid F &amp;\sim F, \\
+  X_n\mid \theta_n &amp;\sim \mathcal N(\theta_n, 1).
+\end{align*}\]</span></p>
+<p>Note that the values of <span class="math inline">\(\theta_n\)</span> come from the set <span class="math inline">\(\{\mu_1, \dotsc, \mu_K\}\)</span> as <span class="math inline">\(F\)</span> is atomic.</p>
+</section>
+</section>
+<section id="dirichlet-process-prior" class="level2">
+<h2 class="anchored" data-anchor-id="dirichlet-process-prior">Dirichlet process prior</h2>
+<section id="stick-breaking-construction" class="level3">
+<h3 class="anchored" data-anchor-id="stick-breaking-construction">Stick-breaking construction</h3>
+<p>With the following example in mind we will pass now to a general distribution <span class="math inline">\(F_0\)</span> defined over some infinite space <span class="math inline">\(\mathcal M\)</span> (which can be <span class="math inline">\(\mathbb R\)</span> as above) and a <em>single</em> positive parameter <span class="math inline">\(\alpha &gt; 0\)</span>.</p>
+<p>We will generate a random measure <span class="math inline">\(F\)</span> from <span class="math inline">\(F_0\)</span> using the construction known as the Dirichlet process.</p>
+<p>Sample for <span class="math inline">\(k=1, 2, \dotsc\)</span> <span class="math display">\[\begin{align*}
+v_k \mid \alpha &amp;\sim \mathrm{Beta}(1, \alpha)\\
+\mu_k \mid F_0 &amp;\sim F_0
+\end{align*}\]</span> and define <span class="math display">\[\begin{align*}
+  p_1 &amp;= v_1\\
+  p_k &amp;= v_k \prod_{i=1}^{k-1} (1-v_k) \quad \text{for } k\ge 2,\\
+  F &amp;= \sum_{k=1}^\infty p_k \delta_{\mu_k}
+\end{align*}\]</span></p>
+<p>With probability 1 it holds that <span class="math display">\[\sum_{k=1}^\infty  p_k = 1,\]</span> i.e., <span class="math inline">\((p_k)\)</span> is a valid proportions vector.</p>
+<p>We say that the distribution <span class="math inline">\(F\)</span> was drawn from the Dirichlet process: <span class="math display">\[F \sim \mathrm{DP}(\alpha, F_0).\]</span></p>
+</section>
+<section id="infinite-limit" class="level3">
+<h3 class="anchored" data-anchor-id="infinite-limit">Infinite limit</h3>
+<p>The atomic distributions generated with finite-dimensional proportions <span class="math inline">\((\pi_k)_{k=1, 2, \dotsc, K}\)</span> and infinite sequence of weights <span class="math inline">\((p_k)_{k=1, 2, \dotsc, \infty}\)</span> look optically similar. There is a close relation between these two generative processes.</p>
+<p>Consider a random measure <span class="math inline">\(F^K\)</span> defined using a <em>symmetric</em> Dirichlet distribution: <span class="math display">\[\begin{align*}
+  \pi^K \mid \alpha &amp;\sim \mathrm{Dirichlet}(\alpha/K, \cdots, \alpha/K)\\
+  \mu^K_k \mid F_0 &amp;\sim F_0\\
+  F^K &amp;= \sum_{k=1}^K \pi^K_k\delta_{\mu^K_k}
+\end{align*}\]</span></p>
+<p>Now if <span class="math inline">\(F^{\infty} \sim \mathrm{DP}(\alpha, F_0)\)</span> and <span class="math inline">\(u\)</span> is any measurable function integrable with respect to <span class="math inline">\(F_0\)</span>, then the sequence of random variables <span class="math display">\[ \int_{\mathcal M} u\, \mathrm{d} F^{K} \]</span> <a href="https://en.wikipedia.org/wiki/Convergence_of_random_variables#Convergence_in_distribution">converges in distribution (that is, weakly)</a> to <span class="math display">\[ \int_{\mathcal M} u\, \mathrm{d} F^{\infty}.\]</span></p>
+<section id="where-the-difference-really-is" class="level4">
+<h4 class="anchored" data-anchor-id="where-the-difference-really-is">Where the difference really is</h4>
+<p>We see that <span class="math inline">\((p_k)\)</span> looks deceptively similar as <span class="math inline">\((\pi_k^K)\)</span> for large <span class="math inline">\(K\)</span>. There are some differences, though. First of all, <span class="math inline">\((p_k)\)</span> is infinite and the number of atoms appearing in the analysis of a particular data set is implicitly controlled by the number of data points. One should expect <span class="math inline">\(O(\alpha\log N)\)</span> atoms in a data set with <span class="math inline">\(N\)</span> points. In the finite-dimensional case more than <span class="math inline">\(K\)</span> clusters are impossible.</p>
+<p>However, for <span class="math inline">\(K\gg N\)</span> it’s natural to expect that several entries from <span class="math inline">\((\pi^K_k)\)</span> should be matching several entries of <span class="math inline">\((p_k)\)</span>. However, the intuition that <span class="math inline">\(p_1 = \pi_1^K\)</span>, <span class="math inline">\(p_2 = \pi_2^K\)</span>, … is <em>wrong</em>. In the stick-breaking construction of the Dirichlet process we expect the first few entries to have the most of the mass, while in the finite-dimensional case the Dirichlet prior is <em>symmetric</em> — we don’t know which weights <span class="math inline">\(\pi_k^K\)</span> will have vanishing mass.</p>
+<p>Although it seems obvious <a href="https://stats.stackexchange.com/q/621038/255508">I spent quite some time trying to understand</a> why the stick-breaking sampling procedure from the Dirichlet distribution gives different results!<br>
+The stick-breaking sampling procedure for the <span class="math inline">\(\mathrm{Dirichlet}(\alpha/K, \dotsc, \alpha/K)\)</span> distribution works as follows: <span class="math display">\[\begin{align*}
+  u_k &amp;\sim \mathrm{Beta}( \alpha/K, \alpha\cdot (1-k/K) )\\
+  \pi_1 &amp;= u_1\\
+  \pi_k &amp;= u_k \prod_{j &lt; k} (1-u_k), \quad k = 2, \dotsc, K-1\\
+  \pi_K &amp;= 1 - (\pi_1 + \dotsc + \pi_{K-1})
+\end{align*}\]</span></p>
+<p>which for <span class="math inline">\(k \ll K\)</span> corresponds to sampling from (approximately) <span class="math inline">\(\mathrm{Beta}(\alpha/K, \alpha)\)</span>, rather than <span class="math inline">\(\mathrm{Beta}(1, \alpha)\)</span>.</p>
+<p><span class="citation" data-cites="Pitman_1996">Pitman (<a href="#ref-Pitman_1996" role="doc-biblioref">1996</a>)</span> describes size-biased permutations, which perhaps can be used to establish link between <span class="math inline">\((\pi_k)\)</span> for large <span class="math inline">\(K\)</span> and <span class="math inline">\((p_k)\)</span>, but I haven’t understood it yet.</p>
+</section>
+</section>
+<section id="defining-property" class="level3">
+<h3 class="anchored" data-anchor-id="defining-property">Defining property</h3>
+<p>We have seen in what sense the Dirichlet process prior can be thought as of an infinite-dimensional generalization of the Dirichlet prior. However, there is another link.</p>
+<p>Recall that the defining property of a Gaussian process is that it is a continuous-time stochastic process <span class="math inline">\(\{X_t\}_{t\in [0, 1]}\)</span> such that for every finite set of indices <span class="math inline">\(t_1, t_2, \dotsc, t_m\)</span> random vector <span class="math inline">\((X_{t_1}, \dotsc, X_{t_m})\)</span> is distributed according to multivariate normal distribution. (In particular every <span class="math inline">\(X_t\)</span> is a normal random variable). While this defining property is not sufficient without a proof of existence (e.g., an explicit construction), it is useful in many calculations involving them.</p>
+<p>We will now give the defining property of the Dirichlet process. Take a probability measure <span class="math inline">\(F_0\)</span> over <span class="math inline">\(\mathcal M\)</span> and the concentration parameter <span class="math inline">\(\alpha &gt; 0\)</span>. We say that <span class="math inline">\(\mathrm{DP}(\alpha, F_0)\)</span> is a Dirichlet process if every sample <span class="math inline">\(F\sim \mathrm{DP}(\alpha, F_0)\)</span> is a probability measure over <span class="math inline">\(\mathcal M\)</span> such that for every partition <span class="math inline">\(A_1, \cdots, A_m\)</span> of <span class="math inline">\(\mathcal M\)</span> the following holds: <span class="math display">\[ \left( F(A_1), \dotsc, F(A_K) \right) \sim \mathrm{Dirichlet}\big(\alpha F_0(A_1), \dotsc, \alpha F_0(A_K) \big) \]</span></p>
+<p>In particular if <span class="math inline">\(A\subseteq \mathcal X\)</span> is any measurable subset, then we can use the partition <span class="math inline">\(\{A, \mathcal M\setminus A\}\)</span> to get <span class="math display">\[ F(A) \sim \mathrm{Beta}\big( \alpha F_0(A), \alpha(1-F_0(A)) \big),\]</span> so that <span class="math display">\[\mathbb E[ F(A) ] = F_0(A)\]</span> and <span class="math display">\[\mathrm{Var}[F(A)] = \frac{ F_0(A)\cdot (1-F_0(A)) }{1+\alpha}\]</span></p>
+<p>Hence, each draw <span class="math inline">\(F\)</span> is centered around <span class="math inline">\(F_0\)</span> and the variance is small for large parameter values <span class="math inline">\(\alpha\)</span>.</p>
+</section>
+<section id="pólya-urn-scheme" class="level3">
+<h3 class="anchored" data-anchor-id="pólya-urn-scheme">Pólya urn scheme</h3>
+<p>Finally, we give an interpretation in terms of <a href="https://en.wikipedia.org/wiki/P%C3%B3lya_urn_model">Pólya urn scheme</a>.</p>
+<p>Above we considered the sampling process from the finite-dimensional Dirichlet distribution: <span class="math display">\[\begin{align*}
+  F\mid \alpha, F_0 &amp;\sim \text{construct atomic measure},\\
+  \theta_n \mid F &amp;\sim F,
+\end{align*}\]</span> where each of the <span class="math inline">\(\theta_n\)</span> was actually some atom of the distribution <span class="math inline">\(\mu_k\)</span>.</p>
+<p>This interpretation is also easy to understand when the atomic measure <span class="math inline">\(F\)</span> is drawn from the Dirichlet process using the stick-breaking construction.</p>
+<p>Consider now a sampling procedure of <span class="math inline">\(\theta_n\)</span> where we do not have direct access to <span class="math inline">\(F\)</span>, but only to the distribution <span class="math inline">\(F_0\)</span>, concentration parameter <span class="math inline">\(\alpha &gt; 0\)</span> and previous draws <span class="math inline">\(\theta_1, \dotsc, \theta_{n-1}\)</span>. It holds that <span class="math display">\[\theta_n \mid \alpha, F_0, \theta_1, \dotsc, \theta_{n-1} \sim \frac{\alpha}{ (n-1) + \alpha }F_0 + \sum_{u=1}^{n-1} \frac{1}{(n-1)+\alpha}\delta_{ \theta_n }.\]</span></p>
+<p>If <span class="math inline">\(\alpha\)</span> is a positive integer we can interpret this sampling procedure as follows: we want to draw the <span class="math inline">\(n\)</span>th ball and we have an urn with <span class="math inline">\(\alpha\)</span> transparent balls and <span class="math inline">\(n-1\)</span> balls of different colors. We draw a random ball. If it is transparent, we use <span class="math inline">\(G_0\)</span> to sample a colored ball from <span class="math inline">\(F_0\)</span>, note it down, and put it to the urn.</p>
+<p>This also suggests a clustering property: if there is a color <span class="math inline">\(\mu_k\)</span> such that there are already <span class="math inline">\(m_k\)</span> balls inside the urn (i.e., <span class="math inline">\(m_k\)</span> is the number of indices <span class="math inline">\(1\le i\le n-1\)</span> such that <span class="math inline">\(\theta_i = \mu_k\)</span>), then we have a larger chance to draw a ball of this color: <span class="math display">\[\theta_n \mid \alpha, F_0, \theta_1, \dotsc, \theta_{n-1} \sim \frac{\alpha}{(n-1) + \alpha}F_0 + \sum_{k} \frac{m_k}{ (n-1) + \alpha } \delta_{ \mu_k }.\]</span></p>
+<p>We also see that for the concentration parameter <span class="math inline">\(\alpha \gg n\)</span> this sampling procedure approximates independent sampling from <span class="math inline">\(F_0\)</span></p>
+</section>
+<section id="chinese-restaurant-process" class="level3">
+<h3 class="anchored" data-anchor-id="chinese-restaurant-process">Chinese restaurant process</h3>
+<p>The procedure above is also closely related to the <a href="https://en.wikipedia.org/wiki/Chinese_restaurant_process">Chinese restaurant process</a>, where the metaphor is that there are <span class="math inline">\(K\)</span> occupied tables (where a dish <span class="math inline">\(\mu_k\)</span> is served) and there are <span class="math inline">\(m_k\)</span> people sitting around the <span class="math inline">\(k\)</span>th table. When a new customer enters the restaurant, they can either join an existing table (with probability proportional to <span class="math inline">\(m_k\)</span>) or start a new (<span class="math inline">\((K+1)\)</span>th) table with probability proportional to <span class="math inline">\(\alpha\)</span>, where a new dish <span class="math inline">\(\mu_{K+1}\sim F_0\)</span> will be served.</p>
+</section>
+</section>
+<section id="a-final-word" class="level2">
+<h2 class="anchored" data-anchor-id="a-final-word">A final word</h2>
+<p>While the Dirichlet process is a useful construction, the results it provides need to be treated with caution: in particular, clusters found in a data set may be very different from the clusters that have “real world” meaning. Clustering is often an ill-defined problem: how many clusters are needed? Are clusters even real or should we use some other abstraction (e.g., combinations of different features)? How to validate such models? Are there robust to misspecification (<a href="https://arxiv.org/abs/1506.06101">the paper on coarsening</a> from Jeffrey Miller and David Dunson)? Are they easy to fit (see this overview of their intrinsic <a href="https://betanalpha.github.io/assets/case_studies/identifying_mixture_models.html">non-identifiability</a>)?</p>
+<p>Anyway, although difficult, clustering can provide useful information about a given problem, so we often need do it. For example, take a look <a href="https://doi.org/10.1093/bioinformatics/btaa599">at this application of Chinese restaurant process to the clustering of single-cell DNA profiles</a>.</p>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-Gelman2013bayesian-data-analysis" class="csl-entry" role="listitem">
+Gelman, A., J. B. Carlin, H. S. Stern, D. B. Dunson, A. Vehtari, and D. B. Rubin. 2013. <em>Bayesian Data Analysis, Third Edition</em>. Chapman &amp; Hall/CRC Texts in Statistical Science. Taylor &amp; Francis. <a href="https://books.google.co.uk/books?id=ZXL6AQAAQBAJ">https://books.google.co.uk/books?id=ZXL6AQAAQBAJ</a>.
+</div>
+<div id="ref-Pitman_1996" class="csl-entry" role="listitem">
+Pitman, Jim. 1996. <span>“Random Discrete Distributions Invariant Under Size-Biased Permutation.”</span> <em>Advances in Applied Probability</em> 28 (2): 525–39. <a href="https://doi.org/10.2307/1428070">https://doi.org/10.2307/1428070</a>.
+</div>
+<div id="ref-Yee_Whye_Teh_2006-Hierarchical_Dirichlet_Process" class="csl-entry" role="listitem">
+Teh, Yee Whye, Michael I Jordan, Matthew J Beal, and David M Blei. 2006. <span>“Hierarchical Dirichlet Processes.”</span> <em>Journal of the American Statistical Association</em> 101 (476): 1566–81. <a href="https://doi.org/10.1198/016214506000000302">https://doi.org/10.1198/016214506000000302</a>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
