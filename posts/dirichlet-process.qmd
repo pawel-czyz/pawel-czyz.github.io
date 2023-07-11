@@ -93,7 +93,8 @@ $$ \int_{\mathcal M} u\, \mathrm{d} F^{\infty}.$$
 #### Where the difference really is
 
 We see that $(p_k)$ looks deceptively similar as $(\pi_k^K)$ for large $K$.
-There are some differences, though. First of all, $(p_k)$ is infinite and the number of atoms appearing in the analysis of a particular data set is implicitly controlled by the number of data points. One should expect $O(\alpha\log N)$ atoms in a data set with $N$ points.
+There are some differences, though. First of all, $(p_k)$ is infinite and the number of atoms appearing in the analysis of a particular data set is implicitly controlled by the number of data points.
+If $F_0$ is [non-atomic](https://en.wikipedia.org/wiki/Atom_(measure_theory)),one can expect $O(\alpha\log N)$ atoms in a data set with $N$ points.
 In the finite-dimensional case more than $K$ clusters are impossible.
 
 However, for $K\gg N$ it's natural to expect that several entries from $(\pi^K_k)$ should be matching several entries of $(p_k)$.
@@ -156,18 +157,31 @@ If $\alpha$ is a positive integer we can interpret this sampling procedure as fo
 This also suggests a clustering property: if there is a color $\mu_k$ such that there are already $m_k$ balls inside the urn (i.e., $m_k$ is the number of indices $1\le i\le n-1$ such that $\theta_i = \mu_k$), then we have a larger chance to draw a ball of this color:
 $$\theta_n \mid \alpha, F_0, \theta_1, \dotsc, \theta_{n-1} \sim \frac{\alpha}{(n-1) + \alpha}F_0 + \sum_{k} \frac{m_k}{ (n-1) + \alpha } \delta_{ \mu_k }.$$
 
-We also see that for the concentration parameter $\alpha \gg n$ this sampling procedure approximates independent sampling from $F_0$
+We also see that for the concentration parameter $\alpha \gg n$ this sampling procedure approximates independent sampling from $F_0$.
+
+#### Asymptotic number of clusters
+
+The above formulation can be used to argue why the number of clusters grows as $O(\alpha\log n)$ *if $F_0$ is non-atomic*. Define $D_1 = 1$ and for $n\ge 1$
+$$D_n = \begin{cases} 1 &\text{ if } \theta_n \notin \{\theta_1, \dotsc, \theta_{n-1}\}\\
+0 &\text{otherwise}\end{cases}$$ 
+From the above construction we know the probability of drawing a new atom, so
+$$\mathbb E[D_n] = \alpha / (\alpha + n-1)$$
+The number of distinct atoms in $F$ is then
+$$\mathbb E[C_n] = \mathbb E[D_1 + \dotsc + D_n] = \alpha \sum_{i=1}^n \frac{1}{\alpha + n - 1}.$$
+We recognise that this sum is similar to the [harmonic series](https://en.wikipedia.org/wiki/Harmonic_series_(mathematics)#Growth_rate) and (this can be proven formally) also grows as $O(\log n)$, so that $\mathbb E[C_n] = O(\alpha\log n)$.
+To provide a more precise result:
+$$\lim_{n\to\infty}\frac{ \mathbb E[C_n] }{\alpha \log n} = 1.$$
+For this and related results [consult these notes](http://www2.stat.duke.edu/~st118/sta941/generalSB.pdf).
 
 ### Chinese restaurant process
 
 The procedure above is also closely related to the [Chinese restaurant process](https://en.wikipedia.org/wiki/Chinese_restaurant_process), where the metaphor is that there are $K$ occupied tables (where a dish $\mu_k$ is served) and there are $m_k$ people sitting around the $k$th table.
 When a new customer enters the restaurant, they can either join an existing table (with probability proportional to $m_k$) or start a new ($(K+1)$th) table with probability proportional to $\alpha$, where a new dish $\mu_{K+1}\sim F_0$ will be served.
 
+## Afterword
 
+The Dirichlet process is a useful construction, which can be used as a nonparametric prior in clustering problems --- instead of specifying a fixed number of clusters one can specify the growth rate via $\alpha$.
 
-## A final word
-
-While the Dirichlet process is a useful construction, the results it provides need to be treated with caution: in particular, clusters found in a data set may be very different from the clusters that have "real world" meaning.
-Clustering is often an ill-defined problem: how many clusters are needed? Are clusters even real or should we use some other abstraction (e.g., combinations of different features)? How to validate such models? Are there robust to misspecification ([the paper on coarsening](https://arxiv.org/abs/1506.06101) from Jeffrey Miller and David Dunson)? Are they easy to fit (see this overview of their intrinsic [non-identifiability](https://betanalpha.github.io/assets/case_studies/identifying_mixture_models.html))?
+In practice the results (including the number of inferred clusters in a particular data set) need to be treated with caution: the clusters found in the data set do not need to have the "real world" meaning (or perhaps "clusters" are a wrong abstration at all, with heterogeneity attributable e.g., to some continuous covariates which could be measured). Careful validation is often needed, epsecially that these models may be non-robust to misspecification (see [this paper on coarsening](https://arxiv.org/abs/1506.06101)) or the inferences may be hard to do (see this overview of their intrinsic [non-identifiability](https://betanalpha.github.io/assets/case_studies/identifying_mixture_models.html)).
 
 Anyway, although difficult, clustering can provide useful information about a given problem, so we often need do it. For example, take a look [at this application of Chinese restaurant process to the clustering of single-cell DNA profiles](https://doi.org/10.1093/bioinformatics/btaa599).
