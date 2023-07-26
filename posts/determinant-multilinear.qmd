@@ -1,0 +1,364 @@
+---
+title: "Matrix determinant from the exterior algebra viewpoint"
+description: "We look at the ordinary matrix determinant from the exterior algebra point of view."
+author: "Paweł Czyż"
+date: "7/26/2023"
+bibliography: references.bib
+execute:
+  freeze: auto
+---
+
+In every linear algebra course matrix determinant is a must. Often it is introduced in the following form:
+
+::: {#def-determinant}
+
+## Determinant
+
+Let $A=(A^i_j)$ be a matrix and $S_n$ be the permutation group of $\{1, 2, \dotsc, n\}$. The determinant is defined to be the number
+$$
+\det A = \sum_{\sigma\in S_n} \mathrm{sgn}\,\sigma \, A^{\sigma(1)}_1 A^{\sigma(2)}_2 \dotsc A^{\sigma(n)}_n
+$$
+
+:::
+
+The definition above has a lot of advantages, but it also has an important drawback --- the "why" behind this construction is hidden and then appears later in a long list of its properties.
+
+We'll take an alternative viewpoint, which I have learned from @Darling1994differential-forms [Chapter 1], and is based around the exterior algebra.
+
+::: {.callout-note}
+
+All our vector spaces will be finite-dimensional.
+
+We will assume that all vector spaces considered are over real numbers $\mathbb R$.
+Mutatis mutandi everything works also over complex numbers $\mathbb C$.
+However, *not* all theorems and exercises will work with finite fields (especially $\mathbb F_2 = \mathbb Z/2\mathbb Z$). 
+
+:::
+
+## Motivational examples
+
+Consider $V=\mathbb R^3$. For vectors $v$ and $w$ we can define their vector product $v\times w$ with the following properties:
+
+  - Bilinearity: $(\lambda v+v')\times w = \lambda (v\times w) + v'\times w$ and $v\times \lambda(w+w') = \lambda (v\times w) + v\times w'$.
+  - Antisymmetry: $v\times w = -w\times v$.
+
+Geometrically we can think of it as of a signed area of the parallelepiped spanned by $v$ and $w$.
+
+For three vectors $v, w, u$ we can form signed volume:
+$$\langle v, w, u\rangle = v\cdot (w\times u),$$
+which has similar properties:
+
+  - Trilinearity: $\langle \lambda v+v', w, u \rangle = \lambda \langle v, w, u \rangle + \langle v', w, u\rangle$ (and similarly in $w$ and $u$ arguments).
+  - Antisymmetry: when we swap any two arguments the sign changes, e.g., $\langle v, w, u\rangle = -\langle w, v, u\rangle = \langle w, u, v\rangle = -\langle u, w, v\rangle$.
+
+Exterior algebra will be a generalisation of the above construction beyond the three-dimensional space $V=\mathbb R^3$.
+
+## Exterior algebra
+
+Let's start with the natural definition:
+
+
+::: {#def-antisymmetric-multilinear}
+
+## Antisymmetric multilinear function
+
+Let $V$ and $U$ be vector spaces and $f\colon V\times V \times \cdots \times V \to U$ be a function.
+We will say that it is *multilinear* if for all $i = 1, 2, \dotsc, n$ it holds that
+$$
+f(v_1, v_2, \dotsc, \lambda v_i + v_i', v_{i+1}, \dotsc, v_n) = \lambda f(v_1, \dotsc, v_i, \dotsc, v_n) + f(v_1, \dotsc, v_i', \dotsc, v_n).
+$$
+We will say that it is *antisymmetric* if it changes the sign whenever we swap any two arguments:
+$$
+f(v_1, \dotsc, v_i, \dotsc, v_j, \dotsc, v_n) = -f(v_1, \dotsc, v_j, \dotsc, v_i, \dotsc, v_n).
+$$
+:::
+
+As we have seen above both $(v, w)\mapsto v\times w$ and $(v, w, u)\mapsto v\cdot (w\times u)$ are antisymmetric multilinear functions.
+
+Note that for every $\sigma\in S_n$ it holds that
+$$
+f(v_1, \dotsc, v_n) = \mathrm{sgn}\,\sigma \, f(v_{\sigma(1)}, \dotsc, v_{\sigma(n)})
+$$
+as $\mathrm{sgn}\,\sigma$ counts transpositions modulo 2.
+
+::: {#exr-antisymmetry-equivalent}
+
+Let $f\colon V\times V\to U$ be multilinear. Show that the following are equivalent:
+
+  - $f$ is antisymmetric, i.e., $f(v, w) = -f(w, v)$ for every $v, w \in V$.
+  - $f$ is alternating, i.e., $f(v, v) = 0$ for every $v\in V$.
+
+Generalise to multilinear mappings $f\colon V\times V \times \cdots\times V\to U$. 
+
+::: {.callout-caution collapse="true"}
+## Hint
+Expand $f(v+w, v+w)$ using multilinearity.
+:::
+
+:::
+
+Now we are ready to construct (a particular) exterior algebra.
+
+::: {#def-second-exterior-power}
+
+## Second exterior power
+
+Let $V$ be a vector space. Its second exterior power $\bigwedge^2 V$ we be the vector space of expressions
+$$
+\lambda_1 v_1\wedge w_1 + \cdots + \lambda_n v_n\wedge w_n
+$$
+with the following rules:
+
+  1. The wedge $\wedge$ operator is bilinear, i.e., $\lambda (v+v')\wedge w = \lambda v\wedge w + v'\wedge w$ and $\lambda v\wedge (w+w') = \lambda v\wedge w + v\wedge w'. 
+  2. $\wedge$ is antisymmetric, i.e., $v\wedge w = -w\wedge v$ (or you should recognise that it's equivalent to $v\times v=0$).
+  3. If $e_1, \dotsc, e_n$ is a basis of $V$, then
+    $$
+    e_1\wedge e_2, e_1\wedge e_3, \dotsc, e_1\wedge e_n, e_2\wedge e_3, \dotsc, e_2\wedge e_n, \dotsc, e_{n-1}\wedge e_n
+    $$ 
+    is a basis of $\bigwedge^2 V$.
+:::
+
+Note that $v\wedge w$ has the interpretation of a signed area of the parallelepiped spanned by $v$ and $w$.
+Such parallelepipeds can be formally added and there is a resemblance between the wedge product and the vector product in $\mathbb R^3$.
+
+We just need to prove that such a space actually exists (this construction can be skipped at the first reading): similarly to the tensor space, build the free vector space on the set $V\times V$. Now quotient it by expressions like $(v, v)$, $(\lambda v, w) - (v, \lambda w)$, $(v+v', w) - (v, w) - (v', w)$ and $(v, w+w') - (v, w) - (v, w')$. 
+
+Then define $v\wedge w$ to be the equivalence class $[(v, w)]$.
+
+::: {.callout-note collapse="true"}
+
+If we had introduced the determinant by other means, we could construct the exterior algebra $\bigwedge^k V$ also as the space of antisymmetric multilinear functions $V^*\times V^*\to \mathbb R$ (where $V^*$ is the dual space) by
+
+$$
+(v\wedge w)(\alpha, \beta) := \det \begin{pmatrix}  \alpha(v_1) & \alpha(v_2) \\ \beta(v_1) & \beta(v_2) \end{pmatrix}
+$$
+:::
+
+
+Analogously we can construct:
+
+::: {#def-exterior-power}
+
+## Exterior power
+
+Let $V$ be a vector space. We define $\bigwedge^0 V = \mathbb R$, $\bigwedge^1 V = V$ and for $k\ge 2$
+its $k$th exterior power $\bigwedge^k V$ as the vector space of expressions
+$$
+\lambda_1 a_1\wedge a_2\cdots\wedge a_k + \cdots + \lambda_n v_1\wedge v_1 \cdots\wedge v_k
+$$
+such that the wedge operator $\wedge$ is multilinear and antisymmetric (alternating) and that if $e_1, \dotsc, e_n$ is a basis of $V$, then the set
+$$
+\{ e_{i_1}\wedge e_{i_2}\wedge \cdots \wedge e_{i_k}\mid i_1 < i_2 < \cdots < i_k \}
+$$
+
+is a basis of $\bigwedge^k V$.
+
+:::
+
+::: {#exr-dimension-exterior-power}
+
+Show that if $\dim V = n$, then $\dim \bigwedge^k V = \binom{n}{k}$.
+
+(And that in particular for $k > n$ we have $\bigwedge^k V = 0$, the trivial vector space).
+:::
+
+The introduced space can be used to convert between antisymmetric multilinear and linear functions by the means of the universal property:
+
+::: {#thm-universal-property}
+
+## Universal property
+
+Let $f\colon V\times V \cdots\times V\to U$ be an antisymmetric multilinear function. Then, there exists a unique linear mapping $\tilde f\colon \bigwedge^k V\to U$ such that
+
+$$ f = \tilde f\circ \mu, $$
+
+where $\mu(v_1, \dotsc, v_k) = v_1\wedge \dotsc \wedge v_k$.
+
+:::
+
+::: {.proof}
+
+(Can be skipped at the first reading.)
+
+As $f$ is multlilinear, its values are determined by the values on the tuples $(e_{i_1}, \dotsc, e_{i_k})$, where $\{e_1, \dotsc, e_n\}$ is a basis of $V$. 
+
+We can use antisymmetry to show that by "sorting out" the elements such that $i_1 \le i_2\cdots \le i_k$ and defining $\tilde f(e_{i_1} \wedge \dotsc, \wedge e_{i_k}) = f(e_{i_1}, \dotsc, e_{i_k})$ we obtain a well-defined mapping. Linearity is easy to proof.
+
+Now the uniqueness is proven by observing that antisymmetry and multilinearity uniquely prescribe the values at the basis elements of $\bigwedge^k V$.
+
+:::
+
+Its importance is the following: to show that a linear map $\bigwedge^k V\to U$ is well-defined, one can construct a multilinear antisymmetric map $V\times V\times \cdots \times V\to U$.
+
+## Determinants
+
+Finally, we can define the determinant. Note that if $\dim V = n$, then $\dim \bigwedge^n V = 1$.
+
+::: {#def-determinant-exterior}
+
+## Determinant
+
+For $A\colon V\to V$ we consider the induced mapping $A'\colon \bigwedge^n V\to \bigwedge^n V$ given by the antisymmetric and multilinear mapping
+$$
+(v_1, \dotsc, v_n) \mapsto (Av_1) \wedge \cdots (Av_n).
+$$
+
+Because $\bigwedge^n V$ is one-dimensional, this mapping must be multiplication by a number. Namely, we define the determinant $\det A$ to be the number such that:
+$$
+Av_1 \wedge \dotsc Av_n = \det A\, (v_1\wedge \dotsc \wedge v_n).
+$$
+:::
+
+In other words, determinant measures the volume stretch of the parallelepiped spanned by the vectors after they are transformed by the mapping.
+I like this geometric intuition, especially that it is clear that determinant depends only on the linear map, rather than a matrix representing it in a chosen basis. 
+
+We can now show a number of lemmata.
+
+::: {#prp-identity}
+If $\mathrm{id}_V\colon V\to V$ is the identity mapping, then $\det \mathrm{id}_V = 1$.
+:::
+
+::: {.proof}
+Obvious from the definition!
+Similarly, it's clear that $\det \left(k\cdot \mathrm{id}_V) = k^{\dim V}$.
+:::
+
+
+::: {#prp-composition}
+For every two mappings $A, B\colon V\to V$ it holds that
+$\det (B\circ A) = \det B\cdot \det A$.
+:::
+
+::: {.proof}
+
+$$
+\begin{align*}
+\det (B\circ A) \, v_1\wedge \cdots \wedge v_n &= (BAv_1) \wedge \cdots \wedge (BAv_n) \\ 
+&= B(Av_1) \wedge \cdots \wedge B(Av_n) \\ 
+&= \det B \, (Av_1) \wedge \cdots \wedge (Av_n) \\
+&= \det B\cdot \det A\, v_1\wedge \cdots\wedge v_n.
+\end{align*}
+$$
+:::
+
+::: {#prp-composition}
+A mapping is an isomorphism if and only if it has non-zero determinant.
+:::
+
+::: {.proof}
+
+If the mapping is invertible, then $A\circ A^{-1} = \mathrm{id}$ and we have $\det A \cdot \det A^{-1} = 1$, so its determinant must be non-zero.
+
+Now assume that the mapping is non-invertible. This means that there exists a non-zero vector $k\in \ker A$ such that $Ak=0$. Let's complete $k$ to a basis $k, e_1, \dotsc, e_{n-1}$. Then
+$$
+\det A\, k\wedge e_1\wedge \cdots\wedge e_{n-1} = (Ak) \wedge \cdots \wedge (Ae_{n-1}) = 0,
+$$
+which means that $\det A=0$ as $\{k\wedge e_1\wedge \dotsc \wedge e_{n-1}\}$ is a basis of $\bigwedge^n V$.
+:::
+
+Let's now connect the usual definition of the determinant to the one coming from exterior algebra:
+
+::: {#prp-determinant-expression}
+Let $e_1, \dotsc, e_n$ be a basis of $V$ and $(A^{i}_j)$ be the matrix of coordinates, i.e.,
+$$
+Ae_k = \sum_i A^{i}_k e_i.
+$$
+Then the determinant $\det A$ can be calculated as
+$$
+\det A = \sum_{\sigma\in S_n} \mathrm{sgn}\,\sigma \, A^{\sigma(1)}_1 A^{\sigma(2)}_2 \dotsc A^{\sigma(n)}_n.
+$$
+:::
+
+::: {.proof}
+Observe that
+$$\begin{align*}
+\det A e_1 \wedge \cdots \wedge e_n &= Ae_1 \wedge \cdots \wedge Ae_n\\
+&= \left( \sum_{i_1} A^{i_1}_1 e_{i_1} \right) \wedge \cdots \wedge \left( \sum_{i_n} A^{i_n}_n e_{i_n} \right)\\
+&= \sum_{i_1, \dotsc, i_n} A^{i_1}A^{i_2}\cdots A^{i_n} \, e_{i_1} \wedge \cdots \wedge e_{i_n}. 
+\end{align*}$$
+
+Now we see that repeated indices give zero contribution to this sum, so we can only consider the indices which are permutations of $1, 2, \dotsc, n$. We also see that $e_{i_1} \wedge \cdots \wedge e_{i_n}$ can be then written as $\pm 1\, e_1\wedge \dotsc \wedge e_n$, where the sign is the number of required transpositions, that is the sign of the permutation.
+This ends the proof.
+
+:::
+
+Going just a bit further into exterior algebra we can also show that [matrix transposition](https://en.wikipedia.org/wiki/Transpose) does not change the determinant.
+
+[To represent matrix transposition, we will use the dual mapping](https://math.stackexchange.com/a/4574493/551592): if $A\colon V\to V$ there is the dual mapping $A^*\colon V^*\to V^*$, given as
+$$
+  (A^*\omega)(v) := \omega(Av).
+$$
+
+We can therefore build the $n$th exterior power of $V^*$: $\bigwedge^n (V^*)$ and consider the determinant $\det A^*$.
+
+We will formally show that
+
+::: {#prp-determinant-dual}
+Let $A\colon V\to V$ be a linear map and $A^*\colon V^*\to V^*$ be its dual. Then,
+$$
+\det A^* = \det A.
+$$
+:::
+
+::: {.proof}
+
+To do this we will need an isomorphism
+$$
+\iota \colon {\bigwedge}^n (V^*) \to \left({\bigwedge}^n V\right)^* 
+$$
+given on basis elements by
+$$
+\iota( \omega^1 \wedge \cdots \wedge \omega^n ) (v_1\wedge \cdots \wedge v_n) = \det \big(\omega^i(v_j) \big)_{i, j = 1, \cdots, n},
+$$
+where on the right side we use any already known formula for the determinant. It is easy to show that this mapping is well-defined and linear, as it descends from a multilinear alternating mapping.
+
+Having this, the proof becomes straightforward calculation:
+$$
+\begin{align*}
+  \det A^* \iota\left(  \omega^1\wedge \cdots\wedge \omega^n  \right)(v_1\wedge \cdots\wedge v_n ) &= 
+  \iota\bigg( \det A^* \, \omega^1\wedge \cdots\wedge \omega^n  \bigg)(v_1\wedge \cdots\wedge v_n ) \\
+  &=\iota\bigg( A^*\omega^1 \wedge \cdots\wedge A^*\omega^n  \bigg )(v_1\wedge \cdots\wedge v_n) \\
+  &= \det \bigg((A^*\omega^i)(v_j)\bigg) = \det \bigg( \omega^i(Av_j ) \bigg) \\
+  &= \iota\left(\omega^1\wedge \cdots\wedge \omega^n \right)(Av_1\wedge\cdots\wedge Av_n) \\
+  &= \iota\left(\omega^1\wedge \cdots\wedge \omega^n \right)(\det A\, v_1\wedge\cdots\wedge v_n) \\
+  &= \det A~ \iota\left(\omega^1\wedge \cdots\wedge \omega^n\right)(v_1\wedge\cdots\wedge v_n)
+\end{align*}
+$$
+:::
+
+Establishing such isomorphisms is quite a nice technique, which also can be used to proof
+
+::: {#prp-direct-sum}
+Let $A\colon V\to V$ and $B\colon W\to W$ be two linear mappings and $A\oplus B\colon V\oplus W\to V\oplus W$ be the mapping given by
+$$
+(A\oplus B)(v, w) = (Av, Bw).
+$$
+
+Then $\det (A\oplus B) = \det A\cdot \det B$.
+:::
+
+::: {.proof}
+We will use [this approach](https://math.stackexchange.com/a/3306537/551592): there [exists an isomorphism](https://math.stackexchange.com/q/822470/551592)
+$$
+{\bigwedge}^p (V\oplus W) \simeq \bigoplus_k {\bigwedge}^k V \otimes {\bigwedge}^{p-k} W,
+$$
+so if we take $n=\dim V$ and $m=\dim W$ and note that $\bigwedge^{p} V = 0$ for $p > n$ (and similarly for $W$) we have
+$$
+\iota\colon {\bigwedge}^{n+m} (V\oplus W) \simeq {\bigwedge}^n V\otimes {\bigwedge}^m W.
+$$
+If $i\colon V\to V\oplus W$ and $j\colon W\to V\oplus W$, this isomorphism is given as
+$$
+\iota\big( iv_1 \wedge \cdots \wedge iv_n\wedge jw_1 \wedge \cdots \wedge jw_m \big) = (v_1\wedge \cdots\wedge v_n) \otimes (w_1\wedge\cdots\wedge w_m).
+$$
+Now we calculate:
+$$\begin{align*}
+(A\oplus B)( iv_1 \wedge \cdots \wedge iv_n\wedge jw_1 \wedge \cdots \wedge jw_m ) &=
+iAv_1 \wedge \cdots \wedge iAv_n \wedge jBw_1\wedge\cdots\wedge jBw_m \\
+&= \iota^{-1}\big( Av_1\wedge \cdots\wedge Av_n \otimes Bw_1\wedge\cdots\wedge Bw_m   \big) \\
+&= \iota^{-1}\big(\det A\cdot \det B\, v_1\wedge \cdots \wedge v_n \otimes w_1\wedge\cdots\wedge w_m) \\
+&= \det A\cdot \det B \, \iota^{-1}\big( v_1\wedge \cdots \wedge v_n \otimes w_1\wedge\cdots\wedge w_m \big)\\
+&= \det A\cdot \det B \, iv_1\wedge \cdots \wedge iv_n \wedge jw_1\wedge\cdots\wedge jw_m.
+\end{align*}
+$$
+
+:::

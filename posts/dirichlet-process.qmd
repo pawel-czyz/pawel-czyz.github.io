@@ -7,6 +7,8 @@ categories:
   - Bayesian nonparametrics
   - Clustering
 bibliography: references.bib
+execute:
+  freeze: auto
 ---
 
 In this post we will quickly review different constructions of the Dirichlet process, following @Yee_Whye_Teh_2006-Hierarchical_Dirichlet_Process and @Gelman2013bayesian-data-analysis [Chapter 23].

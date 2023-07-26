@@ -2,22 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://pawel-czyz.github.io/posts/board-games-monte-carlo.html</loc>
-    <lastmod>2023-07-11T10:23:34.048Z</lastmod>
+    <lastmod>2023-07-27T09:43:43.963Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/expectations-student-mentorship.html</loc>
-    <lastmod>2023-07-11T10:23:34.448Z</lastmod>
+    <lastmod>2023-07-27T09:43:44.415Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/posts/determinant-multilinear.html</loc>
+    <lastmod>2023-07-27T09:43:44.819Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/dirichlet-process.html</loc>
-    <lastmod>2023-07-11T10:23:34.988Z</lastmod>
+    <lastmod>2023-07-27T09:43:45.375Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/index.html</loc>
-    <lastmod>2023-07-11T10:23:35.160Z</lastmod>
+    <lastmod>2023-07-27T09:43:45.791Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/private/prezenty.html</loc>
+    <lastmod>2023-07-27T09:43:45.975Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/blog.html</loc>
-    <lastmod>2023-07-11T10:23:35.464Z</lastmod>
+    <lastmod>2023-07-27T09:43:46.323Z</lastmod>
   </url>
 </urlset>

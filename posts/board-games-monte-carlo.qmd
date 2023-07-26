@@ -5,6 +5,8 @@ author: "Paweł Czyż"
 date: "7/9/2023"
 categories:
   - Monte Carlo
+execute:
+  freeze: true
 format: 
   html:
     code-fold: true

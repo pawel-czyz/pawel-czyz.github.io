@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/determinant-multilinear.html",
       "/posts/dirichlet-process.html",
       "/posts/board-games-monte-carlo.html",
       "/posts/expectations-student-mentorship.html"
