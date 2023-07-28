@@ -21,7 +21,7 @@ $$
 
 :::
 
-The definition above has a lot of advantages, but it also has an important drawback --- the "why" behind this construction is hidden and then appears later in a long list of its properties.
+The definition above has a lot of advantages, but it also has an important drawback --- the "why" of this construction is hidden and appears only later in a long list of its properties.
 
 We'll take an alternative viewpoint, which I have learned from @Darling1994differential-forms [Chapter 1], and is based around the exterior algebra.
 
@@ -30,8 +30,8 @@ We'll take an alternative viewpoint, which I have learned from @Darling1994diffe
 All our vector spaces will be finite-dimensional.
 
 We will assume that all vector spaces considered are over real numbers $\mathbb R$.
-Mutatis mutandi everything works also over complex numbers $\mathbb C$.
-However, *not* all theorems and exercises will work with finite fields (especially $\mathbb F_2 = \mathbb Z/2\mathbb Z$). 
+*Mutatis mutandi* everything works also over complex numbers $\mathbb C$.
+However, *not* all theorems and exercises may work with finite fields, especially $\mathbb F_2 = \mathbb Z/2\mathbb Z$. 
 
 :::
 
@@ -39,7 +39,7 @@ However, *not* all theorems and exercises will work with finite fields (especial
 
 Consider $V=\mathbb R^3$. For vectors $v$ and $w$ we can define their vector product $v\times w$ with the following properties:
 
-  - Bilinearity: $(\lambda v+v')\times w = \lambda (v\times w) + v'\times w$ and $v\times \lambda(w+w') = \lambda (v\times w) + v\times w'$.
+  - Bilinearity: $(\lambda v+v')\times w = \lambda (v\times w) + v'\times w$ and $v\times (\lambda w+w') = \lambda (v\times w) + v\times w'$.
   - Antisymmetry: $v\times w = -w\times v$.
 
 Geometrically we can think of it as of a signed area of the parallelepiped spanned by $v$ and $w$.
@@ -109,11 +109,15 @@ $$
 $$
 with the following rules:
 
-  1. The wedge $\wedge$ operator is bilinear, i.e., $\lambda (v+v')\wedge w = \lambda v\wedge w + v'\wedge w$ and $\lambda v\wedge (w+w') = \lambda v\wedge w + v\wedge w'. 
-  2. $\wedge$ is antisymmetric, i.e., $v\wedge w = -w\wedge v$ (or you should recognise that it's equivalent to $v\times v=0$).
+  1. The wedge $\wedge$ operator is bilinear, i.e., $(\lambda v+v')\wedge w = \lambda v\wedge w + v'\wedge w$ and $v\wedge (\lambda w+w') = \lambda v\wedge w + v\wedge w'$. 
+  2. $\wedge$ is antisymmetric, i.e., $v\wedge w = -w\wedge v$ (or, equivalently, $v\wedge v=0$).
   3. If $e_1, \dotsc, e_n$ is a basis of $V$, then
-    $$
-    e_1\wedge e_2, e_1\wedge e_3, \dotsc, e_1\wedge e_n, e_2\wedge e_3, \dotsc, e_2\wedge e_n, \dotsc, e_{n-1}\wedge e_n
+    $$\begin{align*}
+    &e_1\wedge e_2, e_1\wedge e_3, \dotsc, e_1\wedge e_n, \\
+    &e_2\wedge e_3, \dotsc, e_2\wedge e_n\\
+    &\qquad\vdots\\
+    &e_{n-1}\wedge e_n
+    \end{align*}
     $$ 
     is a basis of $\bigwedge^2 V$.
 :::
@@ -144,7 +148,7 @@ Analogously we can construct:
 Let $V$ be a vector space. We define $\bigwedge^0 V = \mathbb R$, $\bigwedge^1 V = V$ and for $k\ge 2$
 its $k$th exterior power $\bigwedge^k V$ as the vector space of expressions
 $$
-\lambda_1 a_1\wedge a_2\cdots\wedge a_k + \cdots + \lambda_n v_1\wedge v_1 \cdots\wedge v_k
+\lambda_1 a_1\wedge a_2\wedge \cdots\wedge a_k + \cdots + \lambda_n v_1\wedge v_2 \wedge \cdots\wedge v_k
 $$
 such that the wedge operator $\wedge$ is multilinear and antisymmetric (alternating) and that if $e_1, \dotsc, e_n$ is a basis of $V$, then the set
 $$
@@ -158,7 +162,6 @@ is a basis of $\bigwedge^k V$.
 ::: {#exr-dimension-exterior-power}
 
 Show that if $\dim V = n$, then $\dim \bigwedge^k V = \binom{n}{k}$.
-
 (And that in particular for $k > n$ we have $\bigwedge^k V = 0$, the trivial vector space).
 :::
 
@@ -168,11 +171,10 @@ The introduced space can be used to convert between antisymmetric multilinear an
 
 ## Universal property
 
-Let $f\colon V\times V \cdots\times V\to U$ be an antisymmetric multilinear function. Then, there exists a unique linear mapping $\tilde f\colon \bigwedge^k V\to U$ such that
-
-$$ f = \tilde f\circ \mu, $$
-
-where $\mu(v_1, \dotsc, v_k) = v_1\wedge \dotsc \wedge v_k$.
+Let $f\colon V\times V \cdots\times V\to U$ be an antisymmetric multilinear function. Then, there exists a unique linear mapping $\tilde f\colon \bigwedge^k V\to U$ such that for every set of vectors $v_1, \dotsc, v_k$
+$$
+f(v_1, \dotsc, v_k) = \tilde f(v_1\wedge \dotsc \wedge v_k).
+$$
 
 :::
 
@@ -198,19 +200,22 @@ Finally, we can define the determinant. Note that if $\dim V = n$, then $\dim \b
 
 ## Determinant
 
-For $A\colon V\to V$ we consider the induced mapping $A'\colon \bigwedge^n V\to \bigwedge^n V$ given by the antisymmetric and multilinear mapping
+Let $n=\dim V$ and $A\colon V\to V$ be a linear mapping. We consider the mapping
 $$
-(v_1, \dotsc, v_n) \mapsto (Av_1) \wedge \cdots (Av_n).
+(v_1, \dotsc, v_n) \mapsto (Av_1) \wedge \cdots \wedge (Av_n).
 $$
 
-Because $\bigwedge^n V$ is one-dimensional, this mapping must be multiplication by a number. Namely, we define the determinant $\det A$ to be the number such that:
+As it is antisymmetric and multilinear, we know that it induces a unique linear mapping $\bigwedge^n V\to \bigwedge^n V$.
+
+Because $\bigwedge^n V$ is one-dimensional, this mapping must be multiplication by a number. Namely, we define the determinant $\det A$ to be the number such that for every set of vectors $v_1, \dotsc, v_n$
 $$
-Av_1 \wedge \dotsc Av_n = \det A\, (v_1\wedge \dotsc \wedge v_n).
+Av_1 \wedge \cdots \wedge Av_n = \det A\, (v_1\wedge \cdots \wedge v_n).
 $$
 :::
 
 In other words, determinant measures the volume stretch of the parallelepiped spanned by the vectors after they are transformed by the mapping.
-I like this geometric intuition, especially that it is clear that determinant depends only on the linear map, rather than a matrix representing it in a chosen basis. 
+
+I like this geometric intuition, especially that it is clear that determinant depends only on the linear map, rather than a particular matrix representation --- it is independent on the chosen basis.
 
 We can now show a number of lemmata.
 
@@ -220,7 +225,7 @@ If $\mathrm{id}_V\colon V\to V$ is the identity mapping, then $\det \mathrm{id}_
 
 ::: {.proof}
 Obvious from the definition!
-Similarly, it's clear that $\det \left(k\cdot \mathrm{id}_V) = k^{\dim V}$.
+Similarly, it's clear that $\det \left(\lambda\cdot \mathrm{id}_V\right) = \lambda^{\dim V}$.
 :::
 
 
@@ -230,7 +235,7 @@ $\det (B\circ A) = \det B\cdot \det A$.
 :::
 
 ::: {.proof}
-
+For every set of vectors we have
 $$
 \begin{align*}
 \det (B\circ A) \, v_1\wedge \cdots \wedge v_n &= (BAv_1) \wedge \cdots \wedge (BAv_n) \\ 
@@ -242,6 +247,9 @@ $$
 :::
 
 ::: {#prp-composition}
+
+## Only invertible matrices have non-zero determinants
+
 A mapping is an isomorphism if and only if it has non-zero determinant.
 :::
 
@@ -259,6 +267,9 @@ which means that $\det A=0$ as $\{k\wedge e_1\wedge \dotsc \wedge e_{n-1}\}$ is 
 Let's now connect the usual definition of the determinant to the one coming from exterior algebra:
 
 ::: {#prp-determinant-expression}
+
+## Recovering the standard expression
+
 Let $e_1, \dotsc, e_n$ be a basis of $V$ and $(A^{i}_j)$ be the matrix of coordinates, i.e.,
 $$
 Ae_k = \sum_i A^{i}_k e_i.
@@ -294,7 +305,10 @@ We can therefore build the $n$th exterior power of $V^*$: $\bigwedge^n (V^*)$ an
 We will formally show that
 
 ::: {#prp-determinant-dual}
-Let $A\colon V\to V$ be a linear map and $A^*\colon V^*\to V^*$ be its dual. Then,
+
+## Determinant of the transpose
+
+Let $A\colon V\to V$ be a linear map and $A^*\colon V^*\to V^*$ be its dual. Then
 $$
 \det A^* = \det A.
 $$
@@ -326,9 +340,12 @@ $$
 $$
 :::
 
-Establishing such isomorphisms is quite a nice technique, which also can be used to proof
+Establishing such isomorphisms is quite a nice technique, which also can be used to prove
 
 ::: {#prp-direct-sum}
+
+## Determinant of a block-diagonal matrix
+
 Let $A\colon V\to V$ and $B\colon W\to W$ be two linear mappings and $A\oplus B\colon V\oplus W\to V\oplus W$ be the mapping given by
 $$
 (A\oplus B)(v, w) = (Av, Bw).
@@ -346,7 +363,7 @@ so if we take $n=\dim V$ and $m=\dim W$ and note that $\bigwedge^{p} V = 0$ for 
 $$
 \iota\colon {\bigwedge}^{n+m} (V\oplus W) \simeq {\bigwedge}^n V\otimes {\bigwedge}^m W.
 $$
-If $i\colon V\to V\oplus W$ and $j\colon W\to V\oplus W$, this isomorphism is given as
+If $i\colon V\to V\oplus W$ and $j\colon W\to V\oplus W$ are the two "canonical" inclusions, this isomorphism is given as
 $$
 \iota\big( iv_1 \wedge \cdots \wedge iv_n\wedge jw_1 \wedge \cdots \wedge jw_m \big) = (v_1\wedge \cdots\wedge v_n) \otimes (w_1\wedge\cdots\wedge w_m).
 $$
@@ -362,3 +379,36 @@ iAv_1 \wedge \cdots \wedge iAv_n \wedge jBw_1\wedge\cdots\wedge jBw_m \\
 $$
 
 :::
+
+::: {#prp-upper-triangular}
+
+## Determinant of an upper-triangular matrix
+
+Let $A\colon V\to V$ be a linear mapping and $e_1, \dotsc, e_n$ be a basis of $V$ such that matrix $(A^i_j)$ is upper-triangular, that is
+$$
+\begin{align*}
+  Ae_1 &= A^1_1 e_1\\
+  Ae_2 &= A^1_2 e_1 + A^2_2 e_2\\
+  &\vdots\\
+  Ae_n &= A^1_n e_1 + A^2_ne_2 + \dotsc + A^n_n e_n
+\end{align*}
+$$
+Then
+$$
+\det A = \prod_{i=1}^n A^i_i.
+$$
+
+:::
+
+Once proven, this result can also be used for lower-triangular matrices due to @prp-determinant-dual.
+
+::: {.proof}
+Recall that whenever there is $i_j=i_k$, then $e_{i_1}\wedge \cdots\wedge e_{i_n} = 0$. Hence, there is only one term that may be non-zero:
+$$
+Ae_1\wedge Ae_2 \wedge \cdots \wedge Ae_n = A^1_1 e_1 \wedge \cdots \wedge A^n_n e_n = \prod_{i=1}^n A^i_i\, e_1\wedge \cdots\wedge e_n.
+$$
+
+:::
+
+## Acknowledgements
+I would like to thank Adam Klukowski for helpful editing suggestions.

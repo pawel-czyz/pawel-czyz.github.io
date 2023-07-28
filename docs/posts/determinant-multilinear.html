@@ -131,6 +131,7 @@ div.csl-indent {
   <li><a href="#motivational-examples" id="toc-motivational-examples" class="nav-link active" data-scroll-target="#motivational-examples">Motivational examples</a></li>
   <li><a href="#exterior-algebra" id="toc-exterior-algebra" class="nav-link" data-scroll-target="#exterior-algebra">Exterior algebra</a></li>
   <li><a href="#determinants" id="toc-determinants" class="nav-link" data-scroll-target="#determinants">Determinants</a></li>
+  <li><a href="#acknowledgements" id="toc-acknowledgements" class="nav-link" data-scroll-target="#acknowledgements">Acknowledgements</a></li>
   </ul>
 </nav>
     </div>
@@ -177,7 +178,7 @@ div.csl-indent {
 \det A = \sum_{\sigma\in S_n} \mathrm{sgn}\,\sigma \, A^{\sigma(1)}_1 A^{\sigma(2)}_2 \dotsc A^{\sigma(n)}_n
 \]</span></p>
 </div>
-<p>The definition above has a lot of advantages, but it also has an important drawback — the “why” behind this construction is hidden and then appears later in a long list of its properties.</p>
+<p>The definition above has a lot of advantages, but it also has an important drawback — the “why” of this construction is hidden and appears only later in a long list of its properties.</p>
 <p>We’ll take an alternative viewpoint, which I have learned from <span class="citation" data-cites="Darling1994differential-forms">Darling (<a href="#ref-Darling1994differential-forms" role="doc-biblioref">1994, chap. 1</a>)</span>, and is based around the exterior algebra.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -190,14 +191,14 @@ Note
 </div>
 <div class="callout-body-container callout-body">
 <p>All our vector spaces will be finite-dimensional.</p>
-<p>We will assume that all vector spaces considered are over real numbers <span class="math inline">\(\mathbb R\)</span>. Mutatis mutandi everything works also over complex numbers <span class="math inline">\(\mathbb C\)</span>. However, <em>not</em> all theorems and exercises will work with finite fields (especially <span class="math inline">\(\mathbb F_2 = \mathbb Z/2\mathbb Z\)</span>).</p>
+<p>We will assume that all vector spaces considered are over real numbers <span class="math inline">\(\mathbb R\)</span>. <em>Mutatis mutandi</em> everything works also over complex numbers <span class="math inline">\(\mathbb C\)</span>. However, <em>not</em> all theorems and exercises may work with finite fields, especially <span class="math inline">\(\mathbb F_2 = \mathbb Z/2\mathbb Z\)</span>.</p>
 </div>
 </div>
 <section id="motivational-examples" class="level2">
 <h2 class="anchored" data-anchor-id="motivational-examples">Motivational examples</h2>
 <p>Consider <span class="math inline">\(V=\mathbb R^3\)</span>. For vectors <span class="math inline">\(v\)</span> and <span class="math inline">\(w\)</span> we can define their vector product <span class="math inline">\(v\times w\)</span> with the following properties:</p>
 <ul>
-<li>Bilinearity: <span class="math inline">\((\lambda v+v')\times w = \lambda (v\times w) + v'\times w\)</span> and <span class="math inline">\(v\times \lambda(w+w') = \lambda (v\times w) + v\times w'\)</span>.</li>
+<li>Bilinearity: <span class="math inline">\((\lambda v+v')\times w = \lambda (v\times w) + v'\times w\)</span> and <span class="math inline">\(v\times (\lambda w+w') = \lambda (v\times w) + v\times w'\)</span>.</li>
 <li>Antisymmetry: <span class="math inline">\(v\times w = -w\times v\)</span>.</li>
 </ul>
 <p>Geometrically we can think of it as of a signed area of the parallelepiped spanned by <span class="math inline">\(v\)</span> and <span class="math inline">\(w\)</span>.</p>
@@ -252,10 +253,14 @@ Hint
 \lambda_1 v_1\wedge w_1 + \cdots + \lambda_n v_n\wedge w_n
 \]</span> with the following rules:</p>
 <ol type="1">
-<li>The wedge <span class="math inline">\(\wedge\)</span> operator is bilinear, i.e., <span class="math inline">\(\lambda (v+v')\wedge w = \lambda v\wedge w + v'\wedge w\)</span> and $v(w+w’) = vw + vw’.</li>
-<li><span class="math inline">\(\wedge\)</span> is antisymmetric, i.e., <span class="math inline">\(v\wedge w = -w\wedge v\)</span> (or you should recognise that it’s equivalent to <span class="math inline">\(v\times v=0\)</span>).</li>
-<li>If <span class="math inline">\(e_1, \dotsc, e_n\)</span> is a basis of <span class="math inline">\(V\)</span>, then <span class="math display">\[
-    e_1\wedge e_2, e_1\wedge e_3, \dotsc, e_1\wedge e_n, e_2\wedge e_3, \dotsc, e_2\wedge e_n, \dotsc, e_{n-1}\wedge e_n
+<li>The wedge <span class="math inline">\(\wedge\)</span> operator is bilinear, i.e., <span class="math inline">\((\lambda v+v')\wedge w = \lambda v\wedge w + v'\wedge w\)</span> and <span class="math inline">\(v\wedge (\lambda w+w') = \lambda v\wedge w + v\wedge w'\)</span>.</li>
+<li><span class="math inline">\(\wedge\)</span> is antisymmetric, i.e., <span class="math inline">\(v\wedge w = -w\wedge v\)</span> (or, equivalently, <span class="math inline">\(v\wedge v=0\)</span>).</li>
+<li>If <span class="math inline">\(e_1, \dotsc, e_n\)</span> is a basis of <span class="math inline">\(V\)</span>, then <span class="math display">\[\begin{align*}
+    &amp;e_1\wedge e_2, e_1\wedge e_3, \dotsc, e_1\wedge e_n, \\
+    &amp;e_2\wedge e_3, \dotsc, e_2\wedge e_n\\
+    &amp;\qquad\vdots\\
+    &amp;e_{n-1}\wedge e_n
+    \end{align*}
     \]</span> is a basis of <span class="math inline">\(\bigwedge^2 V\)</span>.</li>
 </ol>
 </div>
@@ -284,21 +289,20 @@ Note
 <p>Analogously we can construct:</p>
 <div id="def-exterior-power" class="theorem definition">
 <p><span class="theorem-title"><strong>Definition 4 (Exterior power) </strong></span>Let <span class="math inline">\(V\)</span> be a vector space. We define <span class="math inline">\(\bigwedge^0 V = \mathbb R\)</span>, <span class="math inline">\(\bigwedge^1 V = V\)</span> and for <span class="math inline">\(k\ge 2\)</span> its <span class="math inline">\(k\)</span>th exterior power <span class="math inline">\(\bigwedge^k V\)</span> as the vector space of expressions <span class="math display">\[
-\lambda_1 a_1\wedge a_2\cdots\wedge a_k + \cdots + \lambda_n v_1\wedge v_1 \cdots\wedge v_k
+\lambda_1 a_1\wedge a_2\wedge \cdots\wedge a_k + \cdots + \lambda_n v_1\wedge v_2 \wedge \cdots\wedge v_k
 \]</span> such that the wedge operator <span class="math inline">\(\wedge\)</span> is multilinear and antisymmetric (alternating) and that if <span class="math inline">\(e_1, \dotsc, e_n\)</span> is a basis of <span class="math inline">\(V\)</span>, then the set <span class="math display">\[
 \{ e_{i_1}\wedge e_{i_2}\wedge \cdots \wedge e_{i_k}\mid i_1 &lt; i_2 &lt; \cdots &lt; i_k \}
 \]</span></p>
 <p>is a basis of <span class="math inline">\(\bigwedge^k V\)</span>.</p>
 </div>
 <div id="exr-dimension-exterior-power" class="theorem exercise">
-<p><span class="theorem-title"><strong>Exercise 2 </strong></span>Show that if <span class="math inline">\(\dim V = n\)</span>, then <span class="math inline">\(\dim \bigwedge^k V = \binom{n}{k}\)</span>.</p>
-<p>(And that in particular for <span class="math inline">\(k &gt; n\)</span> we have <span class="math inline">\(\bigwedge^k V = 0\)</span>, the trivial vector space).</p>
+<p><span class="theorem-title"><strong>Exercise 2 </strong></span>Show that if <span class="math inline">\(\dim V = n\)</span>, then <span class="math inline">\(\dim \bigwedge^k V = \binom{n}{k}\)</span>. (And that in particular for <span class="math inline">\(k &gt; n\)</span> we have <span class="math inline">\(\bigwedge^k V = 0\)</span>, the trivial vector space).</p>
 </div>
 <p>The introduced space can be used to convert between antisymmetric multilinear and linear functions by the means of the universal property:</p>
 <div id="thm-universal-property" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 1 (Universal property) </strong></span>Let <span class="math inline">\(f\colon V\times V \cdots\times V\to U\)</span> be an antisymmetric multilinear function. Then, there exists a unique linear mapping <span class="math inline">\(\tilde f\colon \bigwedge^k V\to U\)</span> such that</p>
-<p><span class="math display">\[ f = \tilde f\circ \mu, \]</span></p>
-<p>where <span class="math inline">\(\mu(v_1, \dotsc, v_k) = v_1\wedge \dotsc \wedge v_k\)</span>.</p>
+<p><span class="theorem-title"><strong>Theorem 1 (Universal property) </strong></span>Let <span class="math inline">\(f\colon V\times V \cdots\times V\to U\)</span> be an antisymmetric multilinear function. Then, there exists a unique linear mapping <span class="math inline">\(\tilde f\colon \bigwedge^k V\to U\)</span> such that for every set of vectors <span class="math inline">\(v_1, \dotsc, v_k\)</span> <span class="math display">\[
+f(v_1, \dotsc, v_k) = \tilde f(v_1\wedge \dotsc \wedge v_k).
+\]</span></p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span>(Can be skipped at the first reading.)</p>
@@ -312,26 +316,28 @@ Note
 <h2 class="anchored" data-anchor-id="determinants">Determinants</h2>
 <p>Finally, we can define the determinant. Note that if <span class="math inline">\(\dim V = n\)</span>, then <span class="math inline">\(\dim \bigwedge^n V = 1\)</span>.</p>
 <div id="def-determinant-exterior" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 5 (Determinant) </strong></span>For <span class="math inline">\(A\colon V\to V\)</span> we consider the induced mapping <span class="math inline">\(A'\colon \bigwedge^n V\to \bigwedge^n V\)</span> given by the antisymmetric and multilinear mapping <span class="math display">\[
-(v_1, \dotsc, v_n) \mapsto (Av_1) \wedge \cdots (Av_n).
+<p><span class="theorem-title"><strong>Definition 5 (Determinant) </strong></span>Let <span class="math inline">\(n=\dim V\)</span> and <span class="math inline">\(A\colon V\to V\)</span> be a linear mapping. We consider the mapping <span class="math display">\[
+(v_1, \dotsc, v_n) \mapsto (Av_1) \wedge \cdots \wedge (Av_n).
 \]</span></p>
-<p>Because <span class="math inline">\(\bigwedge^n V\)</span> is one-dimensional, this mapping must be multiplication by a number. Namely, we define the determinant <span class="math inline">\(\det A\)</span> to be the number such that: <span class="math display">\[
-Av_1 \wedge \dotsc Av_n = \det A\, (v_1\wedge \dotsc \wedge v_n).
+<p>As it is antisymmetric and multilinear, we know that it induces a unique linear mapping <span class="math inline">\(\bigwedge^n V\to \bigwedge^n V\)</span>.</p>
+<p>Because <span class="math inline">\(\bigwedge^n V\)</span> is one-dimensional, this mapping must be multiplication by a number. Namely, we define the determinant <span class="math inline">\(\det A\)</span> to be the number such that for every set of vectors <span class="math inline">\(v_1, \dotsc, v_n\)</span> <span class="math display">\[
+Av_1 \wedge \cdots \wedge Av_n = \det A\, (v_1\wedge \cdots \wedge v_n).
 \]</span></p>
 </div>
-<p>In other words, determinant measures the volume stretch of the parallelepiped spanned by the vectors after they are transformed by the mapping. I like this geometric intuition, especially that it is clear that determinant depends only on the linear map, rather than a matrix representing it in a chosen basis.</p>
+<p>In other words, determinant measures the volume stretch of the parallelepiped spanned by the vectors after they are transformed by the mapping.</p>
+<p>I like this geometric intuition, especially that it is clear that determinant depends only on the linear map, rather than a particular matrix representation — it is independent on the chosen basis.</p>
 <p>We can now show a number of lemmata.</p>
 <div id="prp-identity" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 1 </strong></span>If <span class="math inline">\(\mathrm{id}_V\colon V\to V\)</span> is the identity mapping, then <span class="math inline">\(\det \mathrm{id}_V = 1\)</span>.</p>
 </div>
 <div class="proof">
-<p><span class="proof-title"><em>Proof</em>. </span>Obvious from the definition! Similarly, it’s clear that <span class="math inline">\(\det \left(k\cdot \mathrm{id}_V) = k^{\dim V}\)</span>.</p>
+<p><span class="proof-title"><em>Proof</em>. </span>Obvious from the definition! Similarly, it’s clear that <span class="math inline">\(\det \left(\lambda\cdot \mathrm{id}_V\right) = \lambda^{\dim V}\)</span>.</p>
 </div>
 <div id="prp-composition" class="theorem proposition">
 <p><span class="theorem-title"><strong>Proposition 2 </strong></span>For every two mappings <span class="math inline">\(A, B\colon V\to V\)</span> it holds that <span class="math inline">\(\det (B\circ A) = \det B\cdot \det A\)</span>.</p>
 </div>
 <div class="proof">
-<p><span class="proof-title"><em>Proof</em>. </span><span class="math display">\[
+<p><span class="proof-title"><em>Proof</em>. </span>For every set of vectors we have <span class="math display">\[
 \begin{align*}
 \det (B\circ A) \, v_1\wedge \cdots \wedge v_n &amp;= (BAv_1) \wedge \cdots \wedge (BAv_n) \\
 &amp;= B(Av_1) \wedge \cdots \wedge B(Av_n) \\
@@ -341,7 +347,7 @@ Av_1 \wedge \dotsc Av_n = \det A\, (v_1\wedge \dotsc \wedge v_n).
 \]</span></p>
 </div>
 <div id="prp-composition" class="theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 3 </strong></span>A mapping is an isomorphism if and only if it has non-zero determinant.</p>
+<p><span class="theorem-title"><strong>Proposition 3 (Only invertible matrices have non-zero determinants) </strong></span>A mapping is an isomorphism if and only if it has non-zero determinant.</p>
 </div>
 <div class="proof">
 <p><span class="proof-title"><em>Proof</em>. </span>If the mapping is invertible, then <span class="math inline">\(A\circ A^{-1} = \mathrm{id}\)</span> and we have <span class="math inline">\(\det A \cdot \det A^{-1} = 1\)</span>, so its determinant must be non-zero.</p>
@@ -351,7 +357,7 @@ Av_1 \wedge \dotsc Av_n = \det A\, (v_1\wedge \dotsc \wedge v_n).
 </div>
 <p>Let’s now connect the usual definition of the determinant to the one coming from exterior algebra:</p>
 <div id="prp-determinant-expression" class="theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 4 </strong></span>Let <span class="math inline">\(e_1, \dotsc, e_n\)</span> be a basis of <span class="math inline">\(V\)</span> and <span class="math inline">\((A^{i}_j)\)</span> be the matrix of coordinates, i.e., <span class="math display">\[
+<p><span class="theorem-title"><strong>Proposition 4 (Recovering the standard expression) </strong></span>Let <span class="math inline">\(e_1, \dotsc, e_n\)</span> be a basis of <span class="math inline">\(V\)</span> and <span class="math inline">\((A^{i}_j)\)</span> be the matrix of coordinates, i.e., <span class="math display">\[
 Ae_k = \sum_i A^{i}_k e_i.
 \]</span> Then the determinant <span class="math inline">\(\det A\)</span> can be calculated as <span class="math display">\[
 \det A = \sum_{\sigma\in S_n} \mathrm{sgn}\,\sigma \, A^{\sigma(1)}_1 A^{\sigma(2)}_2 \dotsc A^{\sigma(n)}_n.
@@ -372,7 +378,7 @@ Ae_k = \sum_i A^{i}_k e_i.
 <p>We can therefore build the <span class="math inline">\(n\)</span>th exterior power of <span class="math inline">\(V^*\)</span>: <span class="math inline">\(\bigwedge^n (V^*)\)</span> and consider the determinant <span class="math inline">\(\det A^*\)</span>.</p>
 <p>We will formally show that</p>
 <div id="prp-determinant-dual" class="theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 5 </strong></span>Let <span class="math inline">\(A\colon V\to V\)</span> be a linear map and <span class="math inline">\(A^*\colon V^*\to V^*\)</span> be its dual. Then, <span class="math display">\[
+<p><span class="theorem-title"><strong>Proposition 5 (Determinant of the transpose) </strong></span>Let <span class="math inline">\(A\colon V\to V\)</span> be a linear map and <span class="math inline">\(A^*\colon V^*\to V^*\)</span> be its dual. Then <span class="math display">\[
 \det A^* = \det A.
 \]</span></p>
 </div>
@@ -394,9 +400,9 @@ Ae_k = \sum_i A^{i}_k e_i.
 \end{align*}
 \]</span></p>
 </div>
-<p>Establishing such isomorphisms is quite a nice technique, which also can be used to proof</p>
+<p>Establishing such isomorphisms is quite a nice technique, which also can be used to prove</p>
 <div id="prp-direct-sum" class="theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 6 </strong></span>Let <span class="math inline">\(A\colon V\to V\)</span> and <span class="math inline">\(B\colon W\to W\)</span> be two linear mappings and <span class="math inline">\(A\oplus B\colon V\oplus W\to V\oplus W\)</span> be the mapping given by <span class="math display">\[
+<p><span class="theorem-title"><strong>Proposition 6 (Determinant of a block-diagonal matrix) </strong></span>Let <span class="math inline">\(A\colon V\to V\)</span> and <span class="math inline">\(B\colon W\to W\)</span> be two linear mappings and <span class="math inline">\(A\oplus B\colon V\oplus W\to V\oplus W\)</span> be the mapping given by <span class="math display">\[
 (A\oplus B)(v, w) = (Av, Bw).
 \]</span></p>
 <p>Then <span class="math inline">\(\det (A\oplus B) = \det A\cdot \det B\)</span>.</p>
@@ -406,7 +412,7 @@ Ae_k = \sum_i A^{i}_k e_i.
 {\bigwedge}^p (V\oplus W) \simeq \bigoplus_k {\bigwedge}^k V \otimes {\bigwedge}^{p-k} W,
 \]</span> so if we take <span class="math inline">\(n=\dim V\)</span> and <span class="math inline">\(m=\dim W\)</span> and note that <span class="math inline">\(\bigwedge^{p} V = 0\)</span> for <span class="math inline">\(p &gt; n\)</span> (and similarly for <span class="math inline">\(W\)</span>) we have <span class="math display">\[
 \iota\colon {\bigwedge}^{n+m} (V\oplus W) \simeq {\bigwedge}^n V\otimes {\bigwedge}^m W.
-\]</span> If <span class="math inline">\(i\colon V\to V\oplus W\)</span> and <span class="math inline">\(j\colon W\to V\oplus W\)</span>, this isomorphism is given as <span class="math display">\[
+\]</span> If <span class="math inline">\(i\colon V\to V\oplus W\)</span> and <span class="math inline">\(j\colon W\to V\oplus W\)</span> are the two “canonical” inclusions, this isomorphism is given as <span class="math display">\[
 \iota\big( iv_1 \wedge \cdots \wedge iv_n\wedge jw_1 \wedge \cdots \wedge jw_m \big) = (v_1\wedge \cdots\wedge v_n) \otimes (w_1\wedge\cdots\wedge w_m).
 \]</span> Now we calculate: <span class="math display">\[\begin{align*}
 (A\oplus B)( iv_1 \wedge \cdots \wedge iv_n\wedge jw_1 \wedge \cdots \wedge jw_m ) &amp;=
@@ -418,6 +424,28 @@ iAv_1 \wedge \cdots \wedge iAv_n \wedge jBw_1\wedge\cdots\wedge jBw_m \\
 \end{align*}
 \]</span></p>
 </div>
+<div id="prp-upper-triangular" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 7 (Determinant of an upper-triangular matrix) </strong></span>Let <span class="math inline">\(A\colon V\to V\)</span> be a linear mapping and <span class="math inline">\(e_1, \dotsc, e_n\)</span> be a basis of <span class="math inline">\(V\)</span> such that matrix <span class="math inline">\((A^i_j)\)</span> is upper-triangular, that is <span class="math display">\[
+\begin{align*}
+  Ae_1 &amp;= A^1_1 e_1\\
+  Ae_2 &amp;= A^1_2 e_1 + A^2_2 e_2\\
+  &amp;\vdots\\
+  Ae_n &amp;= A^1_n e_1 + A^2_ne_2 + \dotsc + A^n_n e_n
+\end{align*}
+\]</span> Then <span class="math display">\[
+\det A = \prod_{i=1}^n A^i_i.
+\]</span></p>
+</div>
+<p>Once proven, this result can also be used for lower-triangular matrices due to <a href="#prp-determinant-dual">Proposition&nbsp;5</a>.</p>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>Recall that whenever there is <span class="math inline">\(i_j=i_k\)</span>, then <span class="math inline">\(e_{i_1}\wedge \cdots\wedge e_{i_n} = 0\)</span>. Hence, there is only one term that may be non-zero: <span class="math display">\[
+Ae_1\wedge Ae_2 \wedge \cdots \wedge Ae_n = A^1_1 e_1 \wedge \cdots \wedge A^n_n e_n = \prod_{i=1}^n A^i_i\, e_1\wedge \cdots\wedge e_n.
+\]</span></p>
+</div>
+</section>
+<section id="acknowledgements" class="level2">
+<h2 class="anchored" data-anchor-id="acknowledgements">Acknowledgements</h2>
+<p>I would like to thank Adam Klukowski for helpful editing suggestions.</p>
 
 
 
