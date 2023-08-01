@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/histograms-vs-density-estimation.html",
       "/posts/determinant-multilinear.html",
       "/posts/dirichlet-process.html",
       "/posts/board-games-monte-carlo.html",

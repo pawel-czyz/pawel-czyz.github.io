@@ -1,0 +1,150 @@
+---
+title: "Histograms or kernel density estimators?"
+description: "We take a look at summarizing samples with histograms and kernel density estimators."
+author: "Paweł Czyż"
+date: "8/1/2023"
+categories:
+  - Visualisation
+execute:
+  freeze: true
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+I have recently seen [Michael Betancourt's talk](https://www.youtube.com/live/2hzoMqX1Q-k?feature=share&t=439) in which he explains why kernel density estimators can be misleading when visualising samples and points to his wonderful [case study](https://betanalpha.github.io/assets/case_studies/sampling.html#3_Approximating_Probability_Distributions_with_Samples) which includes comparison between histograms and kernel density estimators, as well as many other things.
+
+I recommend reading this case study in depth; in this blog post we will only try to reproduce the example with kernel density estimators in Python.
+
+## Problem setup
+
+We will start with a Gaussian mixture with two components and draw the exact [probability density function](https://en.wikipedia.org/wiki/Probability_density_function) (PDF) as well as a histogram with a very large sample size.
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np 
+from scipy import stats
+
+plt.style.use("dark_background")
+
+class GaussianMixture:
+  def __init__(self, proportions, mus, sigmas) -> None:
+    proportions = np.asarray(proportions)
+    self.proportions = proportions / proportions.sum()
+    assert np.min(self.proportions) > 0
+
+    self.mus = np.asarray(mus)
+    self.sigmas = np.asarray(sigmas)
+
+    n = len(self.proportions)
+    self.n_classes = n
+    assert self.proportions.shape == (n,)
+    assert self.mus.shape == (n,)
+    assert self.sigmas.shape == (n,)
+
+  def sample(self, rng, n: int) -> np.ndarray:
+    z = rng.choice(
+      self.n_classes,
+      p=self.proportions,
+      replace=True,
+      size=n,
+    )
+    return self.mus[z] + self.sigmas[z] * rng.normal(size=n)
+
+  def pdf(self, x):
+    ret = 0
+    for k in range(self.n_classes):
+      ret += self.proportions[k] * stats.norm.pdf(x, loc=self.mus[k], scale=self.sigmas[k])
+    return ret
+
+mixture = GaussianMixture(
+  proportions=[2, 1],
+  mus=[-2, 2],
+  sigmas=[1, 1],
+)
+
+rng = np.random.default_rng(32)
+
+large_data = mixture.sample(rng, 100_000)
+
+x_axis = np.linspace(np.min(large_data), np.max(large_data), 101)
+pdf_values = mixture.pdf(x_axis)
+
+fig, ax = plt.subplots(figsize=(3, 2), dpi=100)
+
+ax.hist(large_data, bins=150, density=True, histtype="stepfilled", alpha=0.5, color="C0")
+ax.plot(x_axis, pdf_values, c="C2", linestyle="--")
+
+ax.set_title("Probability density function\nand histogram with large sample size")
+```
+
+Great, histogram with large sample size agreed well with the exact PDF!
+
+## Plain old histograms
+
+Let's now move to a more challenging problem: we have only a moderate sample size available, say 100 points.
+
+```{python}
+data = mixture.sample(rng, 100)
+
+fig, axs = plt.subplots(5, 1, figsize=(3.2, 3*5), dpi=100)
+bin_sizes = (3, 5, 10, 20, 50)
+
+for bins, ax in zip(bin_sizes, axs):
+  ax.hist(data, bins=bins, density=True, histtype="stepfilled", alpha=0.5, color="C0")
+  ax.plot(x_axis, pdf_values, c="C2", linestyle="--")
+
+  ax.set_title(f"{bins} bins")
+
+fig.tight_layout()
+```
+
+We see that too few bins (three, but nobody will actually choose this number for 100 data points) we don't see two modes and that for more than 20 and 50 bins the histogram looks quite noisy.
+Both 5 and 10 bins would make a sensible choice in this problem.
+
+## Kernel density estimators
+
+Now it's the time for kernel density estimators. We will use several kernel families and several different bandwidths:
+
+```{python}
+from sklearn.neighbors import KernelDensity
+
+
+kernels = ["gaussian", "tophat", "cosine"]
+bandwidths = [0.1, 1.0, 3.0, "scott", "silverman"]
+
+fig, axs = plt.subplots(
+  len(kernels),
+  len(bandwidths),
+  figsize=(12, 8),
+  dpi=130,
+)
+
+for i, kernel in enumerate(kernels):
+  axs[i, 0].set_ylabel(f"Kernel: {kernel}")
+  for j, bandwidth in enumerate(bandwidths):
+    ax = axs[i, j]
+
+    kde = KernelDensity(bandwidth=bandwidth, kernel=kernel)
+    kde.fit(data[:, None])
+
+    kde_pdf = np.exp(kde.score_samples(x_axis[:, None]))
+
+    ax.plot(x_axis, pdf_values, c="C2", linestyle="--")
+    ax.fill_between(x_axis, 0.0, kde_pdf, color="C0", alpha=0.5)
+
+
+for j, bandwidth in enumerate(bandwidths):
+  axs[0, j].set_title(f"Bandwidth: {bandwidth}")
+
+fig.tight_layout()
+```
+
+I see the point now! Apart from the small bandwidth case (0.1 and sometimes Silverman) the issues with KDE plots are hard to diagnose.
+Moreover, conclusions from different plots are different: is the distribution multimodal? If so, how many modes are there? What are the "probability masses" of each modes? Observing only one of these plots can lead to wrong conclusions.
+
+## Links
+
+  - [What's wrong with a kernel density](https://statmodeling.stat.columbia.edu/2009/11/25/whats_wrong_wit/): a blog post by Andrew Gelman, explaining why he prefers histograms over kernel density plots.
+  - [Michael Betancourt's case study](https://betanalpha.github.io/assets/case_studies/sampling.html#3_Approximating_Probability_Distributions_with_Samples), which also discusses histograms with error bars.

@@ -1,31 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://pawel-czyz.github.io/posts/histograms-vs-density-estimation.html</loc>
+    <lastmod>2023-08-01T13:48:04.168Z</lastmod>
+  </url>
+  <url>
     <loc>https://pawel-czyz.github.io/posts/board-games-monte-carlo.html</loc>
-    <lastmod>2023-07-28T14:44:41.628Z</lastmod>
+    <lastmod>2023-08-01T13:48:04.636Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/expectations-student-mentorship.html</loc>
-    <lastmod>2023-07-28T14:44:42.008Z</lastmod>
+    <lastmod>2023-08-01T13:48:05.032Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/determinant-multilinear.html</loc>
-    <lastmod>2023-07-28T14:47:19.232Z</lastmod>
+    <lastmod>2023-08-01T13:48:05.436Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/dirichlet-process.html</loc>
-    <lastmod>2023-07-28T14:44:42.916Z</lastmod>
+    <lastmod>2023-08-01T13:48:05.964Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/index.html</loc>
-    <lastmod>2023-07-28T14:44:49.815Z</lastmod>
+    <lastmod>2023-08-01T13:48:06.604Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/private/prezenty.html</loc>
-    <lastmod>2023-07-28T14:44:43.464Z</lastmod>
+    <lastmod>2023-08-01T13:48:06.788Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/blog.html</loc>
-    <lastmod>2023-07-28T14:47:19.572Z</lastmod>
+    <lastmod>2023-08-01T13:48:07.168Z</lastmod>
   </url>
 </urlset>
