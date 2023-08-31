@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/triangle-distributions.html",
       "/posts/histograms-vs-density-estimation.html",
       "/posts/determinant-multilinear.html",
       "/posts/dirichlet-process.html",
