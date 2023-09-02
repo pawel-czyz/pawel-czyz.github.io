@@ -1,0 +1,12 @@
+---
+title: "Publications"
+listing:
+  template: publications.ejs
+  contents:
+    - publications.yml
+  field-types:
+    date: date
+  field-required: [name, date, authors, manuscript, code]
+  sort-ui: false
+date-format: "MMM, YYYY"
+---

@@ -1,0 +1,20 @@
+- name: "Beyond normal: on the evaluation of mutual information estimators"
+  authors: P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel and A. Marx
+  manuscript: https://arxiv.org/abs/2306.11078
+  code: https://github.com/cbg-ethz/bmi
+  date: June 2023
+- name: Bayesian quantification with black-box estimators
+  authors: A. Ziegler and P. Czyż
+  code: https://github.com/pawel-czyz/labelshift
+  manuscript: https://arxiv.org/abs/2302.09159
+  date: February 2023
+- name: "CanSig: discovery of shared transcriptional states across cancer patients from single-cell RNA sequencing data"
+  authors: J. Yates, F. Barkmann, P. Czyż, ..., N. Beerenwinkel and V. Boeva
+  manuscript: https://doi.org/10.1101/2022.04.14.488324
+  code: https://github.com/BoevaLab/CanSig
+  date: April 2022
+- name: Limits to the rate of information transmission through the MAPK pathway
+  authors: F. Grabowski, P. Czyż, M. Kochańczyk and T. Lipniacki
+  code: https://github.com/pawel-czyz/channel-capacity-estimator/
+  manuscript: https://doi.org/10.1098/rsif.2018.0792
+  date: March 2019

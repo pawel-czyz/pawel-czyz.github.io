@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Paweł Czyż - Blog</title>
+<title>Paweł Czyż - Publications</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -70,9 +70,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      valueNames: ['listing-name','listing-authors','listing-manuscript','listing-code','listing-date',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] }],
       
-      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
+      searchColumns: ["listing-name","listing-authors","listing-manuscript","listing-code","listing-date"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -118,11 +118,11 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./blog.html" rel="" target="" aria-current="page">
+    <a class="nav-link" href="./blog.html" rel="" target="">
  <span class="menu-text">Blog</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./publications.html" rel="" target="">
+    <a class="nav-link active" href="./publications.html" rel="" target="" aria-current="page">
  <span class="menu-text">Publications</span></a>
   </li>  
 </ul>
@@ -138,13 +138,13 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(6)</span></div><div class="category" data-category="Bayesian nonparametrics">Bayesian nonparametrics <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Clustering">Clustering <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Mentorship">Mentorship <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Monte Carlo">Monte Carlo <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Mutual Information">Mutual Information <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Visualisation">Visualisation <span class="quarto-category-count">(1)</span></div></div></div>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Blog</h1>
+<h1 class="title">Publications</h1>
 </div>
 
 
@@ -159,230 +159,50 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<p>I’m still maintaining my <a href="https://joelhooks.com/digital-garden/">digital garden</a> in a non-public manner<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, but from time to time I encounter an idea which I’d just love to share with others or I am asked frequently about to make it a topic of a separate post.</p>
 
 
 
 
-
-<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
-<div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="Mutual Information" data-listing-date-sort="1693432800000" data-listing-file-modified-sort="1693518276668" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
-<div class="thumbnail">
-<p><a href="./posts/triangle-distributions.html"> <p class="card-img-top"><img src="posts/triangle-distributions_files/figure-html/cell-2-output-1.png"  class="thumbnail-image card-img"/></p> </a></p>
-</div>
-<div class="body">
-<a href="./posts/triangle-distributions.html">
-<h3 class="no-anchor listing-title">
-Two distributions on a triangle
-</h3>
-<div class="listing-subtitle">
-
-</div>
-</a>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('Mutual Information'); return false;">
-Mutual Information
-</div>
-</div>
-<a href="./posts/triangle-distributions.html">
-<div class="listing-description">
-<p>Sometimes if you misunderstand something, you can have two interesting distributions, rather than only one.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/triangle-distributions.html">
-<div class="listing-date">
-Aug 31, 2023
-</div>
-<div class="listing-author">
-Paweł Czyż
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-categories="Visualisation" data-listing-date-sort="1690840800000" data-listing-file-modified-sort="1690897609754" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4">
-<div class="thumbnail">
-<p><a href="./posts/histograms-vs-density-estimation.html"> <p class="card-img-top"><img src="posts/histograms-vs-density-estimation_files/figure-html/cell-2-output-2.png"  class="thumbnail-image card-img"/></p> </a></p>
-</div>
-<div class="body">
-<a href="./posts/histograms-vs-density-estimation.html">
-<h3 class="no-anchor listing-title">
-Histograms or kernel density estimators?
-</h3>
-<div class="listing-subtitle">
-
-</div>
-</a>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('Visualisation'); return false;">
-Visualisation
-</div>
-</div>
-<a href="./posts/histograms-vs-density-estimation.html">
-<div class="listing-description">
-<p>We take a look at summarizing samples with histograms and kernel density estimators.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/histograms-vs-density-estimation.html">
-<div class="listing-date">
-Aug 1, 2023
-</div>
-<div class="listing-author">
-Paweł Czyż
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="2" data-listing-date-sort="1690322400000" data-listing-file-modified-sort="1690555638784" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12">
-<div class="thumbnail">
-<p><a href="./posts/determinant-multilinear.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
-</div>
-<div class="body">
-<a href="./posts/determinant-multilinear.html">
-<h3 class="no-anchor listing-title">
-Matrix determinant from the exterior algebra viewpoint
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>We look at the ordinary matrix determinant from the exterior algebra point of view.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/determinant-multilinear.html">
-<div class="listing-date">
-Jul 26, 2023
-</div>
-<div class="listing-author">
-Paweł Czyż
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="3" data-categories="Bayesian nonparametrics,Clustering" data-listing-date-sort="1689026400000" data-listing-file-modified-sort="1689435018755" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9">
-<div class="thumbnail">
-<p><a href="./posts/dirichlet-process.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
-</div>
-<div class="body">
-<a href="./posts/dirichlet-process.html">
-<h3 class="no-anchor listing-title">
-The Dirichlet process
-</h3>
-<div class="listing-subtitle">
-
-</div>
-</a>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('Bayesian nonparametrics'); return false;">
-Bayesian nonparametrics
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('Clustering'); return false;">
-Clustering
-</div>
-</div>
-<a href="./posts/dirichlet-process.html">
-<div class="listing-description">
-<p>In an informal fashion we introduce several constructions of the Dirichlet process.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/dirichlet-process.html">
-<div class="listing-date">
-Jul 11, 2023
-</div>
-<div class="listing-author">
-Paweł Czyż
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="4" data-categories="Monte Carlo" data-listing-date-sort="1688853600000" data-listing-file-modified-sort="1689435010035" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3">
-<div class="thumbnail">
-<p><a href="./posts/board-games-monte-carlo.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
-</div>
-<div class="body">
-<a href="./posts/board-games-monte-carlo.html">
-<h3 class="no-anchor listing-title">
-Understanding board games with Monte Carlo simulations
-</h3>
-<div class="listing-subtitle">
-
-</div>
-</a>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('Monte Carlo'); return false;">
-Monte Carlo
-</div>
-</div>
-<a href="./posts/board-games-monte-carlo.html">
-<div class="listing-description">
-<p>We look at several simple situations occurring in board games and analyse them with Monte Carlo simulations.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/board-games-monte-carlo.html">
-<div class="listing-date">
-Jul 9, 2023
-</div>
-<div class="listing-author">
-Paweł Czyż
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="5" data-categories="Mentorship" data-listing-date-sort="1688767200000" data-listing-file-modified-sort="1688912728035" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8">
-<div class="thumbnail">
-<p><a href="./posts/expectations-student-mentorship.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
-</div>
-<div class="body">
-<a href="./posts/expectations-student-mentorship.html">
-<h3 class="no-anchor listing-title">
-Student mentorship: expectations document
-</h3>
-<div class="listing-subtitle">
-
-</div>
-</a>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('Mentorship'); return false;">
-Mentorship
-</div>
-</div>
-<a href="./posts/expectations-student-mentorship.html">
-<div class="listing-description">
-<p>I learned from one of my mentors that it’s important to discuss the mutual expectations of the mentorship, be it a PhD thesis or a lab rotation. This document serves as a template, which we can further discuss and adjust.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/expectations-student-mentorship.html">
-<div class="listing-date">
-Jul 8, 2023
-</div>
-<div class="listing-author">
-Paweł Czyż
-</div>
-</a>
-</div>
-</div>
-</div>
+<div class="quarto-listing quarto-listing-container-custom" id="listing-listing">
+<style>
+    li {
+      margin-bottom: 20px;
+    }
+</style>
+<ul class="list" style="list-style-type: none;">
+  <li data-index="0" data-listing-date-sort="1685570400000">
+    <font size="4"><strong>Beyond normal: on the evaluation of mutual information estimators </strong> </font> <br>
+    P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel and A. Marx <br>
+    <a href="https://github.com/cbg-ethz/bmi">Code</a>
+    <a href="https://arxiv.org/abs/2306.11078">Manuscript</a>
+    <span class="listing-date">Jun, 2023</span>
+  </li>
+  <li data-index="1" data-listing-date-sort="1675206000000">
+    <font size="4"><strong>Bayesian quantification with black-box estimators </strong> </font> <br>
+    A. Ziegler and P. Czyż <br>
+    <a href="https://github.com/pawel-czyz/labelshift">Code</a>
+    <a href="https://arxiv.org/abs/2302.09159">Manuscript</a>
+    <span class="listing-date">Feb, 2023</span>
+  </li>
+  <li data-index="2" data-listing-date-sort="1648764000000">
+    <font size="4"><strong>CanSig: discovery of shared transcriptional states across cancer patients from single-cell RNA sequencing data </strong> </font> <br>
+    J. Yates, F. Barkmann, P. Czyż, ..., N. Beerenwinkel and V. Boeva <br>
+    <a href="https://github.com/BoevaLab/CanSig">Code</a>
+    <a href="https://doi.org/10.1101/2022.04.14.488324">Manuscript</a>
+    <span class="listing-date">Apr, 2022</span>
+  </li>
+  <li data-index="3" data-listing-date-sort="1551394800000">
+    <font size="4"><strong>Limits to the rate of information transmission through the MAPK pathway </strong> </font> <br>
+    F. Grabowski, P. Czyż, M. Kochańczyk and T. Lipniacki <br>
+    <a href="https://github.com/pawel-czyz/channel-capacity-estimator/">Code</a>
+    <a href="https://doi.org/10.1098/rsif.2018.0792">Manuscript</a>
+    <span class="listing-date">Mar, 2019</span>
+  </li>
+</ul>
 <div class="listing-no-matching d-none">
 No matching items
 </div>
-</div><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>Sometimes my ideas are just silly and need more time before I decide whether they are useful at all or they are just noise. Sometimes it’s joint work with other people and I can’t share their intellectual property without approval. And I still haven’t figured out how to integrate <a href="https://obsidian.md/">Obsidian</a> with <a href="https://quarto.org/">Quarto</a>, which are wonderful tools.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section></div></main> <!-- /main -->
+</div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

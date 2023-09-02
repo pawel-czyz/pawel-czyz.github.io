@@ -229,5 +229,12 @@
     "title": "Blog",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nSometimes my ideas are just silly and need more time before I decide whether they are useful at all or they are just noise. Sometimes it’s joint work with other people and I can’t share their intellectual property without approval. And I still haven’t figured out how to integrate Obsidian with Quarto, which are wonderful tools.↩︎"
+  },
+  {
+    "objectID": "publications.html",
+    "href": "publications.html",
+    "title": "Publications",
+    "section": "",
+    "text": "Beyond normal: on the evaluation of mutual information estimators   \n    P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel and A. Marx \n    Code\n    Manuscript\n    Jun, 2023\n  \n  \n    Bayesian quantification with black-box estimators   \n    A. Ziegler and P. Czyż \n    Code\n    Manuscript\n    Feb, 2023\n  \n  \n    CanSig: discovery of shared transcriptional states across cancer patients from single-cell RNA sequencing data   \n    J. Yates, F. Barkmann, P. Czyż, ..., N. Beerenwinkel and V. Boeva \n    Code\n    Manuscript\n    Apr, 2022\n  \n  \n    Limits to the rate of information transmission through the MAPK pathway   \n    F. Grabowski, P. Czyż, M. Kochańczyk and T. Lipniacki \n    Code\n    Manuscript\n    Mar, 2019\n  \n\n\nNo matching items"
   }
 ]
