@@ -2,46 +2,54 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://pawel-czyz.github.io/posts/histograms-vs-density-estimation.html</loc>
-    <lastmod>2023-08-31T21:46:46.993Z</lastmod>
+    <lastmod>2023-09-28T20:44:52.543Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/board-games-monte-carlo.html</loc>
-    <lastmod>2023-08-31T21:46:47.489Z</lastmod>
+    <lastmod>2023-09-28T20:44:53.079Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/expectations-student-mentorship.html</loc>
-    <lastmod>2023-08-31T21:46:47.909Z</lastmod>
+    <lastmod>2023-09-28T20:44:53.495Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/triangle-distributions.html</loc>
-    <lastmod>2023-08-31T21:47:06.609Z</lastmod>
+    <lastmod>2023-09-28T20:44:53.991Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/determinant-multilinear.html</loc>
-    <lastmod>2023-08-31T21:46:48.833Z</lastmod>
+    <lastmod>2023-09-28T20:44:54.403Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/dirichlet-process.html</loc>
-    <lastmod>2023-08-31T21:46:49.405Z</lastmod>
+    <lastmod>2023-09-28T20:44:54.975Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/posts/patterns-binary-matrices.html</loc>
+    <lastmod>2023-09-28T20:44:55.463Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/posts/no-free-lunch-in-research.html</loc>
+    <lastmod>2023-09-28T20:44:55.683Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/index.html</loc>
-    <lastmod>2023-09-02T14:27:44.863Z</lastmod>
+    <lastmod>2023-09-28T20:44:56.355Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/Almost-Nonidentifiable.html</loc>
+    <lastmod>2023-09-28T20:44:56.591Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/private/prezenty.html</loc>
-    <lastmod>2023-08-31T21:46:50.245Z</lastmod>
+    <lastmod>2023-09-28T20:44:56.783Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/blog.html</loc>
-    <lastmod>2023-09-02T14:27:46.615Z</lastmod>
-  </url>
-  <url>
-    <loc>https://pawel-czyz.github.io/papers.html</loc>
-    <lastmod>2023-09-02T13:07:42.410Z</lastmod>
+    <lastmod>2023-09-28T20:44:57.279Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/publications.html</loc>
-    <lastmod>2023-09-02T14:27:47.763Z</lastmod>
+    <lastmod>2023-09-28T20:44:57.447Z</lastmod>
   </url>
 </urlset>

@@ -2,6 +2,8 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/no-free-lunch-in-research.html",
+      "/posts/patterns-binary-matrices.html",
       "/posts/triangle-distributions.html",
       "/posts/histograms-vs-density-estimation.html",
       "/posts/determinant-multilinear.html",
