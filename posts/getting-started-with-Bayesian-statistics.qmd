@@ -15,7 +15,7 @@ categories:
 
 ### Consult regularly
 
-- [Learning Bayesian statistics](https://learnbayesstats.com/) is a truly excellent podcast hosted by Alexandre Andorra. Many leading statisticians, including [Frank Harrell](https://player.captivate.fm/episode/234eae42-c1f9-44e5-84ac-bfeeea08d5ef), [Jessica Hullman](https://player.captivate.fm/episode/6ae4d4cb-5b94-47a1-8e31-ada93f33484e), [Kevin Murphy](https://player.captivate.fm/episode/ad61580d-844c-423e-b79e-56d21830e3c4) and [Aki Vehtari](https://player.captivate.fm/episode/7a3ff633-4a71-4af4-a5a6-2e578b48e9f4). I find it the best place to learn about various perspectives on modelling techniques and important problems people are working on.
+- [Learning Bayesian Statistics](https://learnbayesstats.com/) is a truly excellent podcast hosted by Alexandre Andorra. Many leading statisticians, including [Frank Harrell](https://player.captivate.fm/episode/234eae42-c1f9-44e5-84ac-bfeeea08d5ef), [Jessica Hullman](https://player.captivate.fm/episode/6ae4d4cb-5b94-47a1-8e31-ada93f33484e), [Kevin Murphy](https://player.captivate.fm/episode/ad61580d-844c-423e-b79e-56d21830e3c4) and [Aki Vehtari](https://player.captivate.fm/episode/7a3ff633-4a71-4af4-a5a6-2e578b48e9f4). I find it the best place to learn about various perspectives on modelling techniques and important problems people are working on. I also enjoy listening to [Data and Science with Glen Wright Colopy](https://www.podofasclepius.com/), which covers a wide range of topics and featured many prominent statisticians, such as [Deborah Mayo](https://youtu.be/MVHoE9V_X5g?feature=shared), [Chris Holmes](https://youtu.be/lvkT-i0ki4Y?feature=shared), [Andrew Gelman](https://youtu.be/R6mq5Esjzfw?feature=shared) and [David Dunson](https://youtu.be/-rWf0TvPyis?feature=shared).
 - [Andrew Gelman's blog](https://statmodeling.stat.columbia.edu/) and [Frank Harrell's blog](https://www.fharrell.com/).
 - And, of course, whenever I open [Bayesian data analysis](http://www.stat.columbia.edu/~gelman/book/), [Probabilistic machine learning](https://probml.github.io/pml-book/) and [Michael Betancourt's notes](https://betanalpha.github.io/writing/), I learn something new.
 
@@ -23,10 +23,10 @@ categories:
 ### Handbooks
 
 #### General references, covering many topics
-- [Bayesian data analysis](http://www.stat.columbia.edu/~gelman/book/) from Andrew Gelman et al.
-- [Biostatistics for biomedical research](https://hbiostat.org/bbr/) written by Frank Harrell.
+- [Bayesian Data Analysis](http://www.stat.columbia.edu/~gelman/book/) from Andrew Gelman et al.
+- [Biostatistics for Biomedical Research](https://hbiostat.org/bbr/) written by Frank Harrell.
 - [Michael Betancourt's notes](https://betanalpha.github.io/writing/).
-- [Probabilistic machine learning](https://probml.github.io/pml-book/) written by Kevin Murphy.
+- [Probabilistic Machine Learning](https://probml.github.io/pml-book/) written by Kevin Murphy.
 
 #### Principled modelling workflow
 - The [Bayesian workflow](https://arxiv.org/abs/2011.01808) manuscript.
