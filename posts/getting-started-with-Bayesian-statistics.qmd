@@ -1,0 +1,48 @@
+---
+title: "Getting started with Bayesian statistics"
+description: "From time to time I receive a question from students and collaborators how to get started with Bayesian statistics. So here it comes: the list of my favourite resources!"
+author: "Paweł Czyż"
+date: "10/14/2023"
+categories:
+  - Bayesian statistics
+---
+
+### Getting started
+
+- Take any two examples from [PyMC Gallery](https://www.pymc.io/projects/examples/en/latest/gallery.html). For example, [GLM](https://www.pymc.io/projects/docs/en/stable/learn/core_notebooks/GLM_linear.html#glm-linear) and [hierarchical partial pooling](https://www.pymc.io/projects/examples/en/latest/case_studies/hierarchical_partial_pooling.html). Implement them in a Jupyter notebook. Rather than copying and running the code, type it on your own and think what it is supposed to do.
+- Read Michael Betancourt's [Inferring gravity from data](https://betanalpha.github.io/assets/case_studies/falling.html). Reproduce it in PyMC --- the data are available on [GitHub](https://github.com/betanalpha/knitr_case_studies/tree/master/falling).
+- If you would like a lecture series to watch, there's Richard McElreath's [Statistical rethinking](https://www.youtube.com/playlist?list=PLDcUM9US4XdPz-KxHM4XHt7uUVGWWVSus).
+
+### Consult regularly
+
+- [Learning Bayesian statistics](https://learnbayesstats.com/) is a truly excellent podcast hosted by Alexandre Andorra. Many leading statisticians, including [Frank Harrell](https://player.captivate.fm/episode/234eae42-c1f9-44e5-84ac-bfeeea08d5ef), [Jessica Hullman](https://player.captivate.fm/episode/6ae4d4cb-5b94-47a1-8e31-ada93f33484e), [Kevin Murphy](https://player.captivate.fm/episode/ad61580d-844c-423e-b79e-56d21830e3c4) and [Aki Vehtari](https://player.captivate.fm/episode/7a3ff633-4a71-4af4-a5a6-2e578b48e9f4). I find it the best place to learn about various perspectives on modelling techniques and important problems people are working on.
+- [Andrew Gelman's blog](https://statmodeling.stat.columbia.edu/) and [Frank Harrell's blog](https://www.fharrell.com/).
+- And, of course, whenever I open [Bayesian data analysis](http://www.stat.columbia.edu/~gelman/book/), [Probabilistic machine learning](https://probml.github.io/pml-book/) and [Michael Betancourt's notes](https://betanalpha.github.io/writing/), I learn something new.
+
+
+### Handbooks
+
+#### General references, covering many topics
+- [Bayesian data analysis](http://www.stat.columbia.edu/~gelman/book/) from Andrew Gelman et al.
+- [Biostatistics for biomedical research](https://hbiostat.org/bbr/) written by Frank Harrell.
+- [Michael Betancourt's notes](https://betanalpha.github.io/writing/).
+- [Probabilistic machine learning](https://probml.github.io/pml-book/) written by Kevin Murphy.
+
+#### Principled modelling workflow
+- The [Bayesian workflow](https://arxiv.org/abs/2011.01808) manuscript.
+- Michael Betancourt's [workflow description](https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html).
+- Kris Sankaran and Susan Holmes wrote a great paper [Generative models: an interdisciplinary perspective](https://www.annualreviews.org/doi/abs/10.1146/annurev-statistics-033121-110134).
+- There's David Blei's [Build, compute, critique, repeat](https://www.annualreviews.org/doi/abs/10.1146/annurev-statistics-022513-115657) paper.
+
+#### Inference methods
+- [Variational inference: a review for statisticians](https://arxiv.org/abs/1601.00670).
+- [Handbook of Markov chain Monte Carlo](https://www.mcmchandbook.net/) (unfortunately, this book is not freely available).
+- [An introduction to sequential Monte Carlo](https://link.springer.com/book/10.1007/978-3-030-47845-2) (unfortunately, this book is not freely available).
+
+### Great to watch
+
+If you are in mood for something as as engaging as a TV series episode, but more informative, take a look at these talks:
+
+- David Dunson's [Debunking the hype](https://youtu.be/UYp2GGo2KKU?feature=shared).
+- Kristin Lennox's [Everything wrong with statistics](https://youtu.be/be2wuOaglFY?feature=shared).
+- Andrew Gelman's [Solve all your statistics problems using p-values](https://youtu.be/ZmbrsbYwRWw?feature=shared).
