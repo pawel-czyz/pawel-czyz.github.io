@@ -153,6 +153,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#markov-chain" id="toc-markov-chain" class="nav-link" data-scroll-target="#markov-chain">Markov chain</a></li>
   </ul></li>
   <li><a href="#markov-chain-monte-carlo" id="toc-markov-chain-monte-carlo" class="nav-link" data-scroll-target="#markov-chain-monte-carlo">Markov chain Monte Carlo</a></li>
+  <li><a href="#how-does-it-differ-from-beta-binomial" id="toc-how-does-it-differ-from-beta-binomial" class="nav-link" data-scroll-target="#how-does-it-differ-from-beta-binomial">How does it differ from beta-binomial?</a></li>
   </ul>
 </nav>
     </div>
@@ -205,7 +206,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>The expected value is <span class="math inline">\(\mathbb E[Y] = p\)</span>.</li>
 <li>The variance is <span class="math inline">\(\mathbb{V}[Y]=\mathbb E[Y^2]-\mathbb E[Y]^2 = p-p^2 = p(1-p).\)</span> From <a href="https://en.wikipedia.org/wiki/AM%E2%80%93GM_inequality">AM-GM</a> we see that <span class="math inline">\(\mathbb{V}[Y] \le (1/2)^2=1/4\)</span>.</li>
 </ul>
-<p>Now, if we consider independent and identically distributed variables <span class="math inline">\(Y_1\sim \mathrm{Bernoulli}(p)\)</span>, <span class="math inline">\(Y_2\sim \mathrm{Bernoulli}(p)\)</span>, …, <span class="math inline">\(Y_n\sim \mathrm{Bernoulli|(p)\)</span>, we can define a new variable <span class="math inline">\(N_n = Y_1 + \cdots + Y_n\)</span> and an average <span class="math display">\[ \bar Y^{(n)} = \frac{N_n}{n}.\]</span></p>
+<p>Now, if we consider independent and identically distributed variables <span class="math inline">\(Y_1\sim \mathrm{Bernoulli}(p)\)</span>, <span class="math inline">\(Y_2\sim \mathrm{Bernoulli}(p)\)</span>, …, <span class="math inline">\(Y_n\sim \mathrm{Bernoulli}(p)\)</span>, we can define a new variable <span class="math inline">\(N_n = Y_1 + \cdots + Y_n\)</span> and an average <span class="math display">\[ \bar Y^{(n)} = \frac{N_n}{n}.\]</span></p>
 <p>The random variable <span class="math inline">\(N_n\)</span> is distributed according to the binomial distribution and it’s easy to calculate the mean <span class="math inline">\(\mathbb E[N_n] = np\)</span> and variance <span class="math inline">\(\mathbb V[N_n] = np(1-p)\)</span>. Consequently, <span class="math inline">\(\mathbb E[ \bar Y^{(n)} ] = p\)</span> and <span class="math inline">\(\mathbb V[\bar Y^{(n)}] = np(1-p)/n^2 = p(1-p)/n \le 1/4n\)</span>.</p>
 <p>Hence, we see that if we want to estimate <span class="math inline">\(p\)</span>, then <span class="math inline">\(\bar Y^{(n)}\)</span> is a reasonable estimator to use, and we can control its variance by choosing appropriate <span class="math inline">\(n\)</span>.</p>
 <p>Thinking about very large <span class="math inline">\(n\)</span>, recall that the <a href="https://en.wikipedia.org/wiki/Law_of_large_numbers#Strong_law">strong law of large numbers</a> guarantees that <span class="math display">\[
@@ -363,6 +364,119 @@ P\left(\lim\limits_{n\to\infty} \frac{1}{n}\sum_{i=1}^n f(Y_i) = \mathbb E[f] \r
 Y_{n+1} \mid Y_n \sim w\, \delta_{Y_{n}} + (1-w)\, \mathcal D
 \]</span> for <span class="math inline">\(w &lt; 1\)</span>. Intuitively, this Markov chain will either jump to a new location with the right probability, or stay at a current point by some additional time. This additional time depends only on <span class="math inline">\(w\)</span>, so that on average, at each point we spend the same time. Hence, it should not affect time averages over very, very, very long sequences. (However, as we have seen, large <span class="math inline">\(w\)</span> may imply large autocorrelation in the Markov chain and the chain would have to be extremely long to yield acceptable variance).</p>
 <p>I think it should not be hard to formalize and prove the above observation, but it’s not for today. <a href="https://arxiv.org/abs/2110.07032">This review</a> could be useful for investigating this further.</p>
+</section>
+<section id="how-does-it-differ-from-beta-binomial" class="level2">
+<h2 class="anchored" data-anchor-id="how-does-it-differ-from-beta-binomial">How does it differ from beta-binomial?</h2>
+<p>Recall that a <a href="https://en.wikipedia.org/wiki/Beta-binomial_distribution">beta-binomial distribution</a> generates samples as follows:</p>
+<ol type="1">
+<li>Draw <span class="math inline">\(b\sim \mathrm{Beta}(\alpha, \beta)\)</span>;</li>
+<li>Then, draw <span class="math inline">\(M \mid b \sim \mathrm{Binomial}(n, b)\)</span>.</li>
+</ol>
+<p>Hence, first a random coin is selected from a set of coins with different biases, and then it’s tossed <span class="math inline">\(n\)</span> times. This distribution has two degrees of freedom: <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span>, and allows one a more flexible control over both the mean and the variance. The mean is given by <span class="math display">\[
+\mathbb E[M] = n\frac{\alpha}{\alpha + \beta},
+\]</span> so if we write <span class="math inline">\(p = \alpha/(\alpha + \beta)\)</span>, we match the mean of a “corresponding” binomial distribution. The variance is given by <span class="math display">\[
+\mathbb V[M] = np(1-p)\left(1 + \frac{n-1}{\alpha + \beta + 1} \right),
+\]</span> so that for <span class="math inline">\(n \ge 2\)</span> we will see a larger variance than for a binomial distribution with corresponding mean.</p>
+<p>We see that this variance is quadratic in <span class="math inline">\(n\)</span>, which is different from the formula for the variance of the almost binomial Markov chain. Nevertheless, we can ask ourselves a question whether beta-binomial can be a good approximation to the distribution studied before.</p>
+<p>This intuition may be formalized in many ways, e.g., as minimization of statistical discrepancy measures, including total variation, various Wasserstain distances or <span class="math inline">\(f\)</span>-divergences. Instead, we will just match mean and variance.</p>
+<p>So, of course, we will take <span class="math inline">\(p=\alpha/(\alpha + \beta)\)</span> and additionally solve for <span class="math inline">\(\mathbb V[M] = V\)</span>. The solution is then given by <span class="math display">\[\begin{align*}
+\alpha &amp;= pR,\\
+\beta &amp;= (1-p)R,\\
+R &amp;= \frac{n^2 p(1-p)-V}{V - n p(1-p)}.
+\end{align*}
+\]</span></p>
+<p>Now it’s coding time! We could use <a href="https://github.com/google/jax/issues/13327">TensorFlow Probability on JAX to sample from beta-binomial distribution</a>, but we will resort to core JAX.</p>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"dark_background"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_alpha_beta(n: <span class="bu">int</span>, p: <span class="bu">float</span>, variance: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>]:</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    num <span class="op">=</span> n<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> p <span class="op">*</span> (<span class="dv">1</span><span class="op">-</span>p) <span class="op">-</span> variance</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    den <span class="op">=</span> variance <span class="op">-</span> n <span class="op">*</span> p <span class="op">*</span> (<span class="dv">1</span><span class="op">-</span>p)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> num <span class="op">/</span> den</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> r <span class="op">&lt;=</span> <span class="dv">0</span> <span class="kw">or</span> p <span class="op">&lt;=</span> <span class="dv">0</span> <span class="kw">or</span> p <span class="op">&gt;=</span> <span class="dv">1</span>:</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Input results in non-positive alpha or beta"</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> p<span class="op">*</span>r, (<span class="dv">1</span><span class="op">-</span>p) <span class="op">*</span> r</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="at">@partial</span>(jax.jit, static_argnames<span class="op">=</span>[<span class="st">"n"</span>])</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _sample_beta_binomial(key, n: <span class="bu">int</span>, alpha: <span class="bu">float</span>, beta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    key_p, key_b <span class="op">=</span> random.split(key)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> random.beta(key_p, a<span class="op">=</span>alpha, b<span class="op">=</span>beta)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    ber <span class="op">=</span> random.bernoulli(key_b, p<span class="op">=</span>p, shape<span class="op">=</span>(n,))</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> jnp.<span class="bu">sum</span>(ber)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="at">@partial</span>(jax.jit, static_argnames<span class="op">=</span>[<span class="st">"n"</span>, <span class="st">"n_samples"</span>])</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_beta_binomial(key, n: <span class="bu">int</span>, alpha: <span class="bu">float</span>, beta: <span class="bu">float</span>, n_samples: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1_000_000</span>) <span class="op">-&gt;</span> jnp.ndarray:</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    keys <span class="op">=</span> random.split(key, n_samples)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> jax.vmap(partial(_sample_beta_binomial, n<span class="op">=</span>n, alpha<span class="op">=</span>alpha, beta<span class="op">=</span>beta))(keys)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_compare(key, ax: plt.Axes, n: <span class="bu">int</span>, p: <span class="bu">float</span>, w: <span class="bu">float</span>, n_samples: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1_000_000</span>, n_bins: <span class="bu">int</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    variance <span class="op">=</span> variance_correlated_binomial(n<span class="op">=</span>n, p<span class="op">=</span>p, w<span class="op">=</span>w)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    alpha, beta <span class="op">=</span> find_alpha_beta(n<span class="op">=</span>n, p<span class="op">=</span>p, variance<span class="op">=</span>variance)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    key1, key2 <span class="op">=</span> random.split(key)</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    sample_corr <span class="op">=</span> sample_correlated_binomial(key1, n<span class="op">=</span>n, p<span class="op">=</span>p, w<span class="op">=</span>w, n_samples<span class="op">=</span>n_samples)</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    sample_betabin <span class="op">=</span> sample_beta_binomial(key2, n<span class="op">=</span>n, alpha<span class="op">=</span>alpha, beta<span class="op">=</span>beta, n_samples<span class="op">=</span>n_samples)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n_bins <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>        bins <span class="op">=</span> jnp.arange(<span class="op">-</span><span class="fl">0.5</span>, n <span class="op">+</span> <span class="fl">1.5</span>, <span class="dv">1</span>)</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>        bins <span class="op">=</span> jnp.linspace(<span class="op">-</span><span class="fl">0.1</span>, n <span class="op">+</span> <span class="fl">0.1</span>, n_bins)</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    ax.hist(</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>        sample_corr, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>, rasterized<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"yellow"</span>,</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="st">"Markov chain"</span>,</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>        histtype<span class="op">=</span><span class="st">"step"</span>,</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    ax.hist(</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        sample_betabin, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>, rasterized<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"orange"</span>,</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="st">"Beta-binomial"</span>,</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>        histtype<span class="op">=</span><span class="st">"step"</span>,</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>        linestyle<span class="op">=</span><span class="st">"--"</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    ax.spines[[<span class="st">"top"</span>, <span class="st">"right"</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"Number of heads"</span>)</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="st">"Probability"</span>)</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>fig, _axs <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, dpi<span class="op">=</span><span class="dv">250</span>)</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>axs <span class="op">=</span> _axs.ravel()</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>key, <span class="op">*</span>keys <span class="op">=</span> random.split(key, <span class="dv">1</span> <span class="op">+</span> <span class="bu">len</span>(axs))</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>params <span class="op">=</span> [</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (n, p, w, n_bins)</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">10</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>, <span class="va">None</span>),</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">10</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="va">None</span>),</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">100</span>, <span class="fl">0.7</span>, <span class="fl">0.98</span>, <span class="dv">41</span>),</span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">100</span>, <span class="fl">0.3</span>, <span class="fl">0.6</span>, <span class="dv">41</span>),</span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(params) <span class="op">==</span> <span class="bu">len</span>(axs)</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, ax, (n, p, w, n_bins) <span class="kw">in</span> <span class="bu">zip</span>(keys, axs, params):</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    plot_compare(</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>        key<span class="op">=</span>key,</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>        ax<span class="op">=</span>ax,</span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>        n<span class="op">=</span>n,</span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>        p<span class="op">=</span>p,</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>        w<span class="op">=</span>w,</span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>        n_samples<span class="op">=</span><span class="dv">1_000_000</span>,</span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>        n_bins<span class="op">=</span>n_bins,</span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="almost-binomial-markov-chain_files/figure-html/cell-3-output-1.png" class="img-fluid"></p>
+</div>
+</div>
 
 
 </section>

@@ -23,7 +23,7 @@ It's easy to see that:
   - The expected value is $\mathbb E[Y] = p$.
   - The variance is $\mathbb{V}[Y]=\mathbb E[Y^2]-\mathbb E[Y]^2 = p-p^2 = p(1-p).$ From [AM-GM](https://en.wikipedia.org/wiki/AM%E2%80%93GM_inequality) we see that $\mathbb{V}[Y] \le (1/2)^2=1/4$.
 
-Now, if we consider independent and identically distributed variables $Y_1\sim \mathrm{Bernoulli}(p)$, $Y_2\sim \mathrm{Bernoulli}(p)$, ..., $Y_n\sim \mathrm{Bernoulli|(p)$, we can define a new variable
+Now, if we consider independent and identically distributed variables $Y_1\sim \mathrm{Bernoulli}(p)$, $Y_2\sim \mathrm{Bernoulli}(p)$, ..., $Y_n\sim \mathrm{Bernoulli}(p)$, we can define a new variable
 $N_n = Y_1 + \cdots + Y_n$
 and an average
 $$ \bar Y^{(n)} = \frac{N_n}{n}.$$
@@ -218,3 +218,126 @@ Intuitively, this Markov chain will either jump to a new location with the right
 (However, as we have seen, large $w$ may imply large autocorrelation in the Markov chain and the chain would have to be extremely long to yield acceptable variance).
 
 I think it should not be hard to formalize and prove the above observation, but it's not for today. [This review](https://arxiv.org/abs/2110.07032) could be useful for investigating this further.
+
+
+## How does it differ from beta-binomial?
+
+Recall that a [beta-binomial distribution](https://en.wikipedia.org/wiki/Beta-binomial_distribution) generates samples as follows:
+
+1. Draw $b\sim \mathrm{Beta}(\alpha, \beta)$;
+2. Then, draw $M \mid b \sim \mathrm{Binomial}(n, b)$.
+
+Hence, first a random coin is selected from a set of coins with different biases, and then it's tossed $n$ times. This distribution has two degrees of freedom: $\alpha$ and $\beta$, and allows one a more flexible control over both the mean and the variance. The mean is given by
+$$
+\mathbb E[M] = n\frac{\alpha}{\alpha + \beta},
+$$
+so if we write $p = \alpha/(\alpha + \beta)$, we match the mean of a "corresponding" binomial distribution.
+The variance is given by
+$$
+\mathbb V[M] = np(1-p)\left(1 + \frac{n-1}{\alpha + \beta + 1} \right),
+$$
+so that for $n \ge 2$ we will see a larger variance than for a binomial distribution with corresponding mean. 
+
+We see that this variance is quadratic in $n$, which is different from the formula for the variance of the almost binomial Markov chain.
+Nevertheless, we can ask ourselves a question whether beta-binomial can be a good approximation to the distribution studied before.
+
+This intuition may be formalized in many ways, e.g., as minimization of statistical discrepancy measures, including total variation, various Wasserstain distances or $f$-divergences.
+Instead, we will just match mean and variance.
+
+So, of course, we will take $p=\alpha/(\alpha + \beta)$ and additionally solve for
+$\mathbb V[M] = V$.
+The solution is then given by
+$$\begin{align*}
+\alpha &= pR,\\
+\beta &= (1-p)R,\\
+R &= \frac{n^2 p(1-p)-V}{V - n p(1-p)}.
+\end{align*}
+$$
+
+Now it's coding time! We could use [TensorFlow Probability on JAX to sample from beta-binomial distribution](https://github.com/google/jax/issues/13327), but we will resort to core JAX.
+
+```{python}
+import matplotlib.pyplot as plt 
+plt.style.use("dark_background")
+
+def find_alpha_beta(n: int, p: float, variance: float) -> tuple[float, float]:
+    num = n**2 * p * (1-p) - variance
+    den = variance - n * p * (1-p)
+    r = num / den
+
+    if r <= 0 or p <= 0 or p >= 1:
+        raise ValueError("Input results in non-positive alpha or beta")
+
+    return p*r, (1-p) * r
+
+@partial(jax.jit, static_argnames=["n"])
+def _sample_beta_binomial(key, n: int, alpha: float, beta: float) -> int:
+    key_p, key_b = random.split(key)
+    p = random.beta(key_p, a=alpha, b=beta)
+    ber = random.bernoulli(key_b, p=p, shape=(n,))
+    return jnp.sum(ber)
+
+@partial(jax.jit, static_argnames=["n", "n_samples"])
+def sample_beta_binomial(key, n: int, alpha: float, beta: float, n_samples: int = 1_000_000) -> jnp.ndarray:
+    keys = random.split(key, n_samples)
+    return jax.vmap(partial(_sample_beta_binomial, n=n, alpha=alpha, beta=beta))(keys)
+
+
+def plot_compare(key, ax: plt.Axes, n: int, p: float, w: float, n_samples: int = 1_000_000, n_bins: int | None = None) -> None:
+    variance = variance_correlated_binomial(n=n, p=p, w=w)
+    alpha, beta = find_alpha_beta(n=n, p=p, variance=variance)
+
+    key1, key2 = random.split(key)
+    sample_corr = sample_correlated_binomial(key1, n=n, p=p, w=w, n_samples=n_samples)
+    sample_betabin = sample_beta_binomial(key2, n=n, alpha=alpha, beta=beta, n_samples=n_samples)
+
+    if n_bins is None:
+        bins = jnp.arange(-0.5, n + 1.5, 1)
+    else:
+        bins = jnp.linspace(-0.1, n + 0.1, n_bins)
+
+    ax.hist(
+        sample_corr, bins=bins, density=True, rasterized=True,
+        color="yellow",
+        label="Markov chain",
+        histtype="step",
+    )
+    ax.hist(
+        sample_betabin, bins=bins, density=True, rasterized=True,
+        color="orange",
+        label="Beta-binomial",
+        histtype="step",
+        linestyle="--"
+    )
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.set_xlabel("Number of heads")
+    ax.set_ylabel("Probability")
+
+
+fig, _axs = plt.subplots(2, 2, dpi=250)
+axs = _axs.ravel()
+
+key, *keys = random.split(key, 1 + len(axs))
+
+params = [
+    # (n, p, w, n_bins)
+    (10, 0.5, 0.9, None),
+    (10, 0.3, 0.2, None),
+    (100, 0.7, 0.98, 41),
+    (100, 0.3, 0.6, 41),
+]
+assert len(params) == len(axs)
+
+for key, ax, (n, p, w, n_bins) in zip(keys, axs, params):
+    plot_compare(
+        key=key,
+        ax=ax,
+        n=n,
+        p=p,
+        w=w,
+        n_samples=1_000_000,
+        n_bins=n_bins,
+)
+axs[0].legend(frameon=False)
+fig.tight_layout()
+```
