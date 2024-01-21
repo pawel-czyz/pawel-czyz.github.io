@@ -156,7 +156,7 @@ $$
 \log P(\pi) + \sum_{i=1}^N\sum_{y=1}^L \xi_{iy} \log \pi_y.
 $$
 
-Let's use the prior $P(\pi) = \mathrm{Dirichlet}(\pi \mid \alpha_1, \dotsc, \alpha_L)$, so that $\log P(\pi) = \sum_{y=1}^L (\alpha_y-1)\log \pi_y$.
+Let's use the prior $P(\pi) = \mathrm{Dirichlet}(\pi \mid \alpha_1, \dotsc, \alpha_L)$, so that $\log P(\pi) = \mathrm{const.} + \sum_{y=1}^L (\alpha_y-1)\log \pi_y$.
 Hence, we are interested in optimising
 $$
 \sum_{y=1}^L \left((\alpha_y-1) + \sum_{i=1}^N \xi_{iy} \right)\log \pi_y.
@@ -239,3 +239,204 @@ I however haven't run simulations to know how well this sampler works in practic
 3. As there are $N$ latent variables sampled, the convergence may perhaps be slow.
 
 It'd be interesting to see how problematic these points are in practice (perhaps not at all!)
+
+
+## Appendix: numerical implementation in JAX
+
+As these algorithms are so simple, let's quickly implement them in [JAX](https://github.com/google/jax). We will consider two Gaussian densities $D_1 = \mathcal N(0, 1^2)$ and $D_2 = \mathcal N(\mu, 1^2)$.
+Let's generate some data:
+```{python}
+import jax
+import jax.numpy as jnp
+from jax import random
+from jaxtyping import Array, Float, Int
+from jax.scipy.special import logsumexp
+
+n_cases: Int[Array, " classes"] = jnp.asarray([10, 40], dtype=int)
+mus: Float[Array, " classes"] = jnp.asarray([0.0, 1.0])
+
+key = random.PRNGKey(42)
+key, *subkeys = random.split(key, len(n_cases) + 1)
+
+xs: Float[Array, " points"] = jnp.concatenate(tuple(
+  mu + random.normal(subkey, shape=(n,))
+  for subkey, n, mu in zip(subkeys, n_cases, mus)
+))
+
+n_classes: int = len(n_cases)
+n_points: int = len(xs)
+```
+
+Now we need a probabilistic classifier. We will assume that it was calibrated on population with proportion $\pi^{(0)} = (0.4, 0.6)$. 
+
+```{python}
+_normalizer: float = 0.5 * jnp.log(2 * jnp.pi)
+
+def log_p(x, mu: float) -> float:
+  """Log-density N(x | mu, 1^2)."""
+  return -0.5 * jnp.square(x - mu) - _normalizer
+
+
+# Auxiliary matrix log P(X | Y)
+_log_p_x_y: Float[Array, "points classes"] = jnp.stack(tuple(log_p(xs, mu) for mu in mus)).T
+assert _log_p_x_y.shape == (n_points, n_classes), f"Shape mismatch: {_log_p_x_y.shape}."
+
+log_pi0: Float[Array, " classes"] = jnp.log(jnp.asarray([0.4, 0.6]))
+
+# Matrix representing log P(Y | X) for labeled population
+log_p_y_x: Float[Array, "points classes"] = _log_p_x_y + log_pi0[None, :]
+# ... currently it's unnormalized, so we have to normalize it
+
+def normalize_logprobs(log_ps: Float[Array, "points classes"]) -> Float[Array, "points classes"]:
+  log_const = logsumexp(log_ps, keepdims=True, axis=-1)
+  return log_ps - log_const
+
+log_p_y_x = normalize_logprobs(log_p_y_x)
+
+# Let's quickly check if it works
+sums = jnp.sum(jnp.exp(log_p_y_x), axis=1)
+assert sums.shape == (n_points,)
+assert jnp.min(sums) > 0.999, f"Minimum: {jnp.min(sums)}."
+assert jnp.max(sums) < 1.001, f"Maximum: {jnp.max(sums)}."
+```
+
+### Expectation-maximization algorithm
+
+It's time to implement expectation-maximization. 
+
+```{python}
+
+def expectation_maximization(
+  log_p_y_x: Float[Array, "points classes"],
+  log_pi0: Float[Array, " classes"],
+  log_start: None | Float[Array, " classes"] = None,
+  alpha: Float[Array, " classes"] | None = None,
+  n_iterations: int = 10_000,
+) -> Float[Array, " classes"]:
+  """Runs the expectation-maximization algorithm.
+
+  Args:
+    log_p_y_x: array log P(Y | X) for the calibrated population
+    log_pi0: array log P(Y) for the calibrated population
+    log_start: starting point. If not provided, `log_pi0` will be used
+    alpha: concentration parameters for the Dirichlet prior.
+      If not provided, the uniform prior will be used
+    n_iterations: number of iterations to run the algorithm for
+  """
+  if log_start is None:
+    log_start = log_pi0
+  if alpha is None:
+    alpha = jnp.ones_like(log_pi0)
+
+  def iteration(_, log_pi: Float[Array, " classes"]) -> Float[Array, " classes"]:
+    # Calculate log xi[n, y]
+    log_ps = normalize_logprobs(log_p_y_x + log_pi[None, :] - log_pi0[None, :])
+    # Sum xi[n, y] over n. We use the logsumexp, as we have log xi[n, y]
+    summed = jnp.exp(logsumexp(log_ps, axis=0, keepdims=False))
+    # The term inside the bracket (numerator)
+    numerator = summed + alpha - 1.0
+    # Denominator
+    denominator = jnp.sum(alpha) + log_p_y_x.shape[0] - log_p_y_x.shape[1]
+    return jnp.log(numerator / denominator)
+
+  return jax.lax.fori_loop(
+    0, n_iterations, iteration, log_start
+  )
+
+log_estimated = expectation_maximization(
+  log_p_y_x=log_p_y_x,
+  log_pi0=log_pi0,
+  n_iterations=1000,
+  # Let's use slight shrinkage towards more uniform solutions
+  alpha=2.0 * jnp.ones_like(log_pi0),
+)
+estimated = jnp.exp(log_estimated)
+print(f"Estimated: {estimated}")
+print(f"Actual:    {n_cases / n_cases.sum()}")
+```
+
+### Gibbs sampler
+
+Expectation-maximization returns only a point estimate. We'll explore the region around the posterior mode with a Gibbs sampler.
+
+```{python}
+
+def gibbs_sampler(
+  key: random.PRNGKeyArray,
+  log_p_y_x: Float[Array, "points classes"],
+  log_pi0: Float[Array, " classes"],
+  log_start: None | Float[Array, " classes"] = None,
+  alpha: Float[Array, " classes"] | None = None,
+  n_warmup: int = 1_000,
+  n_samples: int = 1_000,
+) -> Float[Array, "n_samples classes"]:
+  if log_start is None:
+    log_start = log_pi0
+  if alpha is None:
+    alpha = jnp.ones_like(log_pi0)
+
+  def iteration(
+    log_ps: Float[Array, " classes"],
+    key: random.PRNGKeyArray,
+  ) -> tuple[Float[Array, " classes"], Float[Array, " classes"]]:
+    key, subkey1, subkey2 = random.split(key, 3)
+
+    ys = random.categorical(
+      subkey1,
+      log_ps[None, :] + log_p_y_x - log_pi0[None, :],
+      axis=-1,
+    )
+    counts = jnp.bincount(ys, length=log_pi0.shape[0])
+
+    new_log_pi = jnp.log(
+      random.dirichlet(subkey2, alpha + counts)
+    )
+
+    return new_log_pi, new_log_pi
+
+  _, samples = jax.lax.scan(
+    iteration,
+    log_start,
+    random.split(key, n_warmup + n_samples),
+  )
+  return samples[n_warmup:, :]
+
+key, subkey = random.split(key)
+samples = gibbs_sampler(
+  key=subkey,
+  log_p_y_x=log_p_y_x,
+  log_pi0=log_pi0,
+  # Let's use slight shrinkage towards more uniform solutions
+  alpha=2.0 * jnp.ones_like(log_pi0),
+  # Use EM point as a starting point
+  log_start=log_estimated,
+  n_samples=5_000,
+)
+samples = jnp.exp(samples)
+
+print(f"Mean:   {jnp.mean(samples, axis=0)}")
+print(f"Std:    {jnp.std(samples, axis=0)}")
+print(f"Actual: {n_cases / n_cases.sum()}")
+```
+
+Let's visualise the posterior samples, together with the expectation-maximization solution and the ground truth:
+```{python}
+import matplotlib.pyplot as plt
+plt.style.use("dark_background")
+
+fig, ax = plt.subplots(dpi=150)
+
+bins = jnp.linspace(0, 1, 40)
+
+for y in range(n_classes):
+  color = f"C{y+1}"
+  ax.hist(samples[:, y], bins=bins, density=True, histtype="step", color=color)
+  ax.axvline(n_cases[y] / n_cases.sum(), color=color, linewidth=3)
+  ax.axvline(estimated[y], color=color, linestyle="--")
+
+ax.set_title("Posterior distribution")
+ax.set_ylabel("Posterior density")
+ax.set_xlabel("Component value")
+ax.spines[["top", "right"]].set_visible(False)
+fig.tight_layout()
+```

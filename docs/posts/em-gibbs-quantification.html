@@ -171,6 +171,11 @@ div.csl-indent {
   <li><a href="#expectation-maximization" id="toc-expectation-maximization" class="nav-link" data-scroll-target="#expectation-maximization">Expectation-maximization</a></li>
   <li><a href="#gibbs-sampler" id="toc-gibbs-sampler" class="nav-link" data-scroll-target="#gibbs-sampler">Gibbs sampler</a></li>
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#appendix-numerical-implementation-in-jax" id="toc-appendix-numerical-implementation-in-jax" class="nav-link" data-scroll-target="#appendix-numerical-implementation-in-jax">Appendix: numerical implementation in JAX</a>
+  <ul class="collapse">
+  <li><a href="#expectation-maximization-algorithm" id="toc-expectation-maximization-algorithm" class="nav-link" data-scroll-target="#expectation-maximization-algorithm">Expectation-maximization algorithm</a></li>
+  <li><a href="#gibbs-sampler-1" id="toc-gibbs-sampler-1" class="nav-link" data-scroll-target="#gibbs-sampler-1">Gibbs sampler</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -313,7 +318,7 @@ Q(\pi, \pi^{(t)}) = \log P(\pi) + \sum_{i=1}^N\sum_{y=1}^L \left(\xi_{iy} \log P
 \]</span> Even better: not only <span class="math inline">\(\xi_{iy}\)</span> does not depend on <span class="math inline">\(\pi\)</span>, but also <span class="math inline">\(\log D_y(x_i)\)</span>! Hence, we can drop from the optimization the terms requiring the generative models and we are left only with the easy to calculate quantities: <span class="math display">\[
 \log P(\pi) + \sum_{i=1}^N\sum_{y=1}^L \xi_{iy} \log \pi_y.
 \]</span></p>
-<p>Let’s use the prior <span class="math inline">\(P(\pi) = \mathrm{Dirichlet}(\pi \mid \alpha_1, \dotsc, \alpha_L)\)</span>, so that <span class="math inline">\(\log P(\pi) = \sum_{y=1}^L (\alpha_y-1)\log \pi_y\)</span>. Hence, we are interested in optimising <span class="math display">\[
+<p>Let’s use the prior <span class="math inline">\(P(\pi) = \mathrm{Dirichlet}(\pi \mid \alpha_1, \dotsc, \alpha_L)\)</span>, so that <span class="math inline">\(\log P(\pi) = \mathrm{const.} + \sum_{y=1}^L (\alpha_y-1)\log \pi_y\)</span>. Hence, we are interested in optimising <span class="math display">\[
 \sum_{y=1}^L \left((\alpha_y-1) + \sum_{i=1}^N \xi_{iy} \right)\log \pi_y.
 \]</span></p>
 <p>Write <span class="math inline">\(A_y = \alpha_y - 1 + \sum_{i=1}^N\xi_{iy}\)</span>. We have to optimize the expression <span class="math display">\[
@@ -362,9 +367,237 @@ Y_k \sim P(Y_k \mid X_k, \pi) = \mathrm{Categorical}(\xi_{k1}, \dotsc, \xi_{kL})
 <li>As there are <span class="math inline">\(N\)</span> latent variables sampled, the convergence may perhaps be slow.</li>
 </ol>
 <p>It’d be interesting to see how problematic these points are in practice (perhaps not at all!)</p>
+</section>
+<section id="appendix-numerical-implementation-in-jax" class="level2">
+<h2 class="anchored" data-anchor-id="appendix-numerical-implementation-in-jax">Appendix: numerical implementation in JAX</h2>
+<p>As these algorithms are so simple, let’s quickly implement them in <a href="https://github.com/google/jax">JAX</a>. We will consider two Gaussian densities <span class="math inline">\(D_1 = \mathcal N(0, 1^2)\)</span> and <span class="math inline">\(D_2 = \mathcal N(\mu, 1^2)\)</span>. Let’s generate some data:</p>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jax <span class="im">import</span> random</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jaxtyping <span class="im">import</span> Array, Float, Int</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jax.scipy.special <span class="im">import</span> logsumexp</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>n_cases: Int[Array, <span class="st">" classes"</span>] <span class="op">=</span> jnp.asarray([<span class="dv">10</span>, <span class="dv">40</span>], dtype<span class="op">=</span><span class="bu">int</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>mus: Float[Array, <span class="st">" classes"</span>] <span class="op">=</span> jnp.asarray([<span class="fl">0.0</span>, <span class="fl">1.0</span>])</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>key <span class="op">=</span> random.PRNGKey(<span class="dv">42</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>key, <span class="op">*</span>subkeys <span class="op">=</span> random.split(key, <span class="bu">len</span>(n_cases) <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>xs: Float[Array, <span class="st">" points"</span>] <span class="op">=</span> jnp.concatenate(<span class="bu">tuple</span>(</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  mu <span class="op">+</span> random.normal(subkey, shape<span class="op">=</span>(n,))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> subkey, n, mu <span class="kw">in</span> <span class="bu">zip</span>(subkeys, n_cases, mus)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>n_classes: <span class="bu">int</span> <span class="op">=</span> <span class="bu">len</span>(n_cases)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>n_points: <span class="bu">int</span> <span class="op">=</span> <span class="bu">len</span>(xs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.</code></pre>
+</div>
+</div>
+<p>Now we need a probabilistic classifier. We will assume that it was calibrated on population with proportion <span class="math inline">\(\pi^{(0)} = (0.4, 0.6)\)</span>.</p>
+<div class="cell" data-execution_count="3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>_normalizer: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> jnp.log(<span class="dv">2</span> <span class="op">*</span> jnp.pi)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_p(x, mu: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">"""Log-density N(x | mu, 1^2)."""</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> jnp.square(x <span class="op">-</span> mu) <span class="op">-</span> _normalizer</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Auxiliary matrix log P(X | Y)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>_log_p_x_y: Float[Array, <span class="st">"points classes"</span>] <span class="op">=</span> jnp.stack(<span class="bu">tuple</span>(log_p(xs, mu) <span class="cf">for</span> mu <span class="kw">in</span> mus)).T</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> _log_p_x_y.shape <span class="op">==</span> (n_points, n_classes), <span class="ss">f"Shape mismatch: </span><span class="sc">{</span>_log_p_x_y<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">."</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>log_pi0: Float[Array, <span class="st">" classes"</span>] <span class="op">=</span> jnp.log(jnp.asarray([<span class="fl">0.4</span>, <span class="fl">0.6</span>]))</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Matrix representing log P(Y | X) for labeled population</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>log_p_y_x: Float[Array, <span class="st">"points classes"</span>] <span class="op">=</span> _log_p_x_y <span class="op">+</span> log_pi0[<span class="va">None</span>, :]</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co"># ... currently it's unnormalized, so we have to normalize it</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> normalize_logprobs(log_ps: Float[Array, <span class="st">"points classes"</span>]) <span class="op">-&gt;</span> Float[Array, <span class="st">"points classes"</span>]:</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  log_const <span class="op">=</span> logsumexp(log_ps, keepdims<span class="op">=</span><span class="va">True</span>, axis<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> log_ps <span class="op">-</span> log_const</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>log_p_y_x <span class="op">=</span> normalize_logprobs(log_p_y_x)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Let's quickly check if it works</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>sums <span class="op">=</span> jnp.<span class="bu">sum</span>(jnp.exp(log_p_y_x), axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> sums.shape <span class="op">==</span> (n_points,)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> jnp.<span class="bu">min</span>(sums) <span class="op">&gt;</span> <span class="fl">0.999</span>, <span class="ss">f"Minimum: </span><span class="sc">{</span>jnp<span class="sc">.</span><span class="bu">min</span>(sums)<span class="sc">}</span><span class="ss">."</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> jnp.<span class="bu">max</span>(sums) <span class="op">&lt;</span> <span class="fl">1.001</span>, <span class="ss">f"Maximum: </span><span class="sc">{</span>jnp<span class="sc">.</span><span class="bu">max</span>(sums)<span class="sc">}</span><span class="ss">."</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="expectation-maximization-algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="expectation-maximization-algorithm">Expectation-maximization algorithm</h3>
+<p>It’s time to implement expectation-maximization.</p>
+<div class="cell" data-execution_count="4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> expectation_maximization(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  log_p_y_x: Float[Array, <span class="st">"points classes"</span>],</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  log_pi0: Float[Array, <span class="st">" classes"</span>],</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  log_start: <span class="va">None</span> <span class="op">|</span> Float[Array, <span class="st">" classes"</span>] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  alpha: Float[Array, <span class="st">" classes"</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  n_iterations: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10_000</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> Float[Array, <span class="st">" classes"</span>]:</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">"""Runs the expectation-maximization algorithm.</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">  Args:</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">    log_p_y_x: array log P(Y | X) for the calibrated population</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">    log_pi0: array log P(Y) for the calibrated population</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">    log_start: starting point. If not provided, `log_pi0` will be used</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">    alpha: concentration parameters for the Dirichlet prior.</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">      If not provided, the uniform prior will be used</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">    n_iterations: number of iterations to run the algorithm for</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">  """</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> log_start <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    log_start <span class="op">=</span> log_pi0</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> alpha <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> jnp.ones_like(log_pi0)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> iteration(_, log_pi: Float[Array, <span class="st">" classes"</span>]) <span class="op">-&gt;</span> Float[Array, <span class="st">" classes"</span>]:</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate log xi[n, y]</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    log_ps <span class="op">=</span> normalize_logprobs(log_p_y_x <span class="op">+</span> log_pi[<span class="va">None</span>, :] <span class="op">-</span> log_pi0[<span class="va">None</span>, :])</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sum xi[n, y] over n. We use the logsumexp, as we have log xi[n, y]</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    summed <span class="op">=</span> jnp.exp(logsumexp(log_ps, axis<span class="op">=</span><span class="dv">0</span>, keepdims<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The term inside the bracket (numerator)</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    numerator <span class="op">=</span> summed <span class="op">+</span> alpha <span class="op">-</span> <span class="fl">1.0</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Denominator</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    denominator <span class="op">=</span> jnp.<span class="bu">sum</span>(alpha) <span class="op">+</span> log_p_y_x.shape[<span class="dv">0</span>] <span class="op">-</span> log_p_y_x.shape[<span class="dv">1</span>]</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> jnp.log(numerator <span class="op">/</span> denominator)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> jax.lax.fori_loop(</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, n_iterations, iteration, log_start</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>log_estimated <span class="op">=</span> expectation_maximization(</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>  log_p_y_x<span class="op">=</span>log_p_y_x,</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>  log_pi0<span class="op">=</span>log_pi0,</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>  n_iterations<span class="op">=</span><span class="dv">1000</span>,</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Let's use slight shrinkage towards more uniform solutions</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>  alpha<span class="op">=</span><span class="fl">2.0</span> <span class="op">*</span> jnp.ones_like(log_pi0),</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>estimated <span class="op">=</span> jnp.exp(log_estimated)</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Estimated: </span><span class="sc">{</span>estimated<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Actual:    </span><span class="sc">{</span>n_cases <span class="op">/</span> n_cases<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Estimated: [0.16425547 0.83574456]
+Actual:    [0.2 0.8]</code></pre>
+</div>
+</div>
+</section>
+<section id="gibbs-sampler-1" class="level3">
+<h3 class="anchored" data-anchor-id="gibbs-sampler-1">Gibbs sampler</h3>
+<p>Expectation-maximization returns only a point estimate. We’ll explore the region around the posterior mode with a Gibbs sampler.</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gibbs_sampler(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  key: random.PRNGKeyArray,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  log_p_y_x: Float[Array, <span class="st">"points classes"</span>],</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  log_pi0: Float[Array, <span class="st">" classes"</span>],</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  log_start: <span class="va">None</span> <span class="op">|</span> Float[Array, <span class="st">" classes"</span>] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  alpha: Float[Array, <span class="st">" classes"</span>] <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  n_warmup: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1_000</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  n_samples: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1_000</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> Float[Array, <span class="st">"n_samples classes"</span>]:</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> log_start <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    log_start <span class="op">=</span> log_pi0</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> alpha <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> jnp.ones_like(log_pi0)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> iteration(</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    log_ps: Float[Array, <span class="st">" classes"</span>],</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    key: random.PRNGKeyArray,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">-&gt;</span> <span class="bu">tuple</span>[Float[Array, <span class="st">" classes"</span>], Float[Array, <span class="st">" classes"</span>]]:</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    key, subkey1, subkey2 <span class="op">=</span> random.split(key, <span class="dv">3</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    ys <span class="op">=</span> random.categorical(</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>      subkey1,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>      log_ps[<span class="va">None</span>, :] <span class="op">+</span> log_p_y_x <span class="op">-</span> log_pi0[<span class="va">None</span>, :],</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>      axis<span class="op">=-</span><span class="dv">1</span>,</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    counts <span class="op">=</span> jnp.bincount(ys, length<span class="op">=</span>log_pi0.shape[<span class="dv">0</span>])</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    new_log_pi <span class="op">=</span> jnp.log(</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>      random.dirichlet(subkey2, alpha <span class="op">+</span> counts)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> new_log_pi, new_log_pi</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>  _, samples <span class="op">=</span> jax.lax.scan(</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    iteration,</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    log_start,</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    random.split(key, n_warmup <span class="op">+</span> n_samples),</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> samples[n_warmup:, :]</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>key, subkey <span class="op">=</span> random.split(key)</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> gibbs_sampler(</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>  key<span class="op">=</span>subkey,</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>  log_p_y_x<span class="op">=</span>log_p_y_x,</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>  log_pi0<span class="op">=</span>log_pi0,</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Let's use slight shrinkage towards more uniform solutions</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>  alpha<span class="op">=</span><span class="fl">2.0</span> <span class="op">*</span> jnp.ones_like(log_pi0),</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Use EM point as a starting point</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>  log_start<span class="op">=</span>log_estimated,</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>  n_samples<span class="op">=</span><span class="dv">5_000</span>,</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> jnp.exp(samples)</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Mean:   </span><span class="sc">{</span>jnp<span class="sc">.</span>mean(samples, axis<span class="op">=</span><span class="dv">0</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Std:    </span><span class="sc">{</span>jnp<span class="sc">.</span>std(samples, axis<span class="op">=</span><span class="dv">0</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Actual: </span><span class="sc">{</span>n_cases <span class="op">/</span> n_cases<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>/tmp/ipykernel_80089/3942328187.py:2: DeprecationWarning: jax.random.PRNGKeyArray is deprecated. Use jax.Array for annotations, and jax.dtypes.issubdtype(arr.dtype, jax.dtypes.prng_key) for runtime detection of typed prng keys.
+  key: random.PRNGKeyArray,
+/tmp/ipykernel_80089/3942328187.py:17: DeprecationWarning: jax.random.PRNGKeyArray is deprecated. Use jax.Array for annotations, and jax.dtypes.issubdtype(arr.dtype, jax.dtypes.prng_key) for runtime detection of typed prng keys.
+  key: random.PRNGKeyArray,</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean:   [0.20171012 0.79828984]
+Std:    [0.09912279 0.09912279]
+Actual: [0.2 0.8]</code></pre>
+</div>
+</div>
+<p>Let’s visualise the posterior samples, together with the expectation-maximization solution and the ground truth:</p>
+<div class="cell" data-execution_count="6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"dark_background"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(dpi<span class="op">=</span><span class="dv">150</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>bins <span class="op">=</span> jnp.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">40</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> y <span class="kw">in</span> <span class="bu">range</span>(n_classes):</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  color <span class="op">=</span> <span class="ss">f"C</span><span class="sc">{</span>y<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  ax.hist(samples[:, y], bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>, histtype<span class="op">=</span><span class="st">"step"</span>, color<span class="op">=</span>color)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  ax.axvline(n_cases[y] <span class="op">/</span> n_cases.<span class="bu">sum</span>(), color<span class="op">=</span>color, linewidth<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  ax.axvline(estimated[y], color<span class="op">=</span>color, linestyle<span class="op">=</span><span class="st">"--"</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Posterior distribution"</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Posterior density"</span>)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Component value"</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>ax.spines[[<span class="st">"top"</span>, <span class="st">"right"</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="em-gibbs-quantification_files/figure-html/cell-7-output-1.png" class="img-fluid"></p>
+</div>
+</div>
 
 
 
+</section>
 </section>
 
 
