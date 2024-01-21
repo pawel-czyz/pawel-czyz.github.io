@@ -3,8 +3,6 @@ title: "Student mentorship: expectations document"
 description: "I learned from one of my mentors that it's important to discuss the mutual expectations of the mentorship, be it a PhD thesis or a lab rotation. This document serves as a template, which we can further discuss and adjust."
 author: "Paweł Czyż"
 date: "7/8/2023"
-categories:
-  - Mentorship
 ---
 
 Welcome! This document is supposed to explain my general mentoring style and act as a skeleton around we can build the collaboration and mentorship rules. 

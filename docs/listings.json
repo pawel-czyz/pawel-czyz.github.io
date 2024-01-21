@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/em-gibbs-quantification.html",
       "/posts/almost-binomial-markov-chain.html",
       "/posts/on-beyond-normal.html",
       "/posts/getting-started-with-Bayesian-statistics.html",

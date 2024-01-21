@@ -4,7 +4,7 @@ description: "Sometimes if you misunderstand something, you can have two interes
 author: "Paweł Czyż"
 date: "8/31/2023"
 categories:
-  - Mutual Information
+  - Mutual information
 execute:
   freeze: true
 format: 

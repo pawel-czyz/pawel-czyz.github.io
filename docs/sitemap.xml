@@ -2,62 +2,66 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://pawel-czyz.github.io/posts/histograms-vs-density-estimation.html</loc>
-    <lastmod>2024-01-19T22:35:05.237Z</lastmod>
+    <lastmod>2024-01-21T16:35:28.051Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/posts/em-gibbs-quantification.html</loc>
+    <lastmod>2024-01-21T16:35:31.311Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/board-games-monte-carlo.html</loc>
-    <lastmod>2024-01-19T22:35:05.877Z</lastmod>
+    <lastmod>2024-01-21T16:35:31.835Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/expectations-student-mentorship.html</loc>
-    <lastmod>2024-01-19T22:35:06.485Z</lastmod>
+    <lastmod>2024-01-21T16:35:32.255Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/triangle-distributions.html</loc>
-    <lastmod>2024-01-19T22:35:07.165Z</lastmod>
+    <lastmod>2024-01-21T16:35:32.803Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/determinant-multilinear.html</loc>
-    <lastmod>2024-01-19T22:35:07.749Z</lastmod>
+    <lastmod>2024-01-21T16:35:33.231Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/dirichlet-process.html</loc>
-    <lastmod>2024-01-19T22:35:09.269Z</lastmod>
+    <lastmod>2024-01-21T16:35:34.543Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/almost-binomial-markov-chain.html</loc>
-    <lastmod>2024-01-19T22:37:47.011Z</lastmod>
+    <lastmod>2024-01-21T16:35:35.199Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/getting-started-with-Bayesian-statistics.html</loc>
-    <lastmod>2024-01-19T22:37:18.855Z</lastmod>
+    <lastmod>2024-01-21T16:35:35.479Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/no-free-lunch-in-research.html</loc>
-    <lastmod>2024-01-19T22:37:19.151Z</lastmod>
+    <lastmod>2024-01-21T16:35:35.731Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/on-beyond-normal.html</loc>
-    <lastmod>2024-01-19T22:37:20.175Z</lastmod>
+    <lastmod>2024-01-21T16:35:36.579Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/index.html</loc>
-    <lastmod>2024-01-19T22:37:42.295Z</lastmod>
+    <lastmod>2024-01-21T16:35:36.775Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/Almost-Nonidentifiable.html</loc>
-    <lastmod>2024-01-19T22:37:20.687Z</lastmod>
+    <lastmod>2024-01-21T16:35:37.011Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/private/prezenty.html</loc>
-    <lastmod>2024-01-19T22:37:20.927Z</lastmod>
+    <lastmod>2024-01-21T16:35:37.215Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/blog.html</loc>
-    <lastmod>2024-01-19T22:37:44.847Z</lastmod>
+    <lastmod>2024-01-21T16:35:37.923Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/publications.html</loc>
-    <lastmod>2024-01-19T22:37:21.943Z</lastmod>
+    <lastmod>2024-01-21T16:35:38.123Z</lastmod>
   </url>
 </urlset>

@@ -1,0 +1,241 @@
+---
+title: "Expectation-maximization and Gibbs sampling in quantification"
+description: "Let's analyse how to estimate how many cats and dogs can be found in an unlabeled data set."
+author: "Paweł Czyż"
+date: "1/21/2024"
+categories:
+  - Markov chain Monte Carlo
+  - Bayesian statistics
+execute:
+  freeze: true
+bibliography: references.bib
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+Consider an unlabeled image data set $x_1, \dotsc, x_N$.
+We know that each image in this data set corresponds to a unique class (e.g., a cat or a dog) $y\in \{1, \dotsc, L\}$ and we would like to estimate how many images $x_i$ belong to each class. This problem is known as *quantification* and there exist numerous approaches to this problem, employing an auxiliary data set. Albert Ziegler and I were interested in additionally quantifying uncertainty[^1] around such estimates [see @Ziegler-2023-Bayesian-Quantification] by building a generative model on summary statistic and performing Bayesian inference.
+
+[^1]: Let's call this problem *"quantification of uncertainty in quantification problems"*.
+
+We got a very good question from the reviewer: if we compare our method to point estimates produced by an [expectation-maximization algorithm](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm) [@Saerens-2001-adjustingtheoutputs] and we are interested in uncertainty quantification, why don't we upgrade this method to a [Gibbs sampler](https://en.wikipedia.org/wiki/Gibbs_sampling)?
+
+I like this question, because it's very natural to ask, yet I overlooked the possibliby of doing it.
+As Richard McElreath explains [here](https://elevanth.org/blog/2017/11/28/build-a-better-markov-chain/), Hamiltonian Markov chain Monte Carlo is usually the preferred way of sampling, but let's see how exactly the expectation-maximization algorithm works in this case and how to adapt it to a Gibbs sampler.
+
+## Modelling assumptions
+
+Generatively, the model is very similar to the one used in clustering problems: for each object we have an observed random variable $X_i$ (with its realization being the image $x_i$) and a latent random variable $Y_i$, which is valued in the set of labels $\{1, \dotsc, L\}$.
+
+Additionally, there's a latent vector $\pi = (\pi_1, \dotsc, \pi_L)$ with non-negative entries, such that $\pi_1 + \cdots + \pi_L = 1$. In other words, vector $\pi$ is the proportion vector of interest.
+
+We can visualise the assumed dependencies in the following graphical model:
+```{python}
+import daft
+import matplotlib.pyplot as plt
+
+plt.style.use('grayscale')
+
+# Instantiate a PGM object
+pgm = daft.PGM()
+
+# Add nodes. The arguments are (name, label, x-position, y-position)
+pgm.add_node("pi", "$\\pi$", 0, 1)
+pgm.add_node("Y_i", r"$Y_i$", 2, 1)
+pgm.add_node("X_i", r"$X_i$", 4, 1, plot_params={"facecolor": "cornflowerblue"})
+
+# Add edges
+pgm.add_edge("pi", "Y_i")
+pgm.add_edge("Y_i", "X_i")
+
+# Add a plate
+pgm.add_plate([1.5, 0.5, 3, 1.5], label=r"$i = 1, \ldots, N$", shift=-0.1)
+
+# Render and show the PGM
+pgm.render()
+plt.show()
+```
+
+As $\pi$ is simplex-valued, it's convenient to model it with a Dirichlet prior. Then, $Y_i\mid \pi \sim \mathrm{Categorical}(\pi)$.
+Finally, we assume that each class $y$ has a corresponding distribution $D_y$ from which the image is sampled. In other words, $X_i\mid Y_i=y \sim  D_y$. 
+
+In case we know all distributions $D_y$, this is quite a simple problem: we can marginalise the latent variables $Y_i$ obtaining
+$$
+P(\{X_i=x_i\} \mid \pi) = \prod_{i=1}^N \big( \pi_1 D_1(x_i) + \cdots + \pi_L D_L(x_i) \big)
+$$
+which in turn can be used to infer $\pi$ using Hamiltonian Markov chain Monte Carlo algorithms. In fact, a variant of this approach, employing maximum likelihood estimate, rather than Bayesian inference, was proposed by @Peters-Coberly-1976 as early as in 1976!
+
+## Why expectation-maximization?
+
+However, learning well-calibrated generative models $D_y$ may be very hard task. @Saerens-2001-adjustingtheoutputs instead propose to learn a well-calibrated probabilistic classifier $P(Y \mid X, \pi^{(0)})$ on an auxiliary population.
+
+The assumption on the auxiliary population is the following: the conditional probability distributions $D_y = P(X\mid Y=y)$ have to be the same. The only thing that can differ is the proportion vector $\pi_0$, assumed to be known.
+This assumption is called *prior probability shift* or *label shift* and is rather strong, but also quite hard to avoid: if arbitrary distribution shifts are avoided, it's not possible to generalize from one distribution to another! Finding suitable ways how to weaken the prior probability shift is therefore an interesting research problem on its own.
+
+Note that if we have a well-calibrated classifier $P(Y\mid X, \pi^{(0)})$, we also have an access to a distribution $P(Y\mid X, \pi)$.
+Namely, note that
+$$\begin{align*}
+P(Y=y\mid X=x, \pi) &\propto P(Y=y, X=x \mid \pi) \\
+&= P(X=x \mid Y=y, \pi) P(Y=y\mid \pi) \\
+&= P(X=x \mid Y=y)\, \pi_y,
+\end{align*}
+$$
+where the proportionality constant does not depend on $y$. Analogously,
+$$
+P(Y=y\mid X=x, \pi^{(0)}) \propto P(X=x\mid Y=y)\, \pi^{(0)}_y,
+$$
+where the key observation is that for both distributions we assume that the conditional distribution $P(X=x\mid Y=y)$ is the same.
+Now we can take the ratio of both expressions and obtain
+$$
+P(Y=y\mid X=x, \pi) \propto P(Y=y\mid X=x, \pi^{(0)}) \frac{ \pi_y }{\pi^{(0)}_y},
+$$
+where the proportionality does not depend on $y$. Hence, we can calculate unnormalized probabilities in this manner and then normalize them, so that they sum up to $1$.
+
+To summarize, we have the access to:
+
+1. Well-calibrated probability $P(Y=y\mid X=x, \pi)$;
+2. The prior probability $P(\pi)$;
+3. The probability $P(Y_i=y \mid \pi) = \pi_y$;
+
+and we want to do inference on the posterior $P(\pi \mid \{X_i\})$.
+
+## Expectation-maximization
+
+Expectation-maximization is an iterative algorithm trying to find a stationary point of the log-posterior 
+$$\begin{align*}
+\log P(\pi \mid \{X_i=x_i\}) &= P(\pi) + \log P(\{X_i = x_i\} \mid \pi) \\
+&= P(\pi) + \sum_{i=1}^N \log P(X_i=x_i\mid \pi).
+\end{align*}
+$$
+In particular, by running the optimization procedure several times, we can hope to find the maximum a posteriori estimate (or the maximum likelihood estimate, when the uniform distribution over the simplex is used as $P(\pi)$).
+Interestingly, this optimization procedure will *not* assume that we can compute $\log P(X_i=x_i\mid \pi)$, using instead quantities available to us.
+
+Assume that at the current iteration the proportion vector is $\pi^{(t)}$. Then,
+$$\begin{align*}
+\log P(X_i = x_i\mid \pi) &= \log \sum_{y=1}^L P(X_i = x_i, Y_i = y\mid \pi) \\
+&= \log \sum_{y=1}^L P(Y_i=y \mid \pi^{(t)}, X_i = x_i ) \frac{ P(X_i=x_i, Y_i=y \mid \pi) }{P(Y_i=y \mid \pi^{(t)}, X_i=x_i)} \\
+&\ge \sum_{y=1}^L P(Y_i=y\mid \pi^{(t)}, X_i=x_i) \log \frac{P(X_i=x_i, Y_i=y \mid \pi)}{P(Y_i=y \mid \pi^{(t)}, X_i=x_i)} 
+\end{align*}
+$$
+
+where the inequality follows from Jensen's inequality for concave functions[^2]. 
+
+[^2]: It's good to remember: $\log \mathbb E[A] \ge \mathbb E[\log A]$. 
+
+We can now bound the loglikelihood by
+$$\begin{align*}
+\log P(\{X_i = x_i \}\mid \pi) &= \sum_{i=1}^N \log P(X_i=x_i\mid \pi) \\
+&\ge \sum_{i=1}^N \sum_{y=1}^L P(Y_i=y\mid \pi^{(t)}, X_i=x_i) \log \frac{P(X_i=x_i, Y_i=y \mid \pi)}{P(Y_i=y \mid \pi^{(t)}, X_i=x_i)}.
+\end{align*}
+$$
+
+Now let
+$$
+Q(\pi, \pi^{(t)}) = \log P(\pi) + \sum_{i=1}^N \sum_{y=1}^L P(Y_i=y\mid \pi^{(t)}, X_i=x_i) \log \frac{P(X_i=x_i, Y_i=y \mid \pi)}{P(Y_i=y \mid \pi^{(t)}, X_i=x_i)},
+$$
+which is a lower bound on the log-posterior. We will define the value $\pi^{(t+1)}$ by optimizing this lower bound:
+$$
+\pi^{(t+1)} := \mathrm{argmax}_\pi Q(\pi, \pi^{(t)}).
+$$
+
+Let's define auxiliary quantities $\xi_{iy} = P(Y_i=y \mid \pi^{(t)}, X_i=x_i)$, which can be calculated using the probabilistic classifier, as outlined [above](#why-expectation-maximization). This is called the *expectation* step (although we are actually calculating just probabilities, rather than more general expectations).
+In the new notation we have
+$$
+Q(\pi, \pi^{(t)}) = \log P(\pi) + \sum_{i=1}^N\sum_{y=1}^L \left(\xi_{iy} \log P(X_i=x_i, Y_i=y\mid \pi) - \xi_{iy} \log \xi_{iy}\right)
+$$
+
+The term $\xi_{iy}\log \xi_{iy}$ does not depend on $\pi$, so we don't have to include it in the optimization. Writing
+$\log P(X_i = x_i, Y_i=y\mid \pi) = \log D_y(x_i) + \log \pi_y$ we see that it suffices to optimize for $\pi$ the expression
+$$
+\log P(\pi) + \sum_{i=1}^N\sum_{y=1}^L \xi_{iy}\left( \log \pi_y + \log D_y(x_i) \right).
+$$
+Even better: not only $\xi_{iy}$ does not depend on $\pi$, but also $\log D_y(x_i)$! Hence, we can drop from the optimization the terms requiring the generative models and we are left only with the easy to calculate quantities:
+$$
+\log P(\pi) + \sum_{i=1}^N\sum_{y=1}^L \xi_{iy} \log \pi_y.
+$$
+
+Let's use the prior $P(\pi) = \mathrm{Dirichlet}(\pi \mid \alpha_1, \dotsc, \alpha_L)$, so that $\log P(\pi) = \sum_{y=1}^L (\alpha_y-1)\log \pi_y$.
+Hence, we are interested in optimising
+$$
+\sum_{y=1}^L \left((\alpha_y-1) + \sum_{i=1}^N \xi_{iy} \right)\log \pi_y.
+$$
+
+Write $A_y = \alpha_y - 1 + \sum_{i=1}^N\xi_{iy}$. We have to optimize the expression
+$$
+\sum_{y=1}^L A_y\log \pi_y
+$$
+under a constraint $\pi_1 + \cdots + \pi_L = 1$.
+
+@Saerens-2001-adjustingtheoutputs use [Lagrange multipliers](https://en.wikipedia.org/wiki/Lagrange_multiplier), but we will use the first $L-1$ coordinates to parameterise the simplex and write $\pi_L = 1 - (\pi_1 + \cdots + \pi_{L-1})$. In this case, if we differentiate with respect to $\pi_l$, we obtain
+$$
+\frac{A_l}{\pi_l} + \frac{A_L}{\pi_L} \cdot (-1) = 0,
+$$
+
+which in turn gives that $\pi_y = k A_y$ for some constant $k > 0$.
+We have
+$$
+\sum_{y=1}^L A_y = \sum_{y=1}^L \alpha_y - L + \sum_{i=1}^N\sum_{y=1}^L \xi_{iy} = \sum_{y=1}^L \alpha_y - L + N.
+$$
+Hence,
+$$
+\pi_y = \frac{1}{(\alpha_1 + \cdots + \alpha_L) + N - L}\left( \alpha_y-1 + \sum_{i=1}^N \xi_{iy} \right),
+$$
+which is taken as the next $\pi^{(t+1)}$.
+
+As a minor observation, note that for a uniform prior over the simplex (i.e., all $\alpha_y = 1$) we have
+$$
+\pi^{(t+1)}_y = \frac 1N\sum_{i=1}^N P(Y_i=y_i \mid X_i=x_i, \pi^{(t)} ).
+$$
+Once we have converged to a fixed point and we have $\pi^{(t)} = \pi^{(t+1)}$, it very much looks like
+$$
+P(Y) = \frac 1N\sum_{i=1}^N P(Y_i \mid X_i, \pi) \approx \mathbb E_{X \sim \pi_1 D_1 + \dotsc + \pi_L D_L}[ P(Y\mid X) ]
+$$
+when $N$ is large.
+
+## Gibbs sampler
+
+Finally, let's think how to implement a Gibbs sampler for this problem.
+Compared to the [expectation-maximization](#expectation-maximization) this will be easy.
+
+To solve the quantification problem we have to sample from the posterior distribution $P(\pi \mid \{X_i\})$.
+Instead, let's sample from a high-dimensional distribution $P(\pi, \{Y_i\} \mid \{X_i\})$ --- once we have samples of the form $(\pi, \{Y_i\})$ we can simply forget about the $Y_i$ values.
+
+This is computationally a harder problem (we have many more variables to sample), however each sampling step will be very convenient. We will alternatively sample from
+$$
+\pi \sim P(\pi \mid \{X_i, Y_i\})
+$$
+and
+$$
+\{Y_i\} \sim P(\{Y_i\} \mid \{X_i\}, \pi).
+$$
+
+The first step is easy: $P(\pi \mid \{X_i, Y_i\}) = P(\pi\mid \{Y_i\})$ which (assuming a Dirichlet prior) is a Dirichlet distribution. Namely, if $P(\pi) = \mathrm{Dirichlet}(\alpha_1, \dotsc, \alpha_L)$, then
+$$
+P(\pi\mid \{Y_i=y_i\}) = \mathrm{Dirichlet}\left( \alpha_1 + \sum_{i=1}^N \mathbf{1}[y_i = 1], \dotsc, \alpha_L + \sum_{i=1}^N \mathbf{1}[y_i=L] \right).
+$$
+
+Let's think how to sample $\{Y_i\} \sim P(\{Y_i\} \mid \{X_i\}, \pi)$. This is a high-dimensional distribution, so let's... use Gibbs sampling.
+Namely, we can iteratively sample
+$$
+Y_k \sim P(Y_k \mid \{Y_1, \dotsc, Y_{k-1}, Y_{k+1}, \dotsc, Y_L\}, \{X_i\}, \pi).
+$$
+
+Thanks to the particular structure of this model, this is equivalent to sampling from
+$$
+Y_k \sim P(Y_k \mid X_k, \pi) = \mathrm{Categorical}(\xi_{k1}, \dotsc, \xi_{kL}),
+$$
+where $\xi_{ky} = P(Y_k = y\mid X_k = x_k, \pi)$ is obtained by [recalibrating the given classifier](#why-expectation-maximization).
+
+## Summary
+
+To sum up, the reviewer was right: it's very simple to upgrade the inference scheme in this model from a point estimate to a sample from the posterior!
+
+I however haven't run simulations to know how well this sampler works in practice: I expect that this approach *could* suffer from:
+
+1. Problems from not-so-well-calibrated probabilistic classifier.
+2. Each iteration of the algorithm (whether expectation-maximization or a Gibbs sampler) requires passing through all $N$ examples.
+3. As there are $N$ latent variables sampled, the convergence may perhaps be slow.
+
+It'd be interesting to see how problematic these points are in practice (perhaps not at all!)

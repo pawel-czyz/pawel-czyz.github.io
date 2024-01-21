@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.302">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Paweł Czyż">
+<meta name="dcterms.date" content="2024-01-21">
+<meta name="description" content="Let’s analyse how to estimate how many cats and dogs can be found in an unlabeled data set.">
+
+<title>Paweł Czyż - Expectation-maximization and Gibbs sampling in quantification</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Paweł Czyż</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../blog.html" rel="" target="">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../publications.html" rel="" target="">
+ <span class="menu-text">Publications</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#modelling-assumptions" id="toc-modelling-assumptions" class="nav-link active" data-scroll-target="#modelling-assumptions">Modelling assumptions</a></li>
+  <li><a href="#why-expectation-maximization" id="toc-why-expectation-maximization" class="nav-link" data-scroll-target="#why-expectation-maximization">Why expectation-maximization?</a></li>
+  <li><a href="#expectation-maximization" id="toc-expectation-maximization" class="nav-link" data-scroll-target="#expectation-maximization">Expectation-maximization</a></li>
+  <li><a href="#gibbs-sampler" id="toc-gibbs-sampler" class="nav-link" data-scroll-target="#gibbs-sampler">Gibbs sampler</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Expectation-maximization and Gibbs sampling in quantification</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Markov chain Monte Carlo</div>
+    <div class="quarto-category">Bayesian statistics</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Let’s analyse how to estimate how many cats and dogs can be found in an unlabeled data set.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Paweł Czyż </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 21, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<p>Consider an unlabeled image data set <span class="math inline">\(x_1, \dotsc, x_N\)</span>. We know that each image in this data set corresponds to a unique class (e.g., a cat or a dog) <span class="math inline">\(y\in \{1, \dotsc, L\}\)</span> and we would like to estimate how many images <span class="math inline">\(x_i\)</span> belong to each class. This problem is known as <em>quantification</em> and there exist numerous approaches to this problem, employing an auxiliary data set. Albert Ziegler and I were interested in additionally quantifying uncertainty<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> around such estimates <span class="citation" data-cites="Ziegler-2023-Bayesian-Quantification">(see <a href="#ref-Ziegler-2023-Bayesian-Quantification" role="doc-biblioref">Ziegler and Czyż 2023</a>)</span> by building a generative model on summary statistic and performing Bayesian inference.</p>
+<p>We got a very good question from the reviewer: if we compare our method to point estimates produced by an <a href="https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm">expectation-maximization algorithm</a> <span class="citation" data-cites="Saerens-2001-adjustingtheoutputs">(<a href="#ref-Saerens-2001-adjustingtheoutputs" role="doc-biblioref">Saerens, Latinne, and Decaestecker 2001</a>)</span> and we are interested in uncertainty quantification, why don’t we upgrade this method to a <a href="https://en.wikipedia.org/wiki/Gibbs_sampling">Gibbs sampler</a>?</p>
+<p>I like this question, because it’s very natural to ask, yet I overlooked the possibliby of doing it. As Richard McElreath explains <a href="https://elevanth.org/blog/2017/11/28/build-a-better-markov-chain/">here</a>, Hamiltonian Markov chain Monte Carlo is usually the preferred way of sampling, but let’s see how exactly the expectation-maximization algorithm works in this case and how to adapt it to a Gibbs sampler.</p>
+<section id="modelling-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="modelling-assumptions">Modelling assumptions</h2>
+<p>Generatively, the model is very similar to the one used in clustering problems: for each object we have an observed random variable <span class="math inline">\(X_i\)</span> (with its realization being the image <span class="math inline">\(x_i\)</span>) and a latent random variable <span class="math inline">\(Y_i\)</span>, which is valued in the set of labels <span class="math inline">\(\{1, \dotsc, L\}\)</span>.</p>
+<p>Additionally, there’s a latent vector <span class="math inline">\(\pi = (\pi_1, \dotsc, \pi_L)\)</span> with non-negative entries, such that <span class="math inline">\(\pi_1 + \cdots + \pi_L = 1\)</span>. In other words, vector <span class="math inline">\(\pi\)</span> is the proportion vector of interest.</p>
+<p>We can visualise the assumed dependencies in the following graphical model:</p>
+<div class="cell" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> daft</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'grayscale'</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Instantiate a PGM object</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>pgm <span class="op">=</span> daft.PGM()</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Add nodes. The arguments are (name, label, x-position, y-position)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>pgm.add_node(<span class="st">"pi"</span>, <span class="st">"$</span><span class="ch">\\</span><span class="st">pi$"</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>pgm.add_node(<span class="st">"Y_i"</span>, <span class="vs">r"$Y_i$"</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>pgm.add_node(<span class="st">"X_i"</span>, <span class="vs">r"$X_i$"</span>, <span class="dv">4</span>, <span class="dv">1</span>, plot_params<span class="op">=</span>{<span class="st">"facecolor"</span>: <span class="st">"cornflowerblue"</span>})</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Add edges</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>pgm.add_edge(<span class="st">"pi"</span>, <span class="st">"Y_i"</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>pgm.add_edge(<span class="st">"Y_i"</span>, <span class="st">"X_i"</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a plate</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>pgm.add_plate([<span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="dv">3</span>, <span class="fl">1.5</span>], label<span class="op">=</span><span class="vs">r"$i = 1, \ldots, N$"</span>, shift<span class="op">=-</span><span class="fl">0.1</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Render and show the PGM</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>pgm.render()</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="em-gibbs-quantification_files/figure-html/cell-2-output-1.png" width="393" height="155"></p>
+</div>
+</div>
+<p>As <span class="math inline">\(\pi\)</span> is simplex-valued, it’s convenient to model it with a Dirichlet prior. Then, <span class="math inline">\(Y_i\mid \pi \sim \mathrm{Categorical}(\pi)\)</span>. Finally, we assume that each class <span class="math inline">\(y\)</span> has a corresponding distribution <span class="math inline">\(D_y\)</span> from which the image is sampled. In other words, <span class="math inline">\(X_i\mid Y_i=y \sim D_y\)</span>.</p>
+<p>In case we know all distributions <span class="math inline">\(D_y\)</span>, this is quite a simple problem: we can marginalise the latent variables <span class="math inline">\(Y_i\)</span> obtaining <span class="math display">\[
+P(\{X_i=x_i\} \mid \pi) = \prod_{i=1}^N \big( \pi_1 D_1(x_i) + \cdots + \pi_L D_L(x_i) \big)
+\]</span> which in turn can be used to infer <span class="math inline">\(\pi\)</span> using Hamiltonian Markov chain Monte Carlo algorithms. In fact, a variant of this approach, employing maximum likelihood estimate, rather than Bayesian inference, was proposed by <span class="citation" data-cites="Peters-Coberly-1976">Peters and Coberly (<a href="#ref-Peters-Coberly-1976" role="doc-biblioref">1976</a>)</span> as early as in 1976!</p>
+</section>
+<section id="why-expectation-maximization" class="level2">
+<h2 class="anchored" data-anchor-id="why-expectation-maximization">Why expectation-maximization?</h2>
+<p>However, learning well-calibrated generative models <span class="math inline">\(D_y\)</span> may be very hard task. <span class="citation" data-cites="Saerens-2001-adjustingtheoutputs">Saerens, Latinne, and Decaestecker (<a href="#ref-Saerens-2001-adjustingtheoutputs" role="doc-biblioref">2001</a>)</span> instead propose to learn a well-calibrated probabilistic classifier <span class="math inline">\(P(Y \mid X, \pi^{(0)})\)</span> on an auxiliary population.</p>
+<p>The assumption on the auxiliary population is the following: the conditional probability distributions <span class="math inline">\(D_y = P(X\mid Y=y)\)</span> have to be the same. The only thing that can differ is the proportion vector <span class="math inline">\(\pi_0\)</span>, assumed to be known. This assumption is called <em>prior probability shift</em> or <em>label shift</em> and is rather strong, but also quite hard to avoid: if arbitrary distribution shifts are avoided, it’s not possible to generalize from one distribution to another! Finding suitable ways how to weaken the prior probability shift is therefore an interesting research problem on its own.</p>
+<p>Note that if we have a well-calibrated classifier <span class="math inline">\(P(Y\mid X, \pi^{(0)})\)</span>, we also have an access to a distribution <span class="math inline">\(P(Y\mid X, \pi)\)</span>. Namely, note that <span class="math display">\[\begin{align*}
+P(Y=y\mid X=x, \pi) &amp;\propto P(Y=y, X=x \mid \pi) \\
+&amp;= P(X=x \mid Y=y, \pi) P(Y=y\mid \pi) \\
+&amp;= P(X=x \mid Y=y)\, \pi_y,
+\end{align*}
+\]</span> where the proportionality constant does not depend on <span class="math inline">\(y\)</span>. Analogously, <span class="math display">\[
+P(Y=y\mid X=x, \pi^{(0)}) \propto P(X=x\mid Y=y)\, \pi^{(0)}_y,
+\]</span> where the key observation is that for both distributions we assume that the conditional distribution <span class="math inline">\(P(X=x\mid Y=y)\)</span> is the same. Now we can take the ratio of both expressions and obtain <span class="math display">\[
+P(Y=y\mid X=x, \pi) \propto P(Y=y\mid X=x, \pi^{(0)}) \frac{ \pi_y }{\pi^{(0)}_y},
+\]</span> where the proportionality does not depend on <span class="math inline">\(y\)</span>. Hence, we can calculate unnormalized probabilities in this manner and then normalize them, so that they sum up to <span class="math inline">\(1\)</span>.</p>
+<p>To summarize, we have the access to:</p>
+<ol type="1">
+<li>Well-calibrated probability <span class="math inline">\(P(Y=y\mid X=x, \pi)\)</span>;</li>
+<li>The prior probability <span class="math inline">\(P(\pi)\)</span>;</li>
+<li>The probability <span class="math inline">\(P(Y_i=y \mid \pi) = \pi_y\)</span>;</li>
+</ol>
+<p>and we want to do inference on the posterior <span class="math inline">\(P(\pi \mid \{X_i\})\)</span>.</p>
+</section>
+<section id="expectation-maximization" class="level2">
+<h2 class="anchored" data-anchor-id="expectation-maximization">Expectation-maximization</h2>
+<p>Expectation-maximization is an iterative algorithm trying to find a stationary point of the log-posterior <span class="math display">\[\begin{align*}
+\log P(\pi \mid \{X_i=x_i\}) &amp;= P(\pi) + \log P(\{X_i = x_i\} \mid \pi) \\
+&amp;= P(\pi) + \sum_{i=1}^N \log P(X_i=x_i\mid \pi).
+\end{align*}
+\]</span> In particular, by running the optimization procedure several times, we can hope to find the maximum a posteriori estimate (or the maximum likelihood estimate, when the uniform distribution over the simplex is used as <span class="math inline">\(P(\pi)\)</span>). Interestingly, this optimization procedure will <em>not</em> assume that we can compute <span class="math inline">\(\log P(X_i=x_i\mid \pi)\)</span>, using instead quantities available to us.</p>
+<p>Assume that at the current iteration the proportion vector is <span class="math inline">\(\pi^{(t)}\)</span>. Then, <span class="math display">\[\begin{align*}
+\log P(X_i = x_i\mid \pi) &amp;= \log \sum_{y=1}^L P(X_i = x_i, Y_i = y\mid \pi) \\
+&amp;= \log \sum_{y=1}^L P(Y_i=y \mid \pi^{(t)}, X_i = x_i ) \frac{ P(X_i=x_i, Y_i=y \mid \pi) }{P(Y_i=y \mid \pi^{(t)}, X_i=x_i)} \\
+&amp;\ge \sum_{y=1}^L P(Y_i=y\mid \pi^{(t)}, X_i=x_i) \log \frac{P(X_i=x_i, Y_i=y \mid \pi)}{P(Y_i=y \mid \pi^{(t)}, X_i=x_i)}
+\end{align*}
+\]</span></p>
+<p>where the inequality follows from Jensen’s inequality for concave functions<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<p>We can now bound the loglikelihood by <span class="math display">\[\begin{align*}
+\log P(\{X_i = x_i \}\mid \pi) &amp;= \sum_{i=1}^N \log P(X_i=x_i\mid \pi) \\
+&amp;\ge \sum_{i=1}^N \sum_{y=1}^L P(Y_i=y\mid \pi^{(t)}, X_i=x_i) \log \frac{P(X_i=x_i, Y_i=y \mid \pi)}{P(Y_i=y \mid \pi^{(t)}, X_i=x_i)}.
+\end{align*}
+\]</span></p>
+<p>Now let <span class="math display">\[
+Q(\pi, \pi^{(t)}) = \log P(\pi) + \sum_{i=1}^N \sum_{y=1}^L P(Y_i=y\mid \pi^{(t)}, X_i=x_i) \log \frac{P(X_i=x_i, Y_i=y \mid \pi)}{P(Y_i=y \mid \pi^{(t)}, X_i=x_i)},
+\]</span> which is a lower bound on the log-posterior. We will define the value <span class="math inline">\(\pi^{(t+1)}\)</span> by optimizing this lower bound: <span class="math display">\[
+\pi^{(t+1)} := \mathrm{argmax}_\pi Q(\pi, \pi^{(t)}).
+\]</span></p>
+<p>Let’s define auxiliary quantities <span class="math inline">\(\xi_{iy} = P(Y_i=y \mid \pi^{(t)}, X_i=x_i)\)</span>, which can be calculated using the probabilistic classifier, as outlined <a href="#why-expectation-maximization">above</a>. This is called the <em>expectation</em> step (although we are actually calculating just probabilities, rather than more general expectations). In the new notation we have <span class="math display">\[
+Q(\pi, \pi^{(t)}) = \log P(\pi) + \sum_{i=1}^N\sum_{y=1}^L \left(\xi_{iy} \log P(X_i=x_i, Y_i=y\mid \pi) - \xi_{iy} \log \xi_{iy}\right)
+\]</span></p>
+<p>The term <span class="math inline">\(\xi_{iy}\log \xi_{iy}\)</span> does not depend on <span class="math inline">\(\pi\)</span>, so we don’t have to include it in the optimization. Writing <span class="math inline">\(\log P(X_i = x_i, Y_i=y\mid \pi) = \log D_y(x_i) + \log \pi_y\)</span> we see that it suffices to optimize for <span class="math inline">\(\pi\)</span> the expression <span class="math display">\[
+\log P(\pi) + \sum_{i=1}^N\sum_{y=1}^L \xi_{iy}\left( \log \pi_y + \log D_y(x_i) \right).
+\]</span> Even better: not only <span class="math inline">\(\xi_{iy}\)</span> does not depend on <span class="math inline">\(\pi\)</span>, but also <span class="math inline">\(\log D_y(x_i)\)</span>! Hence, we can drop from the optimization the terms requiring the generative models and we are left only with the easy to calculate quantities: <span class="math display">\[
+\log P(\pi) + \sum_{i=1}^N\sum_{y=1}^L \xi_{iy} \log \pi_y.
+\]</span></p>
+<p>Let’s use the prior <span class="math inline">\(P(\pi) = \mathrm{Dirichlet}(\pi \mid \alpha_1, \dotsc, \alpha_L)\)</span>, so that <span class="math inline">\(\log P(\pi) = \sum_{y=1}^L (\alpha_y-1)\log \pi_y\)</span>. Hence, we are interested in optimising <span class="math display">\[
+\sum_{y=1}^L \left((\alpha_y-1) + \sum_{i=1}^N \xi_{iy} \right)\log \pi_y.
+\]</span></p>
+<p>Write <span class="math inline">\(A_y = \alpha_y - 1 + \sum_{i=1}^N\xi_{iy}\)</span>. We have to optimize the expression <span class="math display">\[
+\sum_{y=1}^L A_y\log \pi_y
+\]</span> under a constraint <span class="math inline">\(\pi_1 + \cdots + \pi_L = 1\)</span>.</p>
+<p><span class="citation" data-cites="Saerens-2001-adjustingtheoutputs">Saerens, Latinne, and Decaestecker (<a href="#ref-Saerens-2001-adjustingtheoutputs" role="doc-biblioref">2001</a>)</span> use <a href="https://en.wikipedia.org/wiki/Lagrange_multiplier">Lagrange multipliers</a>, but we will use the first <span class="math inline">\(L-1\)</span> coordinates to parameterise the simplex and write <span class="math inline">\(\pi_L = 1 - (\pi_1 + \cdots + \pi_{L-1})\)</span>. In this case, if we differentiate with respect to <span class="math inline">\(\pi_l\)</span>, we obtain <span class="math display">\[
+\frac{A_l}{\pi_l} + \frac{A_L}{\pi_L} \cdot (-1) = 0,
+\]</span></p>
+<p>which in turn gives that <span class="math inline">\(\pi_y = k A_y\)</span> for some constant <span class="math inline">\(k &gt; 0\)</span>. We have <span class="math display">\[
+\sum_{y=1}^L A_y = \sum_{y=1}^L \alpha_y - L + \sum_{i=1}^N\sum_{y=1}^L \xi_{iy} = \sum_{y=1}^L \alpha_y - L + N.
+\]</span> Hence, <span class="math display">\[
+\pi_y = \frac{1}{(\alpha_1 + \cdots + \alpha_L) + N - L}\left( \alpha_y-1 + \sum_{i=1}^N \xi_{iy} \right),
+\]</span> which is taken as the next <span class="math inline">\(\pi^{(t+1)}\)</span>.</p>
+<p>As a minor observation, note that for a uniform prior over the simplex (i.e., all <span class="math inline">\(\alpha_y = 1\)</span>) we have <span class="math display">\[
+\pi^{(t+1)}_y = \frac 1N\sum_{i=1}^N P(Y_i=y_i \mid X_i=x_i, \pi^{(t)} ).
+\]</span> Once we have converged to a fixed point and we have <span class="math inline">\(\pi^{(t)} = \pi^{(t+1)}\)</span>, it very much looks like <span class="math display">\[
+P(Y) = \frac 1N\sum_{i=1}^N P(Y_i \mid X_i, \pi) \approx \mathbb E_{X \sim \pi_1 D_1 + \dotsc + \pi_L D_L}[ P(Y\mid X) ]
+\]</span> when <span class="math inline">\(N\)</span> is large.</p>
+</section>
+<section id="gibbs-sampler" class="level2">
+<h2 class="anchored" data-anchor-id="gibbs-sampler">Gibbs sampler</h2>
+<p>Finally, let’s think how to implement a Gibbs sampler for this problem. Compared to the <a href="#expectation-maximization">expectation-maximization</a> this will be easy.</p>
+<p>To solve the quantification problem we have to sample from the posterior distribution <span class="math inline">\(P(\pi \mid \{X_i\})\)</span>. Instead, let’s sample from a high-dimensional distribution <span class="math inline">\(P(\pi, \{Y_i\} \mid \{X_i\})\)</span> — once we have samples of the form <span class="math inline">\((\pi, \{Y_i\})\)</span> we can simply forget about the <span class="math inline">\(Y_i\)</span> values.</p>
+<p>This is computationally a harder problem (we have many more variables to sample), however each sampling step will be very convenient. We will alternatively sample from <span class="math display">\[
+\pi \sim P(\pi \mid \{X_i, Y_i\})
+\]</span> and <span class="math display">\[
+\{Y_i\} \sim P(\{Y_i\} \mid \{X_i\}, \pi).
+\]</span></p>
+<p>The first step is easy: <span class="math inline">\(P(\pi \mid \{X_i, Y_i\}) = P(\pi\mid \{Y_i\})\)</span> which (assuming a Dirichlet prior) is a Dirichlet distribution. Namely, if <span class="math inline">\(P(\pi) = \mathrm{Dirichlet}(\alpha_1, \dotsc, \alpha_L)\)</span>, then <span class="math display">\[
+P(\pi\mid \{Y_i=y_i\}) = \mathrm{Dirichlet}\left( \alpha_1 + \sum_{i=1}^N \mathbf{1}[y_i = 1], \dotsc, \alpha_L + \sum_{i=1}^N \mathbf{1}[y_i=L] \right).
+\]</span></p>
+<p>Let’s think how to sample <span class="math inline">\(\{Y_i\} \sim P(\{Y_i\} \mid \{X_i\}, \pi)\)</span>. This is a high-dimensional distribution, so let’s… use Gibbs sampling. Namely, we can iteratively sample <span class="math display">\[
+Y_k \sim P(Y_k \mid \{Y_1, \dotsc, Y_{k-1}, Y_{k+1}, \dotsc, Y_L\}, \{X_i\}, \pi).
+\]</span></p>
+<p>Thanks to the particular structure of this model, this is equivalent to sampling from <span class="math display">\[
+Y_k \sim P(Y_k \mid X_k, \pi) = \mathrm{Categorical}(\xi_{k1}, \dotsc, \xi_{kL}),
+\]</span> where <span class="math inline">\(\xi_{ky} = P(Y_k = y\mid X_k = x_k, \pi)\)</span> is obtained by <a href="#why-expectation-maximization">recalibrating the given classifier</a>.</p>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>To sum up, the reviewer was right: it’s very simple to upgrade the inference scheme in this model from a point estimate to a sample from the posterior!</p>
+<p>I however haven’t run simulations to know how well this sampler works in practice: I expect that this approach <em>could</em> suffer from:</p>
+<ol type="1">
+<li>Problems from not-so-well-calibrated probabilistic classifier.</li>
+<li>Each iteration of the algorithm (whether expectation-maximization or a Gibbs sampler) requires passing through all <span class="math inline">\(N\)</span> examples.</li>
+<li>As there are <span class="math inline">\(N\)</span> latent variables sampled, the convergence may perhaps be slow.</li>
+</ol>
+<p>It’d be interesting to see how problematic these points are in practice (perhaps not at all!)</p>
+
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-Peters-Coberly-1976" class="csl-entry" role="listitem">
+Peters, C., and W. A Coberly. 1976. <span>“The Numerical Evaluation of the Maximum-Likelihood Estimate of Mixture Proportions.”</span> <em>Communications in Statistics – Theory and Methods</em> 5: 1127–35.
+</div>
+<div id="ref-Saerens-2001-adjustingtheoutputs" class="csl-entry" role="listitem">
+Saerens, Marco, Patrice Latinne, and Christine Decaestecker. 2001. <span>“Adjusting the Outputs of a Classifier to New a Priori Probabilities: A Simple Procedure.”</span> <em>Neural Computation</em> 14: 14–21.
+</div>
+<div id="ref-Ziegler-2023-Bayesian-Quantification" class="csl-entry" role="listitem">
+Ziegler, Albert, and Paweł Czyż. 2023. <span>“Bayesian Quantification with Black-Box Estimators.”</span> <a href="https://arxiv.org/abs/2302.09159">https://arxiv.org/abs/2302.09159</a>.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Let’s call this problem <em>“quantification of uncertainty in quantification problems”</em>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>It’s good to remember: <span class="math inline">\(\log \mathbb E[A] \ge \mathbb E[\log A]\)</span>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
