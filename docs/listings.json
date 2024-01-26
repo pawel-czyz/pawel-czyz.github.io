@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/kernel-regression-transformer.html",
       "/posts/em-gibbs-quantification.html",
       "/posts/almost-binomial-markov-chain.html",
       "/posts/on-beyond-normal.html",
