@@ -1,0 +1,214 @@
+---
+title: "Strict linear independence of measures"
+description: "We look at the concept of strict linear independce of measures and see how it is related to identifiability of mixture models."
+author: "Paweł Czyż"
+date: "1/27/2024"
+bibliography: references.bib
+execute:
+  freeze: auto
+---
+
+[Here](em-gibbs-quantification.qmd) we discussed some possible approaches to tackle the quantification problem.
+Today let's take a more theoretical look on it, as proposed in [*A Unified View of Label Shift Estimation*](https://proceedings.neurips.cc/paper/2020/hash/219e052492f4008818b8adb6366c7ed6-Abstract.html).
+
+## Quantification
+
+We have many objects of distinct types $y\in \mathcal Y = \{1, \dotsc, K\}$, for example chairs, tables, cups, plates...
+However, in our setting the label is not available: we only have a list of features. For example, the features may include weight (which helps to distinguish chairs from beds), number of legs (which helps to distinguish cups from chairs), the main construction material.
+
+We will assume that each object is given a point in the feature space $\mathcal X$.
+Of course, each type of object $y$ may result in a lot of different features observed: there are heavier and lighter tables. Some chairs have three legs. Cups can be made out of wood, glass or metal.
+In other words, for each category $y$ we have a probability measure $Q_y$ on $\mathcal X$, representing the conditional probability distribution $P(X\mid Y=y)$.
+
+Let's assume that the probability distributions $Q_y$ are known, but we are trying to find the proportions of different object, $P(Y=y)$, in the data set.
+
+In other words, we have access to the finite sample from the mixture distribution
+
+$$
+P(X) = \sum_{y\in \mathcal Y} P(X\mid Y=y) P(Y=y) = \sum_{y\in \mathcal Y} \pi_y Q_y,
+$$
+
+where $\pi = (\pi_1, \dotsc, \pi_K)$ is the list of proportions we are trying to find. Note that all entries have to be non-negative and that $\pi_1 + \dotsc + \pi_K=1$, what results in $K-1$ degrees of freedom.
+
+Having access to the finite samples is one of the actual difficulties of solving quantification problems.
+Another one is working with misspecified models, i.e., actually there may be more than $K$ classes (but some of them we are not aware of), or out distributions $Q_y$ may take a different form than assumed. 
+
+However, let's forget about these difficulties for now, and see if we can solve the quantification problem under the ideal circumstances.
+
+## Identifiability
+
+::: {.callout-note icon=false appearance="simple"}
+
+**Ideal quantification problem:** Let $P$ and $Q_1, \dotsc, Q_K$ be probability measures on $\mathcal X$, such that there exist a decomposition into a mixture
+$$
+P = \sum_{y\in \mathcal Y} \pi_y Q_y.
+$$
+
+What are the necessary conditions on $Q_y$ to ensure that the mixture components vector $\pi$ can be uniquely recovered given $Q_y$ and $P$? 
+
+:::
+
+First, let's consider the case in which $\mathcal X$ is finite, with $|\mathcal X| = D$. 
+If we order the elements of $\mathcal X$, we can represent each distribution $Q_y$ by a vector of probabilities $Q_y(\{x\})$ for $x\in \mathcal X$.
+Equivalently, we are constructing conditional probability vectors $P(X=x\mid Y=y)$ and have to solve a set of equations
+
+$$
+P(X=x) = \sum_{y\in \mathcal Y} P(X=x\mid Y=y) \pi_y.
+$$
+
+Clearly, if the probability vectors representing $Q_y$ are linearly independent, the solution for $\pi$ has to be unique (assuming that it exists, which is related to the assumption that we have no misspecification).
+The technique based on solving such a solution of linear equations has been proposed in various [forms](https://doi.org/10.1007/s10618-008-0097-y) [over](https://arxiv.org/abs/1802.03916) [the](https://jmlr.org/papers/v20/18-456.html) [years](https://arxiv.org/abs/1908.09157).
+
+## Strict linear independence of measures
+
+What if $\mathcal X$ is not finite? In particular, what if $\mathcal X$ is a continuous space in which singletons $\{x\}$ have probability zero?
+In this case, the measures $Q_y$ do not have such a convenient finite-dimensional vector representation and the concept of linear independence seems to be less useful.
+
+The authors of [*A Unified View of Label Shift Estimation*](https://proceedings.neurips.cc/paper/2020/hash/219e052492f4008818b8adb6366c7ed6-Abstract.html) propose the following notion of *strict linear independence of probability measures*: for every vector $\lambda \in \mathbb R^K$ such that $\lambda\neq 0$ it holds that
+$$
+\int_{\mathcal X} \left| \sum_{y\in \mathcal Y} p(z\mid y) \right|  \, \mathrm{d}x \neq 0.
+$$
+
+I personally prefer [a bit different formulation](https://math.stackexchange.com/q/4849541/551592) (although perhaps a bit more complicated).
+Assume that we have a $\sigma$-finite measure $\mu$ on $\mathcal X$, such that all $Q_k \ll \mu$.
+Often there is a natural reference measure in many problems (e.g., the Lebesgue measure on $\mathbb R^n$, with the assumption that all $Q_k$ have PDFs), but generally at least one exists, for example $\mu = Q_1 + \dotsc + Q_K$ (or it can be normalised by $K$ to yield a probability measure!)
+
+The equation above is a requirement that
+$$
+\int_{\mathcal X} \left| \sum_{y\in \mathcal Y} \lambda_y \frac{\mathrm d Q_y}{\mathrm d \mu} \right|  \, \mathrm{d}\mu \neq 0
+$$
+which in turn can be written as
+$$
+\left| \sum_{y\in \mathcal Y} \lambda_y Q_y \right|(X) \neq 0.
+$$
+
+It's not hard to prove that the above condition is equivalent to an existence of a measurable set $A_\lambda$ such that
+$$
+\lambda_1 Q_1(A_\lambda) + \cdots + \lambda_K Q_K(A_\lambda) \neq 0.
+$$
+
+Hence, we will prefer to use the equivalent definition:
+
+::: {.callout-note icon=false appearance="simple"}
+
+**Definition:** We say that probability measures $Q_1, \dotsc, Q_K$ are *strictly linearly independent* if for every vector $\lambda \neq 0$ there exists a measurable subset $A_\lambda\subseteq \mathcal X$ such that
+$$
+\lambda_1 Q_1(A_\lambda) + \cdots + \lambda_K Q_K(A_\lambda) \neq 0.
+$$
+
+:::
+
+Let's think why this is a sufficient condition for the uniqueness of $\pi$. Assume that the true composition vector is $\pi$ and suppose that we have a candidate composition vector $\gamma$ such that $\gamma\neq \pi$.
+Take now $\lambda = \pi - \gamma \in \mathbb R^K$. From strict linear independence, we know that there exists $A_\lambda$ such that
+$$
+P(A_\lambda) = \sum_{y} \pi_y Q_y(A_\lambda) \neq \sum_{y} \gamma_y Q_y(A_\lambda).
+$$
+
+Hence, the observed measure $P$ is different from the mixture parameterised by $\gamma$.
+
+## Examples
+
+Finally, let's think about examples of strictly linearly independent measures.
+
+### Discrete spaces
+
+Probably the simplest example is for discrete measures on finite spaces: if $\mathcal X$ is finite, strict linear independence and linear independence are equivalent. 
+
+The proof is easy: consider the probability vectors $q^y_x = P(X=x\mid Y=y) = Q_y(\{x\})$. If the vectors are linearly independent, for every $\lambda \neq 0$ we have $\lambda_1 q^1 + \cdots + \lambda_K q^K\neq 0$, meaning that there exists a component $x\in \mathcal X$ such that $\lambda_1 q^1_x + \cdots + \lambda_K q^K_x \neq 0$. So, we define $A_\lambda = \{x\}$.  
+
+Conversely, if we have $\lambda\neq 0$ and we use strict linear independence to ensure the existence of a set $A_\lambda$ such that
+$$
+    0 \neq \lambda_1 Q_1(A_\lambda) + \cdots + \lambda_K Q_K(A_\lambda) = \sum_{x\in A_\lambda} (\lambda_1 q^1_x + \cdots + \lambda_K q^K_x),
+$$
+then we see that for at least one component $x$ we have $\lambda_1 q^1_x + \cdots + \lambda_K q^K_x\neq 0$, which suffices for linear independence.
+
+### A lemma
+
+For continuous spaces the situation is a bit more complex.
+However, let's prove a useful lemma, which is in fact a generalisation of the previous result.
+
+::: {.callout-note icon=false appearance="simple"}
+
+**Lemma:** Assume that $\mathcal X$ is a standard Borel space and $Q_1, \dotsc, Q_K$ have continuous PDFs $q_1, \dotsc, q_K$, with respect to a $\sigma$-finite and [strictly positive measure](https://en.wikipedia.org/wiki/Strictly_positive_measure) $\mu$.
+Then, if $q_1, \dotsc, q_K$ are linearly independent as vectors in the space of continuous real-valued functions $C(\mathcal X, \mathbb R)$, then the measures $Q_1, \dotsc, Q_K$ are strictly linearly independent.
+
+:::
+
+**Proof:** Take any $\lambda\neq 0$ and write $u = |\lambda_1 q_1 + \cdots + \lambda_K q_K|$.
+From the linear independence it follows that there exists $x_0\in \mathcal X$ such that $u(x_0) > 0$.
+Now use continuity of $u$ to find an open neighborhood $A$ of $x_0$ such that for all $x\in A$ we have $u(x) > u(x_0) / 2$.
+As $u$ is non-negative and $\mu$ is strictly positive, we have $\mu(A) > 0$, so that
+$$
+\int_X u\, \mathrm{d}\mu \ge \int_{A} u\, \mathrm{d}\mu \ge \frac{u(x_0)}{2} \cdot \mu(A) > 0.
+$$
+
+
+I personally find this lemma useful: verifying linear independence of functions is a well-studied problem in mathematics.
+For example, if $\mathcal X\subseteq \mathbb R$ is an interval and the densities $q_y$ are sufficiently smooth, one can use [Wronskian](https://en.wikipedia.org/wiki/Wronskian) (introduced by [Józef Wroński](https://en.wikipedia.org/wiki/J%C3%B3zef_Maria_Hoene-Wro%C5%84ski) in 1812, so it's a classic tool) to study linear independence.
+
+### Exponential variables
+
+Consider a space $\mathcal X = \mathbb R^+$ and the family of exponential random variables, which have densities $q_y(x)=\mu_k\exp(-\mu_y x)$.
+Now assume that all the parameters are different.
+We will prove that these densities are linearly independent functions.
+
+#### Wronskian approach
+Note that the $m$-th derivative is
+$q^{(m)}(x) = (-\mu_y)^{m} q_y(x)$.
+The Wronskian is in this case given by
+$$\begin{align*}
+W(x) &= \det \begin{pmatrix}
+    q_1(x) & \cdots & q_K(x)\\
+    -\mu_1 q_1(x) & \cdots & -\mu_K q_K(x) \\
+    \vdots & \ddots & \vdots \\
+    (-\mu_1)^{K-1} q_1(x) & \cdots & (-\mu_K)^{K-1} q_K(x)
+\end{pmatrix} \\
+  &= \left(\prod_{y} q_y(x)\right) \cdot \det \begin{pmatrix}
+    1 & \cdots & 1\\
+    -\mu_1 & \cdots & -\mu_K \\
+    \vdots & \ddots & \vdots \\
+    (-\mu_1)^{K-1}  & \cdots & (-\mu_K)^{K-1}
+    \end{pmatrix}
+\end{align*}
+$$
+
+Note that all $q_y(x) > 0$ and that the determinant of the last matrix has to be positive, as it's a [Vandermonde polynomial](https://en.wikipedia.org/wiki/Vandermonde_matrix):
+$$
+\prod -(\mu_i - \mu_j) \neq 0,
+$$
+from the assumption that the means are different.
+
+#### Asymptotics
+Let's do another proof, this time going to the limit, similarly to [this solution](https://math.stackexchange.com/a/1087610/551592).
+
+Without loss of generality, assume $0 < \mu_1 < \mu_2 < \dotsc < \mu_K$.
+
+If there's $\lambda \in \mathbb R^K$ such that
+$$
+\sum_k \lambda_k \mu_k \exp(-\mu_k x) = 0,
+$$
+identically, then we can multiply both sides by $\exp(\mu_1 x)$ to obtain 
+$$
+\sum_k \lambda_k \mu_k \exp\big(-(\mu_k-\mu_1) x\big) = 0.
+$$
+For $x\to \infty$ the first term becomes $\lambda_1\mu_1$ and the rest of the terms goes to $0$. Hence, we have $\lambda_1 = 0$.
+Repeating this procedure for $\lambda_2$, $\lambda_3$ and other coefficients, we end up with $\lambda = 0$, proving linear independence.
+
+#### Eigenvectors and eigenvalues
+
+[Sheldon Axler provides a wonderful proof](https://math.stackexchange.com/a/1451686): each $q_y$ is an eigenvector of the differentiation operator:
+$$
+\frac{\mathrm{d}}{\mathrm{d}x} q_y(x) = -\mu_y q_y(x).
+$$
+
+As all these eigenvalues are distinct, the eigenvectors have to be independent (a useful lemma, one proof follows via induction on $K$). 
+
+### How about the normal distributions?
+
+[Here](https://math.stackexchange.com/a/1081379) is a proof strategy for the normal distributions on $\mathbb R$, which employs asymptotics.
+However, I expect the result should generally hold for multivariate normal distributions, provided that the mean vectors are different.
+But how to prove that? Possibly the strategy employing asymptotics would work, but I am not sure about the details.
+Similarly, I expect that multivariate Student distributions with different location vectors should be strictly linearly independent.
+
+I somewhat feel that topic should have been already studied in measure theory and, perhaps, information geometry, although probably under a different name than *strict linear independence*.
+It would be interesting to see a reference on this topic!

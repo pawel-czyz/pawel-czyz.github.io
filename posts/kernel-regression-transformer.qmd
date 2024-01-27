@@ -6,7 +6,7 @@ date: "1/26/2024"
 categories:
   - Deep learning
 execute:
-  freeze: false
+  freeze: true
 format: 
   html:
     code-fold: true

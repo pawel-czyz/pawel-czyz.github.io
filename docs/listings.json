@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/strict-linear-independence-measures.html",
       "/posts/kernel-regression-transformer.html",
       "/posts/em-gibbs-quantification.html",
       "/posts/almost-binomial-markov-chain.html",
