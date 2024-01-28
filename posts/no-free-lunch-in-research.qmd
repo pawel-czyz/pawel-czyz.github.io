@@ -1,6 +1,6 @@
 ---
 title: "The no free lunch theorem for scientific research"
-description: "A perfect paper should have novel methodology, solve an important problem, and be correct (what should go without saying). In practice, the no free lunch theorem says that at most two of these are possible."
+description: "A perfect paper should have novel methodology, solve an important problem, and be correct. In practice, the no free lunch theorem says that at most two of these are possible."
 author: "Paweł Czyż"
 date: "9/28/2023"
 ---
@@ -11,14 +11,20 @@ As typical for our conversations, we spent quite some time discussing applied st
 However, finding logistic regression or other "simple" methods in research papers can be quite hard, as we tend to look for methodological novelty.
 As [Kristin Lennox nicely summarized](https://youtu.be/be2wuOaglFY?feature=shared&t=565), *"you don't get a lot of points for doing really good statistics on really important problems, if these statistics were invented in 1950s"*. (In particular, [Cynthia Rudin investigated](https://youtu.be/XZUZ87wfq70?feature=shared) how much applied research goes into the most presitigious machine learning conferences).
 
-This is one of the reasons for the phenomenon which everybody in the field knows too well: from time to time you take a paper claiming state-of-the-art performance ("They are 0.02% better on CIFAR-10 than others! Let's apply it to my problem"), and then finding out that the method requires heavy hyperparameter tuning and hours of playing with the brittleness that makes the method impossible to use in practice. And, what's even worse, the performance isn't that different from a simple baseline.
+This is one of the reasons for the phenomenon which everybody in the field knows too well: from time to time you take a paper claiming state-of-the-art performance ("They are 0.02% better on CIFAR-10 than others! Let's apply it to my problem"), and then find out that the method requires heavy hyperparameter tuning and hours of playing with the brittleness that makes the method impossible to use in practice.
+And, what's even worse, the performance isn't that different from a simple baseline.
 
 Similarly, there are [voices](https://darrendahly.github.io/post/cluster/) from [many](https://elevanth.org/blog/2021/06/15/regression-fire-and-dangerous-things-1-3/) [statisticians](https://www.fharrell.com/post/badb/) raising the issue that several of the grandiose results, which often involve solving important problems with the state-of-the-art methodology, may be simply invalid.
 
 To summarize, a perfect paper should use **novel methodology**, aim at solving **an important problem**, and **be correct** (which should go without saying).
 The no free lunch of scientific research says that *you can pick two out of three, at most*.
 
-This is of course not universal – there exist great [papers](https://doi.org/10.1038/s41586-021-03819-2), rare [gems](https://arxiv.org/abs/1312.6114), wonderful to read and to apply their methodology in practice.
-Plus, I don't want to dichotomise here: methodological novelty, problem importance and correctness have many facets and subtleties, and may also be hard to assess upfront.
+This "theorem" is not very serious and is, of course, not universal – there [exist](https://arxiv.org/abs/2011.13456) [great](https://arxiv.org/abs/1312.6114) [papers](https://doi.org/10.1038/s41586-021-03819-2), but achieving all three goals in one manuscript is very hard to execute and they are exceptions, not the standard.
+Additionally, I don't want to dichotomise here: methodological novelty, problem importance and correctness have many facets and subtleties (and may also be hard to assess upfront!), so it's better to think about the level of each of these traits desired in a study.
 
-So when I'm planning my next research project, I'm going to be realistic: should I develop a novel cool method (illustrated on a toy problem), try to solve an important problem using well-known tools, or (perhap correctly) tackle a simple problem with a well-known tool?
+As a first-order approximation, I found myself usually doing research on either novel methodology (illustrated on toy problems, without direct applications) or working on problems, which I find practical and important, but which require standard and well-trusted tools (at least as a starting point and a baseline).
+
+On a more positive note, *some* novel (as of today) methods will have become standard and well-trusted tools in the coming years, with a lot practical impact to come.
+And practical problems often lead to improvement on existing methods or asking fundamental questions (see [Pasteur's quadrant](https://en.wikipedia.org/wiki/Pasteur%27s_quadrant)).
+And they usually are much harder to solve, than it seems at the beginning!
+Let's finish with [a quote from Andrew Gelman](https://youtu.be/T1gYvX5c2sM?feature=shared): *"Whenever I have an applied project, I'm always trying to do the stupidest possible thing, that will allow me to get out of the project alive. Unfortunately, the stupidest possible thing, that could possibly work, always seems to be a little more complicated, than the most complicated thing I already know how to do."*

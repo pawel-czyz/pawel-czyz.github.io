@@ -289,10 +289,6 @@ class MultiheadGaussianKernel(eqx.Module):
         preds = jnp.stack([k.predict(X_test=X_test, X_obs=X_obs, Y_obs=Y_obs) for k in self.kernels])
         return jnp.einsum("kn,k->n", preds, self.weights)
 
-    def __call__(self, x: float, x_: float) -> float:
-        return jnp.sum(self.weights * preds)
-
-
 fig, axs = plt.subplots(2, 2, figsize=(2*4, 2*3), dpi=150, sharex=True, sharey=True)
 
 for n_heads, ax in zip([1, 2, 4, 8], axs.ravel()):

@@ -8,7 +8,7 @@
 
 <meta name="author" content="Paweł Czyż">
 <meta name="dcterms.date" content="2023-09-28">
-<meta name="description" content="A perfect paper should have novel methodology, solve an important problem, and be correct (what should go without saying). In practice, the no free lunch theorem says that at most two of these are possible.">
+<meta name="description" content="A perfect paper should have novel methodology, solve an important problem, and be correct. In practice, the no free lunch theorem says that at most two of these are possible.">
 
 <title>Paweł Czyż - The no free lunch theorem for scientific research</title>
 <style>
@@ -119,7 +119,7 @@ ul.task-list li input[type="checkbox"] {
 
 <div>
   <div class="description">
-    A perfect paper should have novel methodology, solve an important problem, and be correct (what should go without saying). In practice, the no free lunch theorem says that at most two of these are possible.
+    A perfect paper should have novel methodology, solve an important problem, and be correct. In practice, the no free lunch theorem says that at most two of these are possible.
   </div>
 </div>
 
@@ -148,11 +148,12 @@ ul.task-list li input[type="checkbox"] {
 
 <p>Yesterday David and I went for pizza after work. As typical for our conversations, we spent quite some time discussing applied statistics and machine learning, and reached our usual conclusion that logistic regression is a wonderful model in <em>so many</em> problems.</p>
 <p>However, finding logistic regression or other “simple” methods in research papers can be quite hard, as we tend to look for methodological novelty. As <a href="https://youtu.be/be2wuOaglFY?feature=shared&amp;t=565">Kristin Lennox nicely summarized</a>, <em>“you don’t get a lot of points for doing really good statistics on really important problems, if these statistics were invented in 1950s”</em>. (In particular, <a href="https://youtu.be/XZUZ87wfq70?feature=shared">Cynthia Rudin investigated</a> how much applied research goes into the most presitigious machine learning conferences).</p>
-<p>This is one of the reasons for the phenomenon which everybody in the field knows too well: from time to time you take a paper claiming state-of-the-art performance (“They are 0.02% better on CIFAR-10 than others! Let’s apply it to my problem”), and then finding out that the method requires heavy hyperparameter tuning and hours of playing with the brittleness that makes the method impossible to use in practice. And, what’s even worse, the performance isn’t that different from a simple baseline.</p>
+<p>This is one of the reasons for the phenomenon which everybody in the field knows too well: from time to time you take a paper claiming state-of-the-art performance (“They are 0.02% better on CIFAR-10 than others! Let’s apply it to my problem”), and then find out that the method requires heavy hyperparameter tuning and hours of playing with the brittleness that makes the method impossible to use in practice. And, what’s even worse, the performance isn’t that different from a simple baseline.</p>
 <p>Similarly, there are <a href="https://darrendahly.github.io/post/cluster/">voices</a> from <a href="https://elevanth.org/blog/2021/06/15/regression-fire-and-dangerous-things-1-3/">many</a> <a href="https://www.fharrell.com/post/badb/">statisticians</a> raising the issue that several of the grandiose results, which often involve solving important problems with the state-of-the-art methodology, may be simply invalid.</p>
 <p>To summarize, a perfect paper should use <strong>novel methodology</strong>, aim at solving <strong>an important problem</strong>, and <strong>be correct</strong> (which should go without saying). The no free lunch of scientific research says that <em>you can pick two out of three, at most</em>.</p>
-<p>This is of course not universal – there exist great <a href="https://doi.org/10.1038/s41586-021-03819-2">papers</a>, rare <a href="https://arxiv.org/abs/1312.6114">gems</a>, wonderful to read and to apply their methodology in practice. Plus, I don’t want to dichotomise here: methodological novelty, problem importance and correctness have many facets and subtleties, and may also be hard to assess upfront.</p>
-<p>So when I’m planning my next research project, I’m going to be realistic: should I develop a novel cool method (illustrated on a toy problem), try to solve an important problem using well-known tools, or (perhap correctly) tackle a simple problem with a well-known tool?</p>
+<p>This “theorem” is not very serious and is, of course, not universal – there <a href="https://arxiv.org/abs/2011.13456">exist</a> <a href="https://arxiv.org/abs/1312.6114">great</a> <a href="https://doi.org/10.1038/s41586-021-03819-2">papers</a>, but achieving all three goals in one manuscript is very hard to execute and they are exceptions, not the standard. Additionally, I don’t want to dichotomise here: methodological novelty, problem importance and correctness have many facets and subtleties (and may also be hard to assess upfront!), so it’s better to think about the level of each of these traits desired in a study.</p>
+<p>As a first-order approximation, I found myself usually doing research on either novel methodology (illustrated on toy problems, without direct applications) or working on problems, which I find practical and important, but which require standard and well-trusted tools (at least as a starting point and a baseline).</p>
+<p>On a more positive note, <em>some</em> novel (as of today) methods will have become standard and well-trusted tools in the coming years, with a lot practical impact to come. And practical problems often lead to improvement on existing methods or asking fundamental questions (see <a href="https://en.wikipedia.org/wiki/Pasteur%27s_quadrant">Pasteur’s quadrant</a>). And they usually are much harder to solve, than it seems at the beginning! Let’s finish with <a href="https://youtu.be/T1gYvX5c2sM?feature=shared">a quote from Andrew Gelman</a>: <em>“Whenever I have an applied project, I’m always trying to do the stupidest possible thing, that will allow me to get out of the project alive. Unfortunately, the stupidest possible thing, that could possibly work, always seems to be a little more complicated, than the most complicated thing I already know how to do.”</em></p>
 
 
 

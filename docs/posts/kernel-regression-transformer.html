@@ -465,40 +465,36 @@ w_i(x) = \frac{K(x, x_i)}{\sum_{j=1}^n K(x, x_j)}.
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        preds <span class="op">=</span> jnp.stack([k.predict(X_test<span class="op">=</span>X_test, X_obs<span class="op">=</span>X_obs, Y_obs<span class="op">=</span>Y_obs) <span class="cf">for</span> k <span class="kw">in</span> <span class="va">self</span>.kernels])</span>
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> jnp.einsum(<span class="st">"kn,k-&gt;n"</span>, preds, <span class="va">self</span>.weights)</span>
 <span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>, x: <span class="bu">float</span>, x_: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> jnp.<span class="bu">sum</span>(<span class="va">self</span>.weights <span class="op">*</span> preds)</span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">2</span><span class="op">*</span><span class="dv">4</span>, <span class="dv">2</span><span class="op">*</span><span class="dv">3</span>), dpi<span class="op">=</span><span class="dv">150</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n_heads, ax <span class="kw">in</span> <span class="bu">zip</span>([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>], axs.ravel()):</span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    key, subkey <span class="op">=</span> random.split(key)</span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> train(</span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        key<span class="op">=</span>subkey,</span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>MultiheadGaussianKernel(n_heads<span class="op">=</span>n_heads),</span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>        X<span class="op">=</span>X,</span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        Y<span class="op">=</span>Y,</span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        print_every<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>        hold_out_size<span class="op">=</span><span class="dv">1</span>,</span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>        n_steps<span class="op">=</span><span class="dv">1_000</span>,</span>
-<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    pred <span class="op">=</span> model.predict(X_ax, X_obs<span class="op">=</span>X, Y_obs<span class="op">=</span>Y)</span>
-<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"Heads=</span><span class="sc">{</span>n_heads<span class="sc">}</span><span class="ss">"</span>) <span class="co"># $\ell$={model.lengthscale:.2f}")</span></span>
-<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    ax.plot(X_ax, f(X_ax), color<span class="op">=</span><span class="st">"maroon"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    ax.plot(X_ax, pred, color<span class="op">=</span><span class="st">"orangered"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    ax.scatter(X, Y, color<span class="op">=</span><span class="st">"white"</span>, s<span class="op">=</span><span class="dv">5</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
-<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"$X$"</span>)</span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="st">"$Y$"</span>)</span>
-<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>    u_h_str <span class="op">=</span> <span class="st">", "</span>.join([<span class="ss">f"</span><span class="sc">{</span>w<span class="sc">:.2f}</span><span class="ss">"</span> <span class="cf">for</span> w <span class="kw">in</span> model.weights])</span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    l_h_str <span class="op">=</span> <span class="st">", "</span>.join([<span class="ss">f"</span><span class="sc">{</span>k<span class="sc">.</span>lengthscale<span class="sc">:.2f}</span><span class="ss">"</span> <span class="cf">for</span> k <span class="kw">in</span> model.kernels])</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">2</span><span class="op">*</span><span class="dv">4</span>, <span class="dv">2</span><span class="op">*</span><span class="dv">3</span>), dpi<span class="op">=</span><span class="dv">150</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n_heads, ax <span class="kw">in</span> <span class="bu">zip</span>([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>], axs.ravel()):</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    key, subkey <span class="op">=</span> random.split(key)</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> train(</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        key<span class="op">=</span>subkey,</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>MultiheadGaussianKernel(n_heads<span class="op">=</span>n_heads),</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        X<span class="op">=</span>X,</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        Y<span class="op">=</span>Y,</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        print_every<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        hold_out_size<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>        n_steps<span class="op">=</span><span class="dv">1_000</span>,</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    pred <span class="op">=</span> model.predict(X_ax, X_obs<span class="op">=</span>X, Y_obs<span class="op">=</span>Y)</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"Heads=</span><span class="sc">{</span>n_heads<span class="sc">}</span><span class="ss">"</span>) <span class="co"># $\ell$={model.lengthscale:.2f}")</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    ax.plot(X_ax, f(X_ax), color<span class="op">=</span><span class="st">"maroon"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    ax.plot(X_ax, pred, color<span class="op">=</span><span class="st">"orangered"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    ax.scatter(X, Y, color<span class="op">=</span><span class="st">"white"</span>, s<span class="op">=</span><span class="dv">5</span>, alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"$X$"</span>)</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="st">"$Y$"</span>)</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    u_h_str <span class="op">=</span> <span class="st">", "</span>.join([<span class="ss">f"</span><span class="sc">{</span>w<span class="sc">:.2f}</span><span class="ss">"</span> <span class="cf">for</span> w <span class="kw">in</span> model.weights])</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    l_h_str <span class="op">=</span> <span class="st">", "</span>.join([<span class="ss">f"</span><span class="sc">{</span>k<span class="sc">.</span>lengthscale<span class="sc">:.2f}</span><span class="ss">"</span> <span class="cf">for</span> k <span class="kw">in</span> model.kernels])</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Number of heads: </span><span class="sc">{</span>n_heads<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Combination:  </span><span class="sc">{</span>u_h_str<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Lengthscales: </span><span class="sc">{</span>l_h_str<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Number of heads: </span><span class="sc">{</span>n_heads<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Combination:  </span><span class="sc">{</span>u_h_str<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Lengthscales: </span><span class="sc">{</span>l_h_str<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Number of heads: 1
