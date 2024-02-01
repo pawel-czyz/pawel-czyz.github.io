@@ -2,74 +2,90 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://pawel-czyz.github.io/posts/histograms-vs-density-estimation.html</loc>
-    <lastmod>2024-01-28T13:11:53.877Z</lastmod>
+    <lastmod>2024-02-01T10:27:25.558Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/em-gibbs-quantification.html</loc>
-    <lastmod>2024-01-28T13:11:54.701Z</lastmod>
+    <lastmod>2024-02-01T10:27:26.486Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/board-games-monte-carlo.html</loc>
-    <lastmod>2024-01-28T13:11:55.365Z</lastmod>
+    <lastmod>2024-02-01T10:27:27.034Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/expectations-student-mentorship.html</loc>
-    <lastmod>2024-01-28T13:11:55.897Z</lastmod>
+    <lastmod>2024-02-01T10:27:27.451Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/kernel-regression-transformer.html</loc>
-    <lastmod>2024-02-01T09:28:59.257Z</lastmod>
+    <lastmod>2024-02-01T10:27:28.067Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/triangle-distributions.html</loc>
-    <lastmod>2024-01-28T13:12:18.909Z</lastmod>
+    <lastmod>2024-02-01T10:27:28.567Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/determinant-multilinear.html</loc>
-    <lastmod>2024-01-28T13:12:19.369Z</lastmod>
+    <lastmod>2024-02-01T10:27:28.975Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/dirichlet-process.html</loc>
-    <lastmod>2024-01-28T13:12:20.813Z</lastmod>
+    <lastmod>2024-02-01T10:27:30.239Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/almost-binomial-markov-chain.html</loc>
-    <lastmod>2024-01-28T13:12:21.501Z</lastmod>
+    <lastmod>2024-02-01T10:27:30.843Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/getting-started-with-Bayesian-statistics.html</loc>
-    <lastmod>2024-02-01T09:28:29.481Z</lastmod>
+    <lastmod>2024-02-01T10:27:31.115Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/no-free-lunch-in-research.html</loc>
-    <lastmod>2024-01-28T13:12:22.133Z</lastmod>
+    <lastmod>2024-02-01T10:27:31.367Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/on-beyond-normal.html</loc>
-    <lastmod>2024-01-28T13:12:23.065Z</lastmod>
+    <lastmod>2024-02-01T10:27:32.159Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/strict-linear-independence-measures.html</loc>
-    <lastmod>2024-01-28T13:12:23.537Z</lastmod>
+    <lastmod>2024-02-01T10:27:32.527Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/index.html</loc>
-    <lastmod>2024-01-28T13:12:23.781Z</lastmod>
+    <lastmod>2024-02-01T10:27:32.727Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/publications/bayesian-quantification.html</loc>
+    <lastmod>2024-02-01T10:27:32.931Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/publications/pmi-profiles.html</loc>
+    <lastmod>2024-02-01T10:27:33.135Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/publications/limits-mapk.html</loc>
+    <lastmod>2024-02-01T10:27:33.367Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/publications/beyond-normal.html</loc>
+    <lastmod>2024-02-01T10:27:33.571Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/Almost-Nonidentifiable.html</loc>
-    <lastmod>2024-01-28T13:12:24.045Z</lastmod>
+    <lastmod>2024-02-01T10:27:33.803Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/private/prezenty.html</loc>
-    <lastmod>2024-01-28T13:12:24.281Z</lastmod>
+    <lastmod>2024-02-01T10:27:34.003Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/blog.html</loc>
-    <lastmod>2024-02-01T09:29:00.017Z</lastmod>
+    <lastmod>2024-02-01T10:27:34.755Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/publications.html</loc>
-    <lastmod>2024-01-28T13:12:25.425Z</lastmod>
+    <lastmod>2024-02-01T10:27:34.983Z</lastmod>
   </url>
 </urlset>

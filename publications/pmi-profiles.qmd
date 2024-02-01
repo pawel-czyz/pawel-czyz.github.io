@@ -1,0 +1,33 @@
+---
+title: "On the properties and estimation of pointwise mutual information profiles"
+type: "article"
+author: "P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx"
+year: "2023"
+publication: "Preprint, submitted"
+preprint: "https://arxiv.org/abs/2310.10240"
+materials: "https://github.com/cbg-ethz/bmi"
+toc: false
+categories:
+  - mutual information
+  - Bayesian statistics
+  - Monte Carlo
+---
+
+## Citation
+```
+@misc{pmi-profiles,
+      title={The Mixtures and the Neural Critics: On the Pointwise Mutual Information Profiles of Fine Distributions}, 
+      author={Paweł Czyż and Frederic Grabowski and Julia E. Vogt and Niko Beerenwinkel and Alexander Marx},
+      year={2023},
+      eprint={2310.10240},
+      archivePrefix={arXiv},
+      primaryClass={stat.ML}
+}
+```
+
+## Abstract
+Mutual information quantifies the dependence between two random variables and remains invariant under diffeomorphisms.
+In this paper, we explore the pointwise mutual information profile, an extension of mutual information that maintains this invariance.
+We analytically describe the profiles of multivariate normal distributions and introduce the family of fine distributions, for which the profile can be accurately approximated using Monte Carlo methods.
+We then show how fine distributions can be used to study the limitations of existing mutual information estimators, investigate the behavior of neural critics used in variational estimators, and understand the effect of experimental outliers on mutual information estimation.
+Finally, we show how fine distributions can be used to obtain model-based Bayesian estimates of mutual information, suitable for problems with available domain expertise in which uncertainty quantification is necessary.

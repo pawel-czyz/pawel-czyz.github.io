@@ -399,6 +399,90 @@
     "text": "My name is Paweł Czyż and I am a data scientist interested in modelling complex biological data using techniques originating in probabilistic machine learning and applied Bayesian statistics.\nCurrently I am a Doctoral Fellow of the ETH AI Center working in Computational Biology Group and Computational Cancer Genomics Laboratory.\nPrior to starting my PhD I was an AI Resident at Microsoft Research Cambridge and studied mathematical physics at University of Oxford."
   },
   {
+    "objectID": "publications/bayesian-quantification.html",
+    "href": "publications/bayesian-quantification.html",
+    "title": "Bayesian quantification with black-box estimators",
+    "section": "",
+    "text": "@misc{bayesian-quantification,\n      title={Bayesian Quantification with Black-Box Estimators}, \n      author={Albert Ziegler and Paweł Czyż},\n      year={2023},\n      eprint={2302.09159},\n      archivePrefix={arXiv},\n      primaryClass={stat.ML}\n}"
+  },
+  {
+    "objectID": "publications/bayesian-quantification.html#citation",
+    "href": "publications/bayesian-quantification.html#citation",
+    "title": "Bayesian quantification with black-box estimators",
+    "section": "",
+    "text": "@misc{bayesian-quantification,\n      title={Bayesian Quantification with Black-Box Estimators}, \n      author={Albert Ziegler and Paweł Czyż},\n      year={2023},\n      eprint={2302.09159},\n      archivePrefix={arXiv},\n      primaryClass={stat.ML}\n}"
+  },
+  {
+    "objectID": "publications/bayesian-quantification.html#abstract",
+    "href": "publications/bayesian-quantification.html#abstract",
+    "title": "Bayesian quantification with black-box estimators",
+    "section": "Abstract",
+    "text": "Abstract\nUnderstanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art."
+  },
+  {
+    "objectID": "publications/pmi-profiles.html",
+    "href": "publications/pmi-profiles.html",
+    "title": "On the properties and estimation of pointwise mutual information profiles",
+    "section": "",
+    "text": "@misc{pmi-profiles,\n      title={The Mixtures and the Neural Critics: On the Pointwise Mutual Information Profiles of Fine Distributions}, \n      author={Paweł Czyż and Frederic Grabowski and Julia E. Vogt and Niko Beerenwinkel and Alexander Marx},\n      year={2023},\n      eprint={2310.10240},\n      archivePrefix={arXiv},\n      primaryClass={stat.ML}\n}"
+  },
+  {
+    "objectID": "publications/pmi-profiles.html#citation",
+    "href": "publications/pmi-profiles.html#citation",
+    "title": "On the properties and estimation of pointwise mutual information profiles",
+    "section": "",
+    "text": "@misc{pmi-profiles,\n      title={The Mixtures and the Neural Critics: On the Pointwise Mutual Information Profiles of Fine Distributions}, \n      author={Paweł Czyż and Frederic Grabowski and Julia E. Vogt and Niko Beerenwinkel and Alexander Marx},\n      year={2023},\n      eprint={2310.10240},\n      archivePrefix={arXiv},\n      primaryClass={stat.ML}\n}"
+  },
+  {
+    "objectID": "publications/pmi-profiles.html#abstract",
+    "href": "publications/pmi-profiles.html#abstract",
+    "title": "On the properties and estimation of pointwise mutual information profiles",
+    "section": "Abstract",
+    "text": "Abstract\nMutual information quantifies the dependence between two random variables and remains invariant under diffeomorphisms. In this paper, we explore the pointwise mutual information profile, an extension of mutual information that maintains this invariance. We analytically describe the profiles of multivariate normal distributions and introduce the family of fine distributions, for which the profile can be accurately approximated using Monte Carlo methods. We then show how fine distributions can be used to study the limitations of existing mutual information estimators, investigate the behavior of neural critics used in variational estimators, and understand the effect of experimental outliers on mutual information estimation. Finally, we show how fine distributions can be used to obtain model-based Bayesian estimates of mutual information, suitable for problems with available domain expertise in which uncertainty quantification is necessary."
+  },
+  {
+    "objectID": "publications/limits-mapk.html",
+    "href": "publications/limits-mapk.html",
+    "title": "Limits to the rate of information transmission through the MAPK pathway",
+    "section": "",
+    "text": "@article{Grabowski-2019-systems-biology,\nauthor = {Grabowski, Frederic  and Czyż, Paweł  and Kochańczyk, Marek  and Lipniacki, Tomasz },\ntitle = {Limits to the rate of information transmission through the {MAPK} pathway},\njournal = {Journal of The Royal Society Interface},\nvolume = {16},\nnumber = {152},\npages = {20180792},\nyear = {2019},\ndoi = {10.1098/rsif.2018.0792},\nURL = {https://royalsocietypublishing.org/doi/abs/10.1098/rsif.2018.0792},\neprint = {https://royalsocietypublishing.org/doi/pdf/10.1098/rsif.2018.0792}\n}"
+  },
+  {
+    "objectID": "publications/limits-mapk.html#citation",
+    "href": "publications/limits-mapk.html#citation",
+    "title": "Limits to the rate of information transmission through the MAPK pathway",
+    "section": "",
+    "text": "@article{Grabowski-2019-systems-biology,\nauthor = {Grabowski, Frederic  and Czyż, Paweł  and Kochańczyk, Marek  and Lipniacki, Tomasz },\ntitle = {Limits to the rate of information transmission through the {MAPK} pathway},\njournal = {Journal of The Royal Society Interface},\nvolume = {16},\nnumber = {152},\npages = {20180792},\nyear = {2019},\ndoi = {10.1098/rsif.2018.0792},\nURL = {https://royalsocietypublishing.org/doi/abs/10.1098/rsif.2018.0792},\neprint = {https://royalsocietypublishing.org/doi/pdf/10.1098/rsif.2018.0792}\n}"
+  },
+  {
+    "objectID": "publications/limits-mapk.html#abstract",
+    "href": "publications/limits-mapk.html#abstract",
+    "title": "Limits to the rate of information transmission through the MAPK pathway",
+    "section": "Abstract",
+    "text": "Abstract\nTwo important signalling pathways of NF-κB and ERK transmit merely 1 bit of information about the level of extracellular stimulation. It is thus unclear how such systems can coordinate complex cell responses to external cues. We analyse information transmission in the MAPK/ERK pathway that converts both constant and pulsatile EGF stimulation into pulses of ERK activity. Based on an experimentally verified computational model, we demonstrate that, when input consists of sequences of EGF pulses, transmitted information increases nearly linearly with time. Thus, pulse-interval transcoding allows more information to be relayed than the amplitude–amplitude transcoding considered previously for the ERK and NF-κB pathways. Moreover, the information channel capacity \\(C\\), or simply bitrate, is not limited by the bandwidth \\(B = 1/\\tau\\), where \\(\\tau\\approx 1\\, h\\) is the relaxation time. Specifically, when the input is provided in the form of sequences of short binary EGF pulses separated by intervals that are multiples of \\(\\tau/n\\) (but not shorter than \\(\\tau\\)), then for \\(n = 2\\), \\(C \\approx 1.39\\) bit/h; and for \\(n = 4\\), \\(C \\approx 1.86\\) bit/h. The capability to respond to random sequences of EGF pulses enables cells to propagate spontaneous ERK activity waves across tissue."
+  },
+  {
+    "objectID": "publications/beyond-normal.html",
+    "href": "publications/beyond-normal.html",
+    "title": "Beyond normal: on the evaluation of mutual information estimators",
+    "section": "",
+    "text": "@inproceedings{beyond-normal-2023,\n  title={Beyond Normal: On the Evaluation of Mutual Information Estimators},\n  author={Paweł Czyż and Frederic Grabowski and Julia E. Vogt and Niko Beerenwinkel and Alexander Marx},\n  booktitle={Thirty-seventh Conference on Neural Information Processing Systems},\n  year={2023}\n}"
+  },
+  {
+    "objectID": "publications/beyond-normal.html#citation",
+    "href": "publications/beyond-normal.html#citation",
+    "title": "Beyond normal: on the evaluation of mutual information estimators",
+    "section": "",
+    "text": "@inproceedings{beyond-normal-2023,\n  title={Beyond Normal: On the Evaluation of Mutual Information Estimators},\n  author={Paweł Czyż and Frederic Grabowski and Julia E. Vogt and Niko Beerenwinkel and Alexander Marx},\n  booktitle={Thirty-seventh Conference on Neural Information Processing Systems},\n  year={2023}\n}"
+  },
+  {
+    "objectID": "publications/beyond-normal.html#abstract",
+    "href": "publications/beyond-normal.html#abstract",
+    "title": "Beyond normal: on the evaluation of mutual information estimators",
+    "section": "Abstract",
+    "text": "Abstract\nMutual information is a general statistical dependency measure which has found applications in representation learning, causality, domain generalization and computational biology. However, mutual information estimators are typically evaluated on simple families of probability distributions, namely multivariate normal distribution and selected distributions with one-dimensional random variables. In this paper, we show how to construct a diverse family of distributions with known ground-truth mutual information and propose a language-independent benchmarking platform for mutual information estimators. We discuss the general applicability and limitations of classical and neural estimators in settings involving high dimensions, sparse interactions, long-tailed distributions, and high mutual information. Finally, we provide guidelines for practitioners on how to select appropriate estimator adapted to the difficulty of problem considered and issues one needs to consider when applying an estimator to a new data set."
+  },
+  {
     "objectID": "Almost-Nonidentifiable.html",
     "href": "Almost-Nonidentifiable.html",
     "title": "Paweł Czyż",
@@ -438,20 +522,20 @@
     "href": "blog.html",
     "title": "Blog",
     "section": "",
-    "text": "I’m still maintaining my digital garden in a non-public manner1, but from time to time I encounter an idea which I’d just love to share with others or I am asked frequently about to make it a topic of a separate post."
+    "text": "The following posts have evolved from my digital garden1 into a bit longer form. Note that these posts may be incomplete, written from a subjective point of view or contain errors. I’d be grateful for feedback on how to improve them."
   },
   {
     "objectID": "blog.html#footnotes",
     "href": "blog.html#footnotes",
     "title": "Blog",
     "section": "Footnotes",
-    "text": "Footnotes\n\n\nSometimes my ideas are just silly and need more time before I decide whether they are useful at all or they are just noise. Sometimes it’s joint work with other people and I can’t share their intellectual property without approval. And I still haven’t figured out how to integrate Obsidian with Quarto, which are wonderful tools.↩︎"
+    "text": "Footnotes\n\n\nSee this post for a difference. If you know how to integrate Obsidian together with Quarto, I’d very interested to hear.↩︎"
   },
   {
     "objectID": "publications.html",
     "href": "publications.html",
     "title": "Publications",
     "section": "",
-    "text": "Beyond normal: on the evaluation of mutual information estimators   \n    P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel and A. Marx \n    Code\n    Manuscript\n    Jun, 2023\n  \n  \n    Bayesian quantification with black-box estimators   \n    A. Ziegler and P. Czyż \n    Code\n    Manuscript\n    Feb, 2023\n  \n  \n    CanSig: discovery of shared transcriptional states across cancer patients from single-cell RNA sequencing data   \n    J. Yates, F. Barkmann, P. Czyż, ..., N. Beerenwinkel and V. Boeva \n    Code\n    Manuscript\n    Apr, 2022\n  \n  \n    Limits to the rate of information transmission through the MAPK pathway   \n    F. Grabowski, P. Czyż, M. Kochańczyk and T. Lipniacki \n    Code\n    Manuscript\n    Mar, 2019\n  \n\n\nNo matching items"
+    "text": "Order By\n       Default\n         \n          Title\n        \n         \n          Author\n        \n         \n          Publication\n        \n         \n          Year\n        \n     \n  \n    \n      \n      \n    \n\n\n  \n    Bayesian quantification with black-box estimators\n    A. Ziegler, P. Czyż\n    Preprint, submitted\n    (2023)\n    \n      Details\n    \n    \n       Preprint\n    \n    \n       Materials\n    \n  \n  \n    Beyond normal: on the evaluation of mutual information estimators\n    P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx\n    NeurIPS\n    (2023)\n    \n      Details\n    \n    \n      DOI\n    \n    \n       Preprint\n    \n    \n       Materials\n    \n  \n  \n    On the properties and estimation of pointwise mutual information profiles\n    P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx\n    Preprint, submitted\n    (2023)\n    \n      Details\n    \n    \n       Preprint\n    \n    \n       Materials\n    \n  \n  \n    Limits to the rate of information transmission through the MAPK pathway\n    F. Grabowski, P. Czyż, M. Kochańczyk, T. Lipniacki\n    J. R. Soc. Interface\n    (2019)\n    \n      Details\n    \n    \n      DOI\n    \n    \n       Preprint\n    \n    \n       Materials\n    \n  \n\n\nNo matching items\n\n\n\nThis page was created using the following template."
   }
 ]

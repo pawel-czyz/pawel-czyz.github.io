@@ -7,6 +7,8 @@ listing:
   categories: true
 ---
 
-I'm still maintaining my [digital garden](https://joelhooks.com/digital-garden/) in a non-public manner[^1], but from time to time I encounter an idea which I'd just love to share with others or I am asked frequently about to make it a topic of a separate post.
+The following posts have evolved from my digital garden[^1] into a bit longer form.
+Note that these posts may be incomplete, written from a subjective point of view or contain errors.
+I'd be grateful for feedback on how to improve them.
 
-[^1]: Sometimes my ideas are just silly and need more time before I decide whether they are useful at all or they are just noise. Sometimes it's joint work with other people and I can't share their intellectual property without approval. And I still haven't figured out how to integrate [Obsidian](https://obsidian.md/) with [Quarto](https://quarto.org/), which are wonderful tools.
+[^1]: See [this post](https://github.com/pawel-czyz/channel-capacity-estimator) for a difference. If you know how to integrate [Obsidian](https://obsidian.md/) together with [Quarto](https://quarto.org/), I'd very interested to hear.

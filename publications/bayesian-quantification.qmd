@@ -1,0 +1,28 @@
+---
+title: "Bayesian quantification with black-box estimators"
+type: "article"
+author: "A. Ziegler, P. Czyż"
+year: "2023"
+publication: "Preprint, submitted"
+preprint: "https://arxiv.org/abs/2302.09159"
+materials: "https://github.com/pawel-czyz/labelshift"
+toc: false
+categories:
+  - Bayesian statistics
+  - distribution shift
+---
+
+## Citation
+```
+@misc{bayesian-quantification,
+      title={Bayesian Quantification with Black-Box Estimators}, 
+      author={Albert Ziegler and Paweł Czyż},
+      year={2023},
+      eprint={2302.09159},
+      archivePrefix={arXiv},
+      primaryClass={stat.ML}
+}
+```
+
+## Abstract
+Understanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art.
