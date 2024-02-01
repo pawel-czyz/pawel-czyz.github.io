@@ -73,7 +73,7 @@ $$
 
 where $w_i(x)$ is the weight of the $i$-th data point used to estimate the value at $x$. To make it a weighted average, we will ensure that $w_1(x) + \cdots + w_n(x) = 1$. In case where $w_i(x) = 1/n$ we obtain just constant prediction, equal to the sample average over $y_i$.
 
-More generally, consider a positive function $K\colon \mathcal X \times \mathcal X \to \mathbb R^+$ which measures similarity between two data points: we want $K(x, x)$ to attain the largest possible value and for $x'$ very far from $x$ we want to have $K(x, x')$ to be small.
+More generally, consider a positive function $K\colon \mathcal X \times \mathcal X \to \mathbb R^+$ which measures similarity between two data points: we want $K(x, x')$ to attain the largest possible value and for $x'$ very far from $x$ we want to have $K(x, x')$ to be small.
 For such a function we can form a set of weights via
 $$
 w_i(x) = \frac{K(x, x_i)}{\sum_{j=1}^n K(x, x_j)}.

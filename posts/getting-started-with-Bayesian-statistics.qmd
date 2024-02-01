@@ -41,7 +41,7 @@ categories:
 
 ### Great to watch
 
-If you are in mood for something as as engaging as a TV series episode, but more informative, take a look at these talks:
+If you are in mood for something as engaging as a TV series episode, but more informative, take a look at these talks:
 
 - David Dunson's [Debunking the hype](https://youtu.be/UYp2GGo2KKU?feature=shared).
 - Kristin Lennox's [Everything wrong with statistics](https://youtu.be/be2wuOaglFY?feature=shared).
