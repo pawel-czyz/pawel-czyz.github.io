@@ -10,8 +10,7 @@ categories:
   - Bayesian statistics
 bibliography: references.bib
 execute:
-  freeze: auto
-draft: false
+  freeze: true
 ---
 
 Where and when should we start this story? Probably a good origin will be in the [Laboratory of Modeling in Biology and Medicine](https://pmbm.ippt.pan.pl/web/Main_Page) in Warsaw, where [Tomasz Lipniacki](http://www.ippt.pan.pl/en/staff/tlipnia) and [Marek Kochańczyk](https://pmbm.ippt.pan.pl/web/Marek_Kocha%C5%84czyk) decided to mentor two students who just completed high-school education, namely the younger versions of [Frederic](https://pmbm.ippt.pan.pl/web/Frederic_Grabowski) and myself.

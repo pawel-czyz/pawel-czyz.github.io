@@ -5,7 +5,7 @@ author: "Paweł Czyż"
 date: "1/27/2024"
 bibliography: references.bib
 execute:
-  freeze: auto
+  freeze: true
 ---
 
 [Here](em-gibbs-quantification.qmd) we discussed some possible approaches to tackle the quantification problem.
