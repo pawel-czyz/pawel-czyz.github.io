@@ -1,0 +1,336 @@
+---
+title: "Regression to the mean and biased predictions"
+description: "We take a closer look at an example where adding some bias can help with making predictions."
+author: "Paweł Czyż"
+date: "2/4/2024"
+execute:
+  freeze: true
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+In September 2008 [*Bayesian Analysis*, vol. 3, issue 3](https://projecteuclid.org/journals/bayesian-analysis/volume-3/issue-3) featured a wonderful discussion between five statistics superstars: [Andrew Gelman](http://www.stat.columbia.edu/~gelman/), [José M. Bernardo](https://en.wikipedia.org/wiki/Jos%C3%A9-Miguel_Bernardo), [Joseph B. Kadane](https://en.wikipedia.org/wiki/Joseph_Born_Kadane), [Stephen Senn](http://www.senns.uk/) and [Larry Wasserman](https://www.stat.cmu.edu/~larry/).
+
+The discussion is a great read on foundations of Bayesian statistics (and it's open access!), but we will not summarise it today. Instead, let's focus on an example from Andrew Gelman's [*Rejoinder*](https://projecteuclid.org/journals/bayesian-analysis/volume-3/issue-3/Rejoinder/10.1214/08-BA318REJ.full) on regression to the mean and unbiased predictions.
+
+## The example
+
+Andrew Gelman considers a problem in which one tries to estimate the height of adult daughter, $Y$, from the height of her mother, $X$.
+Consider an artificial scenario, where we have millions of data points, which we can use to estimate the joint probability distribution $(X, Y)$ and it turns out to be bivariate normal[^1] of the following form:
+$$
+\begin{pmatrix} X\\Y \end{pmatrix} \sim \mathcal N\left(\begin{pmatrix}\mu\\\mu\end{pmatrix}, \sigma^2\begin{pmatrix}  1 & 0.5 \\ 0.5 & 1\end{pmatrix}  \right)
+$$
+with known $\mu$ and $\sigma$, say, $\mu=160$ and $\sigma=10$ in centimeters.
+
+[^1]: Yes, height can't be negative. But let's ignore that: it's a toy, but still informative, problem.
+
+The marginal distributions on both $X$ and $Y$ are the same: $\mathcal N(\mu, \sigma^2)$. 
+
+Let's plot all of them:
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+plt.style.use("dark_background")
+
+def generate_data(
+    rng,
+    mu: float,
+    sigma: float,
+    n_points: int,
+) -> np.ndarray:
+    var = np.square(sigma)
+    return rng.multivariate_normal(
+        mean=(mu, mu),
+        cov=var * np.asarray([
+            [1.0, 0.5],
+            [0.5, 1.0],
+        ]),
+        size=n_points,
+    )
+
+
+rng = np.random.default_rng(42)
+
+mu = 160
+sigma = 10
+
+data = generate_data(rng, mu=mu, sigma=sigma, n_points=5_000)
+
+fig, axs = plt.subplots(1, 2, figsize=(4.5, 2.2), dpi=170, sharex=True)
+
+ax = axs[0]
+ax.scatter(data[:, 0], data[:, 1], c="C0", s=1, alpha=0.1, rasterized=True)
+ax.set_title("Joint")
+ax.set_xlabel("$X$")
+ax.set_ylabel("$Y$")
+
+lim = (mu - 4*sigma, mu + 4*sigma)
+
+ax.set_xlim(*lim)
+ax.set_ylim(*lim)
+
+ax = axs[1]
+ax.hist(data[:, 0], color="C1", bins=np.linspace(*lim, 21), rasterized=True, density=True)
+ax.set_title("Marginal")
+ax.set_xlim(*lim)
+ax.set_xlabel("$X$")
+ax.set_ylabel("PDF")
+
+for ax in axs:
+  ax.spines[['top', 'right']].set_visible(False)
+
+fig.tight_layout()
+```
+
+The [conditional distributions](https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Bivariate_case_2) are also normal and take very similar form:
+$$
+Y\mid X=x \sim \mathcal N\big( \mu + 0.5(x-\mu), 0.75\sigma^2\big),
+$$
+and
+$$
+X\mid Y=y \sim \mathcal N\big( \mu + 0.5(y-\mu), 0.75\sigma^2\big).
+$$
+
+Let's plot the conditional distribution in the fist panel. We will plot conditional distributions using mean $\mathbb E[Y\mid X=x]$ and the intervals representing one, two, and three standard deviations from it. 
+
+Then, in the second panel we will overlay it with points and the line $y=x$ (dashed red line).
+
+```{python}
+fig, axs = plt.subplots(1, 2, figsize=(4.5, 2.2), dpi=170, sharex=True, sharey=True)
+
+x_ax = np.linspace(*lim, 51)
+mean_pred = mu + 0.5 * (x_ax-mu)
+
+def plot_conditional(ax):
+    ax.set_xlim(*lim)
+    ax.set_ylim(*lim)
+
+    for n_sigma in [1, 2, 3]:
+        band = n_sigma * np.sqrt(0.75) * sigma
+        ax.fill_between(
+            x_ax,
+            mean_pred - band,
+            mean_pred + band,
+            alpha=0.1,
+            color="yellow",
+            edgecolor=None,
+        )
+
+    ax.plot(
+        x_ax,
+        mean_pred,
+        c="white",
+    )
+
+ax = axs[0]
+plot_conditional(ax)
+ax.set_xlabel("$X$")
+ax.set_ylabel(r"$Y\mid X$")
+
+ax = axs[1]
+plot_conditional(ax)
+ax.set_xlabel("$X$")
+ax.set_ylabel("$Y$")
+ax.scatter(data[:, 0], data[:, 1], c="C0", s=1, alpha=0.2, rasterized=True)
+ax.plot(x_ax, x_ax, c="maroon", linestyle="--")
+
+for ax in axs:
+  ax.spines[['top', 'right']].set_visible(False)
+
+fig.tight_layout()
+```
+
+The $y=x$ has greater slope than $\mathbb E[Y\mid X=x]$ (namely, 1 is greater than 0.5), which is the usual [regression to the mean](https://en.wikipedia.org/wiki/Regression_toward_the_mean). 
+
+## Biased and unbiased estimators
+
+We have seen that we could do probabilistic prediction, returning the whole conditional distribution $P(Y\mid X=x)$.
+Imagine however that a single point is required as the answer. We can take $\mathbb E[Y\mid X=x]$ as one estimator (solid line in the previous plot).
+More generally, for every number $f\in \mathbb R$ define an estimator
+$$
+\hat Y_f = \mu + f\cdot (X-\mu).
+$$
+
+We have the following:
+
+- For $f=0$, we have $\hat Y_0 = \mu$ is constantly predicting the mean. 
+- For $f=0.5$, $\hat Y_{0.5}$ is the regression to the mean we have seen above.
+- For $f=1$, $\hat Y_1 = X$ returns the input, which we also have seen above.
+
+Let's take a look at the bias and variance[^2] of these estimators.
+
+[^2]: It would be a wasted opportunity to not mention [this wonderful joke](https://youtu.be/ZmbrsbYwRWw?feature=shared&t=349). The whole lecture is a true gem.
+
+We have 
+$$
+(X\mid Y=y) \sim \mathcal N\big(\mu + 0.5(y-\mu), 0.75\sigma^2\big)
+$$
+and $\hat Y_f = f\cdot X + \mu(1-f)$, meaning that
+$$
+\mathbb{V}[ \hat Y_f \mid Y=y ] = f^2 \cdot \mathbb{V}[X \mid Y=y] = 0.75 f^2\sigma^2
+$$
+and
+$$
+\begin{align*}\mathbb E[ \hat Y_f \mid Y=y ] &= \mu(1-f) + f\cdot \mathbb E[X \mid Y=y ]\\ &= \mu(1-f) + f\cdot ( \mu + 0.5(y-\mu) ) \\ &=\mu-\mu f + f\mu + 0.5 f\cdot (y-\mu) \\
+&= \mu + 0.5f\cdot (y-\mu) \\ &= 0.5 f\cdot y +\mu(1-0.5f)\end{align*}
+$$
+
+Hence, for $f=0.5$ we have
+$$
+\mathbb E[\hat Y_{0.5}\mid Y=y] = 0.25y + 0.75\mu,
+$$
+which is biased towards the mean.
+
+To have an unbiased estimate, consider $f=2$:
+$$
+\mathbb E[\hat Y_2\mid Y=y] = y,
+$$
+which however has the form $(\hat Y_2 \mid X=x) = \mu + 2(x-\mu)$, which amplifies the distance from the mean!
+
+### Visualisations
+
+Let's spend a minute designing the plots and then visualise the estimators.
+
+The raw data are visualised by plotting $Y$ and $X$.
+We can add the lines $\hat Y_f\mid X=x$ to them, to add some information on how $\hat Y_f$ (which is a deterministic function of $X$) varies, and what the predictions are.
+
+```{python}
+def yhat(x: np.ndarray, f: float) -> np.ndarray:
+    return mu + f * (x - mu)
+
+fig, ax = plt.subplots(figsize=(3, 3), dpi=150)
+
+
+ax.scatter(data[:, 0], data[:, 1], c="C0", s=1, alpha=0.2, rasterized=True)
+
+fs = [0, 0.5, 1, 2]
+colors = ["orange", "white", "maroon", "purple"]
+
+for f, col in zip(fs, colors):
+    ax.plot(
+        x_ax,
+        yhat(x_ax, f),
+        color=col,
+        label=f"$f=${f:.1f}",
+    )
+
+ax.set_xlabel("$X$")
+ax.set_ylabel("$Y$")
+ax.set_xlim(*lim)
+ax.set_ylim(*lim)
+ax.spines[['top', 'right']].set_visible(False)
+ax.legend(frameon=False)
+fig.tight_layout()
+```
+
+Then, we can also look at the plot of $\hat Y_f$ and $Y$. This will be a good illustration showing what bias and variance of these estimators actually mean. We will add a dashed "diagonal" line, $\hat y_f = y$, to each of these plots.
+
+```{python}
+
+fig, axs = plt.subplots(1, len(fs), figsize=(2 * len(fs), 2), dpi=150, sharex=True, sharey=True)
+
+for f, ax in zip(fs, axs):
+    x, y = data[:, 0], data[:, 1]
+    y_ = yhat(x, f)
+    ax.scatter(y, y_, c="C2", s=1, alpha=0.2, rasterized=True)
+    ax.plot(
+        x_ax, x_ax
+    )
+    ax.set_xlim(*lim)
+    ax.set_ylim(np.min(y_), np.max(y_))
+    ax.set_title(f"$f=${f:.1f}")
+    ax.set_xlabel("$Y$")
+    ax.set_ylabel(f"$\hat Y_f$")
+
+for ax in axs:
+    ax.spines[['top', 'right']].set_visible(False)
+fig.tight_layout()
+```
+
+The bias can be seen in the following manner: for each value $Y$, the values of $\hat Y$ corresponding to that $Y$ should be distributed in such a way that the mean lies on the line.
+This actually will be easier to see once we plot the difference $\hat Y_f - \hat Y$ and $Y$.
+
+```{python}
+
+fig, axs = plt.subplots(1, len(fs), figsize=(2 * len(fs), 2), dpi=150, sharex=True, sharey=True)
+
+for f, ax in zip(fs, axs):
+    x, y = data[:, 0], data[:, 1]
+    y_ = yhat(x, f)
+    ax.scatter(y, y_ - y, c="C2", s=1, alpha=0.2, rasterized=True)
+    ax.plot(
+        x_ax, np.zeros_like(x_ax)
+    )
+    ax.set_xlim(*lim)
+    ax.set_title(f"$f=${f:.1f}")
+    ax.set_xlabel("$Y$")
+    ax.set_ylabel(f"$\hat Y_f - Y$")
+
+for ax in axs:
+    ax.spines[['top', 'right']].set_visible(False)
+fig.tight_layout()
+```
+
+We also see what how variance manifests: for $Y\approx 160$, we have quite a range of corresponding $\hat Y_2$.
+The estimator $\hat Y_{0.5}$ has clear bias for $Y$ far from the mean, but for most of the data points (which lie close the mean in this case) the prediction is reasonable. 
+
+More precisely, let's take a look at two conditional losses, measuring how wrong our predictions will be on average for a given value of $X$:
+$$\begin{align*}
+\ell_1(x) &= \mathbb E\left[\left| Y_f - Y \right| \mid X=x \right], \\
+\ell_2(x) &= \sqrt{\mathbb E\left[\left( \hat Y_f - Y \right)^2 \mid X=x \right]}.
+\end{align*}
+$$
+
+```{python}
+
+n_y_samples = 10_000
+
+# Shape (n_x, n_y_samples)
+y_samples = mu + 0.5 * (x_ax[:, None] - mu) + rng.normal(loc=0, scale=np.sqrt(0.75) * sigma, size=(x_ax.shape[0], n_y_samples))
+
+fig, axs = plt.subplots(1, 2, figsize=(2.5*2, 2.5), dpi=150, sharex=True, sharey=True)
+
+ax = axs[0]
+for f in fs:
+    preds = yhat(x_ax, f)
+    loss = np.mean(np.abs(y_samples - preds[:, None]), axis=1)
+    ax.plot(x_ax, loss, label=f"$f=${f:.1f}")
+
+ax.legend(frameon=False)
+ax.set_xlabel("$x$")
+ax.set_ylabel(r"$\ell_1$")
+
+ax = axs[1]
+for f in fs:
+    preds = yhat(x_ax, f)
+    loss = np.sqrt(np.mean(np.square(y_samples - preds[:, None]), axis=1))
+    ax.plot(x_ax, loss, label=f"$f=${f:.1f}")
+
+ax.legend(frameon=False)
+ax.set_xlabel("$x$")
+ax.set_ylabel(r"$\ell_2$")
+
+for ax in axs:
+    ax.spines[['top', 'right']].set_visible(False)
+fig.tight_layout()
+```
+
+Even for values of $X$ quite far from the mean, [some bias helps](https://en.wikipedia.org/wiki/Bias%E2%80%93variance_tradeoff#Bias%E2%80%93variance_decomposition_of_mean_squared_error)! Overall, we see that regression to the mean is a sensible strategy in this case.
+
+Also, using $f=1$ (i.e., $\hat Y_f=X$) performs as well as $f=0$ (constant prediction $\mu$).
+More precisely, observe that
+$$
+\left(Y - \hat Y_0 \mid X=x\right) = (Y-\mu \mid X=x) \sim \mathcal N\left( 0.5(x-\mu), 0.75 \sigma^2\right)
+$$
+and
+$$
+\left(Y - \hat Y_1 \mid X=x\right) = (Y-X \mid X=x) \sim \mathcal N\left( 0.5(\mu - x) , 0.75\sigma^2 \right)
+$$
+
+and the absolute value (or squaring) makes the losses exactly equal.
+
+As a final note, one can notice that for every $x$, both $\ell_1$ and $\ell_2$ are minimised for $f=0.5$ using the following argument: $f=0.5$ predicts the mean of the conditional distribution $Y\mid X=x$.
+The sum of squares (in this case we have actually expectation, but let's not worry about averaging) is minimised for the mean.
+Similarly, median optimises the sum of absolute deviations, and each of the normal distributions representing $Y-\hat Y_f \mid X=x$ has mean equal to median.
