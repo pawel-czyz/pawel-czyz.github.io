@@ -1,0 +1,30 @@
+---
+title: "TITLE"
+description: "DESCRIPTION"
+author: "Paweł Czyż"
+date: "MONTH/DAY/2024"
+categories:
+  - Category 1
+  - Category 2
+execute:
+  freeze: true
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+## First section
+
+See the footnote[^1].
+
+[^1]: It's here.
+
+$$
+a = b
+$$
+
+```{python}
+import numpy as np
+```
+

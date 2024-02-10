@@ -1,0 +1,107 @@
+---
+title: "Setting up a new project repository"
+description: "From time to time I receive a question on setting up a new project repository. I'm not really qualified to answer this question, but I'll do my best."
+author: "Paweł Czyż"
+date: "2/10/2024"
+---
+
+First, a disclaimer: I am not an expert and what I write below is likely to be suboptimal in many ways.
+On the other hand, in academia we rarely have access to an experienced team of software engineers, DevOps, testers and documentation writers, so perhaps some of the tricks below will be useful. 
+
+Secondly, setting up a new scientific project is generally much more complex than setting up a repository: discussing the project idea with the academic adviser, writing a good research plan, checking with an ethics committee, applying for a grant...
+
+We will not cover any of these here, assuming that you have completed the necessary steps and you and your collaborators just want to start coding.
+
+::: {.callout-note}
+
+As mentioned, the advice below is likely to be suboptimal or incomplete – use it at your own risk.
+
+However, any suggestions for improvements will be very welcome.
+
+:::
+
+## On collaboration and mentorship
+
+Sometimes you will be the sole developer of the project.
+More frequently, you will be a member of a team.
+This includes mentoring students, which includes taking more responsibility, but we will discuss some of these aspects [below](#mentorship).
+
+I think it is important to set the expectations on all sides involved. In the meeting it's worth to discuss the following:
+
+- Finding the time for a regular meeting. (Or, if a regular time slot is impossible, scheduling the next meeting.)
+- Does the whole team adhere to some best coding practices?
+- What are the views on authorship of the subsequent publication(s)? 
+  - How is it going to be reflected in the expected contributions and time committed to the project?
+  - I don't like politics, but this topic will eventually appear, so it's good to discuss it early.
+
+Regarding deciding on coding practices, we often use the following:
+
+- We work within [Git feature branch workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
+- We try to submit small pull requests and have pull request reviewed happening as soon as possible.
+- We put ideas for next changes as GitHub issues.
+- When we want to discuss large code changes, sometimes we submit a PR just with function stubs and docstrings. This PR is not really going to be merged, but we can discuss proposed changes using reviewing capabilities, before the time is spent on implementing them.
+- We often do [pair programming](https://en.wikipedia.org/wiki/Pair_programming), which is great.
+- We have continuous integration set using GitHub Actions, which forces us to use consistent style (sometimes to write enough tests and documentation).
+
+### Student mentorship
+
+Speaking of mentoring students, I have [a separate document](expectations-student-mentorship.qmd) on this topic.
+I think it is good to discuss expectations as early as possible and remember that part of our job is mentoring.
+Of course, it's great that the students can contribute to the project, but in the end, they should learn useful skills via mentorship.
+
+Speaking of coding aspects of mentorship:
+
+- Schedule enough time in the calendar to the student at least once a week.
+- Discuss not only the science, but also other issues they may be facing. Isn't the workload too high?
+- Do detailed code reviews (and pair programming, if possible), so they can learn software development from you.
+- For complicated changes, sometimes it may help to write code stubs. I.e., design interfaces, write most important function names (together with type annotations and docstrings) and ask the student to study them and fill in the missing bits.
+  - Designing right abstractions is hard and it may take a lot of yor time.
+  - But remember that this skill is hard even for experienced software developers, and many students haven't had yet enough experience to handle these problems.   
+- Try to find balance with being hand-on and hands-off.
+  - I find it quite difficult and this balance is going to depend on the project difficulty and the student's needs.
+  - Generally, being hands-on is important, so that they feel supported. Mentorship is a key part of our job.
+  - On the other hand, [micromanagement](https://en.wikipedia.org/wiki/Micromanagement) is bad.
+  - Even if somebody is not not micromanaging, sometimes being too available can harm the student.
+    - They need to know how to use available resources and work independently. (Whether they stay in academia or move to industry.)
+    - Discuss with the students that they are expected to check obvious resources (like Wikipedia, Google, ChatGPT, project documentation...) before reaching out.
+    - In some teams there is something like a formal "15-minute rule" and "1-hour rule", but I think it's better to rely on discussing the expectations early.
+    - In some cases, answering the questions with a delay of a few hours seemed to reinforce the students to search for the answers on their own. I'm not convinced about this method, though, and would prefer to rely on clear communication of expectations.
+
+## Setting up a repository
+
+Great: the research plan tells the team what they need to do, expectations are clear, but we still haven't set up the repository.
+
+I recommend taking studying how [Equinox](https://github.com/patrick-kidger/equinox) is set up, which is the model solution.
+
+  - See [.github/workflows](https://github.com/patrick-kidger/equinox/tree/main/.github/workflows) to see how GitHub Actions are set.
+  - Note that [pre-commit](https://pre-commit.com/) is used and configured.
+  - Project manager is used. Equinox uses [Hatch](https://github.com/pypa/hatch), I usually go for [Poetry](https://python-poetry.org/).
+
+
+My personal steps to creating a new repository are the following:
+
+- Create a new [Micromamba](https://mamba.readthedocs.io/) environment. (There are many other alternatives to virtual environments, though.)
+- Initialise the project. I use Poetry and the `src` layout, i.e., `poetry new --src project_name`.
+- Create a GitHub repository and commit the changes.
+- Set up tests using [PyTest](https://docs.pytest.org/).
+  - You can create a simple function and one unit test.
+- Set up [pre-commit](https://pre-commit.com/) checks.
+  - For linting and formatting, I use [Ruff](https://github.com/astral-sh/ruff). (Alternatives include [Black](https://black.readthedocs.io/en/stable/), [flake8](https://flake8.pycqa.org/en/latest/) and [isort](https://pycqa.github.io/isort/).)
+  - For type checking I usually go for [Pyright](https://github.com/microsoft/pyright). (Alternatives include [MyPy](https://mypy-lang.org/) and [PyType](https://github.com/google/pytype).)
+- Set up documentation using [Material for Mkdocs](https://squidfunk.github.io/mkdocs-material/).
+- Make sure that GitHub Actions are configured and properly run. (As a starting point, consult the configurations of Equinox or [pMHN](https://github.com/cbg-ethz/pmhn).)
+- Set up pull request merging criteria on GitHub (depending on what has been agreed with the team):
+  - Nobody can commit to `main` branch without a pull request.
+  - Pre-commit checks and unit tests run properly.
+  - The code is reviewed and conversations are resolved.
+  - The branch has all changes from `main` (disputable).
+  - The pull request is squashed into one commit on `main`, rather than merged (disputable). 
+
+Regarding the data science workflow (which often includes developing some Python package, but also running experiments and generating the figures):
+
+- We usually develop Python code in `src/` and use `test/` and `docs/` for unit tests for its documentation.
+- To run experiments, we use [Snakemake workflows](https://snakemake.readthedocs.io/) in the `workflows/` directory.
+  - Ensuring reproducibility is important.
+  - Micromamba works very nicely with Snakemake.
+  - Alternatives include [NextFlow](https://www.nextflow.io/) (I personally liked Snakemake more, though).
+- [Kedro](https://kedro.org/) sounds interesting. At the moment of writing this post I haven't had much experience with it, but I'm planning to try it.

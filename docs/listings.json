@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/setting-up-repository.html",
       "/posts/regression-to-the-mean-bias-rejoinder.html",
       "/posts/small-power.html",
       "/posts/strict-linear-independence-measures.html",
