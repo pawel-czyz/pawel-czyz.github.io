@@ -20,15 +20,16 @@ Contrary to correlation, mutual information works for any kind of variables (con
 
 I enjoyed my time in the project and the provided mentorship very much! We wrote [a paper](https://royalsocietypublishing.org/doi/10.1098/rsif.2018.0792), and – perhaps more importantly – I learned that information theory and biology are great fields to study!
 
-Many years have passed and I thought that perhaps it's the time to become a mentor on my own. Fortunately, my very first Master's student I supervised, [Anej](https://anejsvete.github.io/), was so bright and motivated that he wrote a great Master's thesis even with such an experienced supervisor as myself!
-Anyway, Anej was working on representation learning and extensively used mutual information estimators.
-But I had not done my homework: when I wrote the project proposal, I happily assumed that mutual information estimators have to work if the space $\mathcal X\times \mathcal Y$ is of moderate dimension and the number of points is large. 
-Apparently I was wrong. Different mutual information estimators seemed to give very different estimates even in low-dimensions problems.
-That was concerning.
+Many years have passed and I thought that perhaps it's the time to become a mentor on my own.
+Fortunately, the very first Master's student I supervised, [Anej](https://anejsvete.github.io/), was so bright and motivated that he wrote a great Master's thesis despite having such an unexperienced supervisor as me!
+Anej was working on representation learning and extensively used mutual information estimators.
+But I had not done my homework: when I wrote the project proposal, I happily assumed that mutual information estimators have to work, if the space $\mathcal X\times \mathcal Y$ is of moderate dimension and the number of points is quite large. 
+I was wrong.
+Different mutual information estimators seemed to give very different estimates and that was concerning.
 
 ## Beyond normal
 
-I did the only rational thing in this situation: I ran screaming to two mutual information experts, Frederic and [Alex](https://www.a-marx.com/).
+I did the only rational thing in this situation: I ran screaming for help to two mutual information experts, Frederic and [Alex](https://www.a-marx.com/).
 We started thinking:
 
 1. How do we really know when mutual information estimators work? As mutual information is analytically known only for the simplest distributions, the estimators are evaluated usually on "simple" low-dimensional distributions (or moderate-dimensional multivariate normal distributions).
