@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.302">
+<meta name="generator" content="quarto-1.3.450">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -92,7 +92,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
     "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit"
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 
@@ -151,6 +152,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#biased-and-unbiased-estimators" id="toc-biased-and-unbiased-estimators" class="nav-link" data-scroll-target="#biased-and-unbiased-estimators">Biased and unbiased estimators</a>
   <ul class="collapse">
   <li><a href="#visualisations" id="toc-visualisations" class="nav-link" data-scroll-target="#visualisations">Visualisations</a></li>
+  <li><a href="#twisting-the-problem" id="toc-twisting-the-problem" class="nav-link" data-scroll-target="#twisting-the-problem">Twisting the problem</a></li>
   </ul></li>
   <li><a href="#digression-simple-linear-regression-and-pca" id="toc-digression-simple-linear-regression-and-pca" class="nav-link" data-scroll-target="#digression-simple-linear-regression-and-pca">Digression: simple linear regression and PCA</a>
   <ul class="collapse">
@@ -413,7 +415,7 @@ X\mid Y=y \sim \mathcal N\big( \mu + 0.5(y-\mu), 0.75\sigma^2\big).
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_15232/2941644956.py:11: UserWarning: Attempting to set identical low and high ylims makes transformation singular; automatically expanding.
+<pre><code>/tmp/ipykernel_107538/2941644956.py:11: UserWarning: Attempting to set identical low and high ylims makes transformation singular; automatically expanding.
   ax.set_ylim(np.min(y_), np.max(y_))</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -447,30 +449,73 @@ X\mid Y=y \sim \mathcal N\big( \mu + 0.5(y-\mu), 0.75\sigma^2\big).
 </div>
 </div>
 <p>We also see what how variance manifests: for <span class="math inline">\(Y\approx 160\)</span>, we have quite a range of corresponding <span class="math inline">\(\hat Y_2\)</span>. The estimator <span class="math inline">\(\hat Y_{0.5}\)</span> has clear bias for <span class="math inline">\(Y\)</span> far from the mean, but for most of the data points (which lie close the mean in this case) the prediction is reasonable.</p>
-<p>More precisely, let’s think what happens when we observe the value <span class="math inline">\(X\)</span> and we want to know how far our estimate <span class="math inline">\(\hat Y_f\)</span> is from the unobserved value <span class="math inline">\(Y\)</span>. We can do a variant of the previous plot, where we put <span class="math inline">\(X\)</span> on the horizontal axis and <span class="math inline">\(\hat Y_f-Y\)</span> on the vertical one:</p>
+<p>In fact, let’s plot <span class="math inline">\(\mathbb E[|\hat Y_f -y | \mid y]\)</span> and <span class="math inline">\(\sqrt{\mathbb E[(\hat Y_f-y)^2\mid y]}\)</span> as a function of <span class="math inline">\(y\)</span>:</p>
 <div class="cell" data-execution_count="6">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="bu">len</span>(fs), figsize<span class="op">=</span>(<span class="dv">2</span> <span class="op">*</span> <span class="bu">len</span>(fs), <span class="dv">2</span>), dpi<span class="op">=</span><span class="dv">150</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f, ax <span class="kw">in</span> <span class="bu">zip</span>(fs, axs):</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> data[:, <span class="dv">0</span>], data[:, <span class="dv">1</span>]</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    y_ <span class="op">=</span> yhat(x, f)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y_ <span class="op">-</span> y, c<span class="op">=</span><span class="st">"C2"</span>, s<span class="op">=</span><span class="dv">1</span>, alpha<span class="op">=</span><span class="fl">0.2</span>, rasterized<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    ax.plot(</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        x_ax, np.zeros_like(x_ax)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    ax.set_xlim(<span class="op">*</span>lim)</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"$f=$</span><span class="sc">{</span>f<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"$X$"</span>)</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="ss">f"$\hat Y_f - Y$"</span>)</span>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n_y_hat_samples <span class="op">=</span> <span class="dv">10_000</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>y_ax <span class="op">=</span> np.linspace(mu <span class="op">-</span> <span class="dv">4</span> <span class="op">*</span> sigma, mu <span class="op">+</span> <span class="dv">4</span> <span class="op">*</span> sigma, <span class="dv">51</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Shape (n_y, n_y_hat_samples)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>x_samples <span class="op">=</span> mu <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> (y_ax[:, <span class="va">None</span>] <span class="op">-</span> mu) <span class="op">+</span> rng.normal(loc<span class="op">=</span><span class="dv">0</span>, scale<span class="op">=</span>np.sqrt(<span class="fl">0.75</span>) <span class="op">*</span> sigma, size<span class="op">=</span>(y_ax.shape[<span class="dv">0</span>], n_y_hat_samples))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">2.5</span><span class="op">*</span><span class="dv">2</span><span class="op">+</span><span class="dv">1</span>, <span class="fl">2.5</span>), dpi<span class="op">=</span><span class="dv">150</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> fs:</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    preds <span class="op">=</span> yhat(x_samples, f)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> np.mean(np.<span class="bu">abs</span>(preds <span class="op">-</span> y_ax[:, <span class="va">None</span>]), axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    ax.plot(y_ax, loss, label<span class="op">=</span><span class="ss">f"$f=$</span><span class="sc">{</span>f<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co"># ax.legend(frameon=False)</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"$y$"</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="vs">r"$E[|\hat Y_f-y| \mid y ]$"</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> fs:</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    preds <span class="op">=</span> yhat(x_ax, f)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> np.sqrt(np.mean(np.square(preds <span class="op">-</span> y_ax[:, <span class="va">None</span>]), axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    ax.plot(y_ax, loss, label<span class="op">=</span><span class="ss">f"$f=$</span><span class="sc">{</span>f<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>, bbox_to_anchor<span class="op">=</span>(<span class="fl">1.05</span>, <span class="fl">1.0</span>))</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"$y$"</span>)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="vs">r"$\sqrt{E[(\hat Y_f-y)^2 \mid y ]}$"</span>)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <p><img src="regression-to-the-mean-bias-rejoinder_files/figure-html/cell-7-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="twisting-the-problem" class="level3">
+<h3 class="anchored" data-anchor-id="twisting-the-problem">Twisting the problem</h3>
+<p>The above plots condition on unobserved parameter <span class="math inline">\(y\)</span>. Let’s think what happens when we observe the value <span class="math inline">\(X\)</span> and we want to know how far our estimate <span class="math inline">\(\hat Y_f\)</span> is from the unobserved value <span class="math inline">\(Y\)</span>. We can do a variant of one plots we have seen previously, where we put <span class="math inline">\(X\)</span> on the horizontal axis and <span class="math inline">\(\hat Y_f-Y\)</span> on the vertical one:</p>
+<div class="cell" data-execution_count="7">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="bu">len</span>(fs), figsize<span class="op">=</span>(<span class="dv">2</span> <span class="op">*</span> <span class="bu">len</span>(fs), <span class="dv">2</span>), dpi<span class="op">=</span><span class="dv">150</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f, ax <span class="kw">in</span> <span class="bu">zip</span>(fs, axs):</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> data[:, <span class="dv">0</span>], data[:, <span class="dv">1</span>]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    y_ <span class="op">=</span> yhat(x, f)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y_ <span class="op">-</span> y, c<span class="op">=</span><span class="st">"C2"</span>, s<span class="op">=</span><span class="dv">1</span>, alpha<span class="op">=</span><span class="fl">0.2</span>, rasterized<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    ax.plot(</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        x_ax, np.zeros_like(x_ax)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    ax.set_xlim(<span class="op">*</span>lim)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"$f=$</span><span class="sc">{</span>f<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="st">"$X$"</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(<span class="ss">f"$\hat Y_f - Y$"</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="regression-to-the-mean-bias-rejoinder_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 <p>We see that for all values of <span class="math inline">\(X\)</span>, the regression to the mean estimator, <span class="math inline">\(\hat Y_{0.5}\)</span>, works well. Let’s also take a look at the following losses, measuring how wrong our predictions will be on average for a given value of <span class="math inline">\(X\)</span>: <span class="math display">\[\begin{align*}
@@ -478,42 +523,42 @@ X\mid Y=y \sim \mathcal N\big( \mu + 0.5(y-\mu), 0.75\sigma^2\big).
 \ell_2(x) &amp;= \sqrt{\mathbb E\left[\left( \hat Y_f - Y \right)^2 \mid X=x \right]}.
 \end{align*}
 \]</span></p>
-<div class="cell" data-execution_count="7">
+<div class="cell" data-execution_count="8">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>n_y_samples <span class="op">=</span> <span class="dv">10_000</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Shape (n_x, n_y_samples)</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>y_samples <span class="op">=</span> mu <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> (x_ax[:, <span class="va">None</span>] <span class="op">-</span> mu) <span class="op">+</span> rng.normal(loc<span class="op">=</span><span class="dv">0</span>, scale<span class="op">=</span>np.sqrt(<span class="fl">0.75</span>) <span class="op">*</span> sigma, size<span class="op">=</span>(x_ax.shape[<span class="dv">0</span>], n_y_samples))</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">2.5</span><span class="op">*</span><span class="dv">2</span>, <span class="fl">2.5</span>), dpi<span class="op">=</span><span class="dv">150</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> fs:</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    preds <span class="op">=</span> yhat(x_ax, f)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> np.mean(np.<span class="bu">abs</span>(y_samples <span class="op">-</span> preds[:, <span class="va">None</span>]), axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    ax.plot(x_ax, loss, label<span class="op">=</span><span class="ss">f"$f=$</span><span class="sc">{</span>f<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"$x$"</span>)</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="vs">r"$\ell_1$"</span>)</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> fs:</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    preds <span class="op">=</span> yhat(x_ax, f)</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> np.sqrt(np.mean(np.square(y_samples <span class="op">-</span> preds[:, <span class="va">None</span>]), axis<span class="op">=</span><span class="dv">1</span>))</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    ax.plot(x_ax, loss, label<span class="op">=</span><span class="ss">f"$f=$</span><span class="sc">{</span>f<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"$x$"</span>)</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="vs">r"$\ell_2$"</span>)</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>n_y_samples <span class="op">=</span> <span class="dv">10_000</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Shape (n_x, n_y_samples)</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>y_samples <span class="op">=</span> mu <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> (x_ax[:, <span class="va">None</span>] <span class="op">-</span> mu) <span class="op">+</span> rng.normal(loc<span class="op">=</span><span class="dv">0</span>, scale<span class="op">=</span>np.sqrt(<span class="fl">0.75</span>) <span class="op">*</span> sigma, size<span class="op">=</span>(x_ax.shape[<span class="dv">0</span>], n_y_samples))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">2.5</span><span class="op">*</span><span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span>, <span class="fl">2.5</span>), dpi<span class="op">=</span><span class="dv">150</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> fs:</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    preds <span class="op">=</span> yhat(x_ax, f)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> np.mean(np.<span class="bu">abs</span>(y_samples <span class="op">-</span> preds[:, <span class="va">None</span>]), axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    ax.plot(x_ax, loss, label<span class="op">=</span><span class="ss">f"$f=$</span><span class="sc">{</span>f<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"$x$"</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="vs">r"$\ell_1$"</span>)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> fs:</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    preds <span class="op">=</span> yhat(x_ax, f)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> np.sqrt(np.mean(np.square(y_samples <span class="op">-</span> preds[:, <span class="va">None</span>]), axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    ax.plot(x_ax, loss, label<span class="op">=</span><span class="ss">f"$f=$</span><span class="sc">{</span>f<span class="sc">:.1f}</span><span class="ss">"</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"$x$"</span>)</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="vs">r"$\ell_2$"</span>)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>, bbox_to_anchor<span class="op">=</span>(<span class="fl">1.05</span>, <span class="fl">1.0</span>))</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="regression-to-the-mean-bias-rejoinder_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
+<p><img src="regression-to-the-mean-bias-rejoinder_files/figure-html/cell-9-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 <p>Even for values of <span class="math inline">\(X\)</span> quite far from the mean, <a href="https://en.wikipedia.org/wiki/Bias%E2%80%93variance_tradeoff#Bias%E2%80%93variance_decomposition_of_mean_squared_error">some bias helps</a>! Overall, we see that regression to the mean is a sensible strategy in this case.</p>

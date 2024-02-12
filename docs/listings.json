@@ -1,5 +1,14 @@
 [
   {
+    "listing": "/publications.html",
+    "items": [
+      "/publications/bayesian-quantification.html",
+      "/publications/beyond-normal.html",
+      "/publications/pmi-profiles.html",
+      "/publications/limits-mapk.html"
+    ]
+  },
+  {
     "listing": "/blog.html",
     "items": [
       "/posts/setting-up-repository.html",
@@ -18,15 +27,6 @@
       "/posts/dirichlet-process.html",
       "/posts/board-games-monte-carlo.html",
       "/posts/expectations-student-mentorship.html"
-    ]
-  },
-  {
-    "listing": "/publications.html",
-    "items": [
-      "/publications/bayesian-quantification.html",
-      "/publications/beyond-normal.html",
-      "/publications/pmi-profiles.html",
-      "/publications/limits-mapk.html"
     ]
   }
 ]

@@ -276,8 +276,49 @@ fig.tight_layout()
 We also see what how variance manifests: for $Y\approx 160$, we have quite a range of corresponding $\hat Y_2$.
 The estimator $\hat Y_{0.5}$ has clear bias for $Y$ far from the mean, but for most of the data points (which lie close the mean in this case) the prediction is reasonable. 
 
-More precisely, let's think what happens when we observe the value $X$ and we want to know how far our estimate $\hat Y_f$ is from the unobserved value $Y$.
-We can do a variant of the previous plot, where we put $X$ on the horizontal axis and $\hat Y_f-Y$ on the vertical one:
+In fact, let's plot $\mathbb E[|\hat Y_f -y | \mid y]$ and  $\sqrt{\mathbb E[(\hat Y_f-y)^2\mid y]}$ as a function of $y$:
+
+```{python}
+
+n_y_hat_samples = 10_000
+y_ax = np.linspace(mu - 4 * sigma, mu + 4 * sigma, 51)
+
+# Shape (n_y, n_y_hat_samples)
+x_samples = mu + 0.5 * (y_ax[:, None] - mu) + rng.normal(loc=0, scale=np.sqrt(0.75) * sigma, size=(y_ax.shape[0], n_y_hat_samples))
+
+fig, axs = plt.subplots(1, 2, figsize=(2.5*2+1, 2.5), dpi=150, sharex=True, sharey=True)
+
+ax = axs[0]
+for f in fs:
+    preds = yhat(x_samples, f)
+    loss = np.mean(np.abs(preds - y_ax[:, None]), axis=1)
+    ax.plot(y_ax, loss, label=f"$f=${f:.1f}")
+
+# ax.legend(frameon=False)
+ax.set_xlabel("$y$")
+ax.set_ylabel(r"$E[|\hat Y_f-y| \mid y ]$")
+
+ax = axs[1]
+for f in fs:
+    preds = yhat(x_ax, f)
+    loss = np.sqrt(np.mean(np.square(preds - y_ax[:, None]), axis=1))
+    ax.plot(y_ax, loss, label=f"$f=${f:.1f}")
+
+ax.legend(frameon=False, bbox_to_anchor=(1.05, 1.0))
+ax.set_xlabel("$y$")
+ax.set_ylabel(r"$\sqrt{E[(\hat Y_f-y)^2 \mid y ]}$")
+
+for ax in axs:
+    ax.spines[['top', 'right']].set_visible(False)
+fig.tight_layout()
+```
+
+
+### Twisting the problem
+
+The above plots condition on unobserved parameter $y$.
+Let's think what happens when we observe the value $X$ and we want to know how far our estimate $\hat Y_f$ is from the unobserved value $Y$.
+We can do a variant of one plots we have seen previously, where we put $X$ on the horizontal axis and $\hat Y_f-Y$ on the vertical one:
 
 ```{python}
 fig, axs = plt.subplots(1, len(fs), figsize=(2 * len(fs), 2), dpi=150, sharex=True, sharey=True)
@@ -314,7 +355,7 @@ n_y_samples = 10_000
 # Shape (n_x, n_y_samples)
 y_samples = mu + 0.5 * (x_ax[:, None] - mu) + rng.normal(loc=0, scale=np.sqrt(0.75) * sigma, size=(x_ax.shape[0], n_y_samples))
 
-fig, axs = plt.subplots(1, 2, figsize=(2.5*2, 2.5), dpi=150, sharex=True, sharey=True)
+fig, axs = plt.subplots(1, 2, figsize=(2.5*2 + 1, 2.5), dpi=150, sharex=True, sharey=True)
 
 ax = axs[0]
 for f in fs:
@@ -322,7 +363,6 @@ for f in fs:
     loss = np.mean(np.abs(y_samples - preds[:, None]), axis=1)
     ax.plot(x_ax, loss, label=f"$f=${f:.1f}")
 
-ax.legend(frameon=False)
 ax.set_xlabel("$x$")
 ax.set_ylabel(r"$\ell_1$")
 
@@ -332,9 +372,10 @@ for f in fs:
     loss = np.sqrt(np.mean(np.square(y_samples - preds[:, None]), axis=1))
     ax.plot(x_ax, loss, label=f"$f=${f:.1f}")
 
-ax.legend(frameon=False)
 ax.set_xlabel("$x$")
 ax.set_ylabel(r"$\ell_2$")
+
+ax.legend(frameon=False, bbox_to_anchor=(1.05, 1.0))
 
 for ax in axs:
     ax.spines[['top', 'right']].set_visible(False)
