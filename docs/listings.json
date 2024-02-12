@@ -11,6 +11,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/conditioning-multivariate-normal.html",
       "/posts/setting-up-repository.html",
       "/posts/regression-to-the-mean-bias-rejoinder.html",
       "/posts/small-power.html",

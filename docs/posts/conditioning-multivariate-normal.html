@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Paweł Czyż">
+<meta name="dcterms.date" content="2024-02-12">
+<meta name="description" content="Gaussian processes are wonderful. Let’s take a look at the machinery behind them in the simplest case: when they are just a multivariate normal distribution.">
+
+<title>Paweł Czyż - Starting (on finite domains) with Gaussian processes</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Paweł Czyż</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../blog.html" rel="" target="">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../publications.html" rel="" target="">
+ <span class="menu-text">Publications</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#formalising-the-problem" id="toc-formalising-the-problem" class="nav-link active" data-scroll-target="#formalising-the-problem">Formalising the problem</a></li>
+  <li><a href="#lets-write-some-code" id="toc-lets-write-some-code" class="nav-link" data-scroll-target="#lets-write-some-code">Let’s write some code</a></li>
+  <li><a href="#gaussian-processes" id="toc-gaussian-processes" class="nav-link" data-scroll-target="#gaussian-processes">Gaussian processes</a></li>
+  <li><a href="#modelling-functions" id="toc-modelling-functions" class="nav-link" data-scroll-target="#modelling-functions">Modelling functions</a></li>
+  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
+  <ul class="collapse">
+  <li><a href="#matrix-of-regression-coefficients" id="toc-matrix-of-regression-coefficients" class="nav-link" data-scroll-target="#matrix-of-regression-coefficients">Matrix of regression coefficients</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Starting (on finite domains) with Gaussian processes</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Bayesian nonparametrics</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Gaussian processes are wonderful. Let’s take a look at the machinery behind them in the simplest case: when they are just a multivariate normal distribution.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Paweł Czyż </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 12, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<p>Let <span class="math inline">\(Y = (Y_1, \dotsc, Y_n)^T\)</span> be a random variable distributed according to the multivariate normal distribution <span class="math inline">\(\mathcal N(\mu, \Sigma)\)</span>, where <span class="math inline">\(\mu\in \mathbb R^n\)</span> and <span class="math inline">\(\Sigma\)</span> is a real symmetric positive-definite<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> <span class="math inline">\(n\times n\)</span> matrix.</p>
+<p>We will think of this distribution in the following manner: we have a domain <span class="math inline">\(\mathcal X = \{1, 2, \dotsc, n\}\)</span> and for each <span class="math inline">\(x\in \mathcal X\)</span> we have a random variable <span class="math inline">\(Y_i\)</span> and the joint distribution <span class="math inline">\(P(Y_1, \dotsc, Y_n)\)</span> is multivariate normal.</p>
+<p>Assume that we have measured <span class="math inline">\(Y_x\)</span> variables for indices <span class="math inline">\(x_1, \dotsc, x_k\)</span>, with corresponding values <span class="math inline">\(Y_{x_1}=y_1, \dotsc, Y_{x_k}=y_k\)</span>, and we are interested in predicting the values at locations <span class="math inline">\(x'_1, \dotsc, x'_q\)</span>, i.e., modelling the conditional probability distribution <span class="math display">\[
+P(Y_{x'_1}, \dotsc, Y_{x'_q} \mid Y_{x_1}=y_1, \dotsc, Y_{x_k}=y_k).
+\]</span></p>
+<p>We will also allow <span class="math inline">\(k=0\)</span>, i.e., we would like to access marginal distributions. This can be treated as an extension of the problems answered by bend and mix models we studied <a href="../publications/pmi-profiles.html">here</a>.</p>
+<section id="formalising-the-problem" class="level2">
+<h2 class="anchored" data-anchor-id="formalising-the-problem">Formalising the problem</h2>
+<p>To formalise the problem a bit:</p>
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Conditional calculation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Consider a set of measured values <span class="math inline">\(M = \{(x_1, y_1), \dotsc, (x_k, y_k)\}\)</span> and a non-empty query set <span class="math inline">\(Q = \{x'_1, \dotsc, x'_q\} \subseteq \mathcal X\)</span>.</p>
+<p>We assume that <span class="math inline">\(Q\cap M_x = \varnothing\)</span> and <span class="math inline">\(|M_x| = |M|\)</span>, where <span class="math inline">\(M_x = \{x \in \mathcal X \mid (x, y)\in M \text{ for some } y \}\)</span>.</p>
+<p>We would like to be able to sample from the conditional probability distribution <span class="math display">\[
+P(Y_{x_1'}, \dotsc, Y_{x_q'} \mid Y_{x_1}=y_1, \dotsc, Y_{x_k}=y_k)
+\]</span> as well as to evaluate the (log-)density at any point.</p>
+<p>We allow <span class="math inline">\(M=\varnothing\)</span>, which corresponds then to marginal distributions.</p>
+</div>
+</div>
+<p>This problem can be solved for multivariate normal distributions by noticing that all conditional (and marginal) distributions will also be multivariate normal. Let’s introduce some notation.</p>
+<p>For a tuple <span class="math inline">\(\pi = (\pi_1, \dotsc, \pi_m) \in \mathcal X^m\)</span> such that <span class="math inline">\(\pi_i\neq \pi_j\)</span> for <span class="math inline">\(i\neq j\)</span>, we will write <span class="math inline">\(Y_\pi\)</span> for a random vector <span class="math inline">\((Y_{\pi_1}, \dotsc, Y_{\pi_m})\)</span>. Note that this operation can be implemented using a linear mapping <span class="math inline">\(A_\pi \colon \mathbb R^n\to \mathbb R^m\)</span> with <span class="math display">\[
+A_\pi \begin{pmatrix} Y_1 \\ \vdots \\ Y_n \end{pmatrix} = \begin{pmatrix}
+  Y_{\pi_1} \\ \vdots \\ Y_{\pi_m}
+\end{pmatrix}
+\]</span> and <span class="math inline">\((A_\pi)_{oi} = \mathbf 1[ i = \pi_o]\)</span>. Hence, <span class="math inline">\(Y_\pi\)</span> vector is distributed according to <span class="math inline">\(\mathcal N(A_\pi\mu, A_\pi\Sigma A_\pi^T)\)</span>.</p>
+<p>The above operation suffices for calculating arbitrary marginal distributions and distributions corresponding to permuting the components.</p>
+<p>Consider now the case where we want to calculate a “true” conditional distribution (i.e., with <span class="math inline">\(M\neq \varnothing\)</span>), so the marginalisation does no suffice.</p>
+<p>We can use the tuple <span class="math inline">\(\pi = (x_1', \dotsc, x_q', x_1, \dotsc, x_k)\)</span> to select the right variables and reorder them into a <span class="math inline">\(q\)</span>-dimensional block of unobserved (“query”) variables and a <span class="math inline">\(k\)</span>-dimensional block of observed (“key”) variables<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<div id="tip-cond" class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Conditioning multivariate normal
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Let <span class="math inline">\(Y=(Y_1, Y_2) \in \mathbb R^{k}\times \mathbb R^{n-k}\)</span> be a random vector split into blocks of dimensions <span class="math inline">\(k\)</span> and <span class="math inline">\(n-k\)</span>. If <span class="math inline">\(Y\sim \mathcal N(\mu, \Sigma)\)</span>, where <span class="math display">\[
+\mu = (\mu_1, \mu_2)
+\]</span> and <span class="math display">\[
+\Sigma = \begin{pmatrix}
+  \Sigma_{11} &amp; \Sigma_{12} \\
+  \Sigma_{21} &amp; \Sigma_{22}
+\end{pmatrix},
+\]</span></p>
+<p>then for every <span class="math inline">\(y \in \mathbb R^{n-k}\)</span> it holds that</p>
+<p><span class="math display">\[
+Y_1 \mid Y_2=y \sim \mathcal N(\mu', \Sigma'),
+\]</span> where <span class="math display">\[
+  \mu' = \mu_1 + {\color{Apricot}\Sigma_{12}\Sigma_{22}^{-1}}(y-\mu_2)
+\]</span> and <span class="math display">\[
+\Sigma' = \Sigma_{11} - {\color{Apricot}\Sigma_{12} \Sigma_{22}^{-1}} \Sigma_{21}.
+\]</span></p>
+</div>
+</div>
+<p>We see that in both formulae the <em>matrix of regression coefficients</em><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> <span class="math inline">\(\color{Apricot}\Sigma_{12}\Sigma_{22}^{-1}\)</span> appears. We will discuss calculation of this term <a href="#digression-matrix-of-regression-coefficients">below</a>.</p>
+</section>
+<section id="lets-write-some-code" class="level2">
+<h2 class="anchored" data-anchor-id="lets-write-some-code">Let’s write some code</h2>
+<p>Now let’s implement a prototype:</p>
+<div class="cell" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy.linalg <span class="im">as</span> npla</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> jaxtyping <span class="im">import</span> Float, Int, Array</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.linalg <span class="im">as</span> spla</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MultivariateNormal:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">__init__</span>(</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    mu: Float[Array, <span class="st">" dim"</span>],</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    cov: Float[Array, <span class="st">"dim dim"</span>],</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    eigvals, _ <span class="op">=</span> npla.eig(cov)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> np.<span class="bu">min</span>(eigvals) <span class="op">&lt;=</span> <span class="dv">0</span>:</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>      <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Covariance should be positive-definite."</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.mu <span class="op">=</span> np.asarray(mu)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.cov <span class="op">=</span> np.asarray(cov)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    dim <span class="op">=</span> <span class="va">self</span>.mu.shape[<span class="dv">0</span>]</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="va">self</span>.mu.shape <span class="op">==</span> (dim,)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="va">self</span>.cov.shape <span class="op">==</span> (dim, dim)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">@property</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> dim(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">self</span>.mu.shape[<span class="dv">0</span>]</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> sample(</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>,</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    rng: np.random.Generator,</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    size: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="op">-&gt;</span> np.ndarray:</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rng.multivariate_normal(</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>      mean<span class="op">=</span><span class="va">self</span>.mu, cov<span class="op">=</span><span class="va">self</span>.cov, size<span class="op">=</span>size,</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> logpdf(<span class="va">self</span>, y: Float[Array, <span class="st">" dim"</span>]) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> stats.multivariate_normal.logpdf(</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>      y,</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>      mean<span class="op">=</span><span class="va">self</span>.mu,</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>      cov<span class="op">=</span><span class="va">self</span>.cov,</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>      allow_singular<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _contruct_projection_matrix(</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  n: <span class="bu">int</span>,</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  indices: Int[Array, <span class="st">" k"</span>],</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> Int[Array, <span class="st">"k n"</span>]:</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>  indices <span class="op">=</span> np.asarray(indices, dtype<span class="op">=</span><span class="bu">int</span>)  </span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Output dimension</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  k <span class="op">=</span> indices.shape[<span class="dv">0</span>]</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> np.unique(indices).shape[<span class="dv">0</span>] <span class="op">!=</span> k:</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Indices should be unique."</span>)</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>  inp <span class="op">=</span> np.arange(n, dtype<span class="op">=</span><span class="bu">int</span>)</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>  ret <span class="op">=</span> np.asarray(inp[<span class="va">None</span>, :] <span class="op">==</span> indices[:, <span class="va">None</span>], dtype<span class="op">=</span><span class="bu">int</span>)</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>  <span class="cf">assert</span> ret.shape <span class="op">==</span> (k, n)</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> ret</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> select(</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>  dist: MultivariateNormal,</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>  indices: Int[Array, <span class="st">" k"</span>],</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> MultivariateNormal:</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>  proj <span class="op">=</span> np.asarray(</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>    _contruct_projection_matrix(</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>      n<span class="op">=</span>dist.dim,</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>      indices<span class="op">=</span>indices,</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>    dtype<span class="op">=</span><span class="bu">float</span>,</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>  new_mu <span class="op">=</span> np.einsum(<span class="st">"oi,i -&gt; o"</span>, proj, dist.mu)</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>  new_cov <span class="op">=</span> np.einsum(<span class="st">"oi,iI,OI -&gt; oO"</span>, proj, dist.cov, proj)</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> MultivariateNormal(</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>    mu<span class="op">=</span>new_mu,</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>    cov<span class="op">=</span>new_cov,</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _regression_coefs(</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>  sigma12: Float[Array, <span class="st">"Q K"</span>],</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>  sigma22: Float[Array, <span class="st">"K K"</span>],</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> Float[Array, <span class="st">"Q K"</span>]:</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> spla.solve(sigma22, sigma12.T).T</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _condition_gaussian(</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>  dist: MultivariateNormal,</span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a>  m: <span class="bu">int</span>,</span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a>  y: Float[Array, <span class="st">" vals"</span>]</span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> MultivariateNormal:</span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a>  <span class="cf">assert</span> y.shape[<span class="dv">0</span>] <span class="op">==</span> dist.dim <span class="op">-</span> m</span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a>  mu1 <span class="op">=</span> dist.mu[:m]</span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a>  mu2 <span class="op">=</span> dist.mu[m:]</span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>  sigma11 <span class="op">=</span> dist.cov[:m, :m]</span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a>  sigma12 <span class="op">=</span> dist.cov[:m, m:]</span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a>  sigma22 <span class="op">=</span> dist.cov[m:, m:]</span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a>  reg <span class="op">=</span> _regression_coefs(</span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a>    sigma12<span class="op">=</span>sigma12, sigma22<span class="op">=</span>sigma22,</span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a>  mu_ <span class="op">=</span> mu1 <span class="op">+</span> reg <span class="op">@</span> (y <span class="op">-</span> mu2)</span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a>  sigma_ <span class="op">=</span> sigma11 <span class="op">-</span> reg <span class="op">@</span> sigma12.T</span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> MultivariateNormal(</span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a>    mu<span class="op">=</span>mu_, cov<span class="op">=</span>sigma_,</span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> condition(</span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a>  dist: MultivariateNormal,</span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a>  query: Int[Array, <span class="st">" Q"</span>],</span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a>  key: Int[Array, <span class="st">" K"</span>],</span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a>  values: Float[Array, <span class="st">" K"</span>],</span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> MultivariateNormal:</span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a>  q, k <span class="op">=</span> query.shape[<span class="dv">0</span>], key.shape[<span class="dv">0</span>]</span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a>  <span class="cf">assert</span> values.shape <span class="op">==</span> (k,), <span class="st">"Values have wrong shape"</span></span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>  total_index <span class="op">=</span> np.concatenate((query, key))</span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> np.unique(total_index).shape[<span class="dv">0</span>] <span class="op">!=</span> k <span class="op">+</span> q:</span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Indices must be unique."</span>)</span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> np.<span class="bu">min</span>(total_index) <span class="op">&lt;</span> <span class="dv">0</span> <span class="kw">or</span> np.<span class="bu">max</span>(total_index) <span class="op">&gt;=</span> dist.dim:</span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Indices must be from the set 0, 1, ..., dim-1."</span>)</span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a>  ordered_dist <span class="op">=</span> select(dist, indices<span class="op">=</span>total_index)</span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> k <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ordered_dist</span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> _condition_gaussian(</span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>      dist<span class="op">=</span>ordered_dist,</span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a>      m<span class="op">=</span>q,</span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a>      y<span class="op">=</span>values,</span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now we can do conditioning. For example, imagine that we have <span class="math inline">\(\mu = 0\)</span> and we know <span class="math inline">\(\Sigma\)</span>: <span class="math inline">\(Y_1\)</span> correlates with <span class="math inline">\(Y_3\)</span>, and <span class="math inline">\(Y_2\)</span> anticorrelates with <span class="math inline">\(Y_4\)</span> and <span class="math inline">\(Y_5\)</span> doesn’t correlate with anything else. We measure <span class="math inline">\(Y_1\)</span> and <span class="math inline">\(Y_2\)</span>, so we can use this correlation structure to impute <span class="math inline">\(Y_3\)</span>, <span class="math inline">\(Y_4\)</span> and <span class="math inline">\(Y_5\)</span>.</p>
+<p>First, let’s plot the covariance matrix and the samples:</p>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"dark_background"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>mixing <span class="op">=</span> np.asarray([</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  [<span class="fl">1.5</span>, <span class="op">-</span><span class="fl">0.7</span>, <span class="fl">1.5</span>, <span class="dv">0</span>, <span class="dv">0</span>],</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>, <span class="dv">0</span>],</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>],</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>], dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> np.einsum(<span class="st">"io,iO-&gt;oO"</span>, mixing, mixing) <span class="op">+</span> <span class="fl">0.1</span> <span class="op">*</span> np.eye(<span class="dv">5</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">4.5</span>, <span class="dv">2</span>), dpi<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>ticklabels <span class="op">=</span> [<span class="ss">f"$Y_</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">$"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">5</span><span class="op">+</span><span class="dv">1</span>)]</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>sns.heatmap(cov, ax<span class="op">=</span>ax, xticklabels<span class="op">=</span>ticklabels, yticklabels<span class="op">=</span>ticklabels, vmin<span class="op">=-</span><span class="fl">1.5</span>, vmax<span class="op">=</span><span class="fl">1.5</span>, center<span class="op">=</span><span class="dv">0</span>, square<span class="op">=</span><span class="va">True</span>, annot<span class="op">=</span><span class="va">True</span>, fmt<span class="op">=</span><span class="st">".1f"</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>dist <span class="op">=</span> MultivariateNormal(mu<span class="op">=</span>np.zeros(<span class="dv">5</span>), cov<span class="op">=</span>cov)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> dist.sample(rng, size<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> samples:</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  x_ax <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="dv">6</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  ax.plot(x_ax, sample, alpha<span class="op">=</span><span class="fl">0.5</span>, c<span class="op">=</span><span class="st">"C1"</span>)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  ax.scatter(x_ax, sample, alpha<span class="op">=</span><span class="fl">0.5</span>, c<span class="op">=</span><span class="st">"C1"</span>, s<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="fl">0.9</span>, <span class="fl">5.1</span>)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(x_ax, ticklabels)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="conditioning-multivariate-normal_files/figure-html/cell-3-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Imagine now that we observed <span class="math inline">\(Y_1=1.5\)</span> and <span class="math inline">\(Y_2=1\)</span>. We expect that <span class="math inline">\(Y_3\)</span> should move upwards (the posterior should be shifted so that most of the mass is above <span class="math inline">\(0\)</span>), <span class="math inline">\(Y_4\)</span> to go downwards and <span class="math inline">\(Y_5\)</span> to stay as it was. Let’s plot covariance matrix and draws from the conditional posterior <span class="math inline">\(P(Y_3, Y_4, Y_5\mid Y_1=1.5, Y_2=1)\)</span>:</p>
+<div class="cell" data-execution_count="3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>y_obs <span class="op">=</span> np.asarray([<span class="fl">1.5</span>, <span class="dv">1</span>])</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>cond <span class="op">=</span> condition(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  dist<span class="op">=</span>dist,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  query<span class="op">=</span>np.asarray([<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]),</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  key<span class="op">=</span>np.asarray([<span class="dv">0</span>, <span class="dv">1</span>]),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  values<span class="op">=</span>y_obs,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">4.5</span>, <span class="dv">2</span>), dpi<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>sns.heatmap(</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  cond.cov,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  ax<span class="op">=</span>ax,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  xticklabels<span class="op">=</span>ticklabels[<span class="dv">2</span>:],</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  yticklabels<span class="op">=</span>ticklabels[<span class="dv">2</span>:],</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  vmin<span class="op">=-</span><span class="fl">1.5</span>,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  vmax<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  center<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  annot<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  square<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="fl">0.9</span>, <span class="fl">5.1</span>)</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(x_ax)</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>ax.scatter([<span class="dv">1</span>, <span class="dv">2</span>], y_obs, c<span class="op">=</span><span class="st">"maroon"</span>, s<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> cond.sample(rng, size<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> samples:</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  ax.plot([<span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>], sample, alpha<span class="op">=</span><span class="fl">0.5</span>, c<span class="op">=</span><span class="st">"C1"</span>)</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  ax.scatter([<span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>], sample, alpha<span class="op">=</span><span class="fl">0.5</span>, c<span class="op">=</span><span class="st">"C1"</span>, s<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>ax.set_xticks(x_ax, ticklabels)</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="conditioning-multivariate-normal_files/figure-html/cell-4-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We see that there is slight anticorrelation between <span class="math inline">\(Y_3\)</span> and <span class="math inline">\(Y_4\)</span>: by sampling from the conditional distribution we obtain a coherent sample. This is different than drawing independent samples from <span class="math inline">\(P(Y_3 \mid Y_1=y_1, Y_2=y_2)\)</span> and <span class="math inline">\(P(Y_4\mid Y_1=y_1, Y_2=y_2)\)</span>. Perhaps it’ll be easier to visualise it on a scatter plot:</p>
+<div class="cell" data-execution_count="4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="fl">4.5</span>, <span class="dv">3</span>), dpi<span class="op">=</span><span class="dv">200</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> cond.sample(rng, size<span class="op">=</span><span class="dv">15_000</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>ax.scatter(samples[:, <span class="dv">0</span>], samples[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">2</span>, alpha<span class="op">=</span><span class="fl">0.01</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Joint sample"</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="vs">r"$Y_3$"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="vs">r"$Y_4$"</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>samples2 <span class="op">=</span> cond.sample(rng, size<span class="op">=</span>samples.shape[<span class="dv">0</span>])</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>ax.scatter(samples[:, <span class="dv">0</span>], samples2[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">2</span>, alpha<span class="op">=</span><span class="fl">0.01</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Independent"</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="vs">r"$Y_3$"</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="vs">r"$Y_4$"</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>corr <span class="op">=</span> cond.cov[<span class="dv">0</span>, <span class="dv">1</span>] <span class="op">/</span> np.sqrt(cond.cov[<span class="dv">0</span>, <span class="dv">0</span>] <span class="op">*</span> cond.cov[<span class="dv">1</span>, <span class="dv">1</span>])</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="vs">r"$\text</span><span class="sc">{Corr}</span><span class="vs">(Y_3, Y_4) = $"</span> <span class="op">+</span> <span class="ss">f"</span><span class="sc">{</span>corr<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="conditioning-multivariate-normal_files/figure-html/cell-5-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Ok, it’s hard to see, but visible – the (negative) correlation is just quite weak in this case.</p>
+<p>Let’s do the last visualisation before we move to Gaussian processes. As mentioned, the magical thing is the access to the whole posterior distribution <span class="math inline">\(P(Y_3, Y_4, Y_5 \mid Y_1=y_1, Y_2=y_2)\)</span>: we can evaluate arbitrary probabilities and sample consistent vectors from this distribution. We can visualise samples, but sometimes a simpler summary statistic would be useful. Each of the distributions <span class="math inline">\(P(Y_i \mid Y_1=y_1, Y_2=y_2)\)</span> is one-dimensional Gaussian, so we can plot its mean and standard deviation. Or, even better, let’s plot <span class="math inline">\(\mu_i\pm 2\sigma_i\)</span> to see where <a href="https://en.wikipedia.org/wiki/68%E2%80%9395%E2%80%9399.7_rule">approximately 95% of probability lies</a>.</p>
+<p>We’ll plot these regions both before and after conditioning:</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">4</span>, <span class="fl">1.5</span>), dpi<span class="op">=</span><span class="dv">170</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Before conditioning</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>ax.plot(np.arange(<span class="dv">1</span>, <span class="dv">1</span><span class="op">+</span><span class="dv">5</span>), np.zeros(<span class="dv">5</span>), linestyle<span class="op">=</span><span class="st">"--"</span>, c<span class="op">=</span><span class="st">"gray"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>ax.errorbar(</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  np.arange(<span class="dv">1</span>, <span class="dv">1</span><span class="op">+</span><span class="dv">5</span>),</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  dist.mu,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  yerr<span class="op">=</span><span class="dv">2</span> <span class="op">*</span> np.sqrt(np.diagonal(dist.cov)),</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  fmt<span class="op">=</span><span class="st">"o"</span>,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co"># After conditioning</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>ax.plot(np.arange(<span class="dv">1</span>, <span class="dv">1</span><span class="op">+</span><span class="dv">5</span>), np.zeros(<span class="dv">5</span>), linestyle<span class="op">=</span><span class="st">"--"</span>, c<span class="op">=</span><span class="st">"gray"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>, linewidth<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>ax.scatter([<span class="dv">1</span>, <span class="dv">2</span>], y_obs, c<span class="op">=</span><span class="st">"maroon"</span>, s<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>ax.errorbar(</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  [<span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>],</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  cond.mu,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  yerr<span class="op">=</span><span class="dv">2</span> <span class="op">*</span> np.sqrt(np.diagonal(cond.cov)),</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  fmt<span class="op">=</span><span class="st">"o"</span>,</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  ax.set_xlim(<span class="fl">0.8</span>, <span class="fl">5.3</span>)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  ax.set_xticks(x_ax, ticklabels)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="conditioning-multivariate-normal_files/figure-html/cell-6-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>As mentioned, these plots don’t really allow us to look at correlations between different variables, but they are still useful: we can easily see that the posterior of <span class="math inline">\(Y_3\)</span> moved upwards and <span class="math inline">\(Y_4\)</span> moved downwards! Variable <span class="math inline">\(Y_5\)</span>, which is independent of <span class="math inline">\((Y_1, Y_2, Y_3, Y_4)\)</span>, doesn’t change: if we want to know it, we just have to measure it.</p>
+</section>
+<section id="gaussian-processes" class="level2">
+<h2 class="anchored" data-anchor-id="gaussian-processes">Gaussian processes</h2>
+<p>For <span class="math inline">\(\mathcal X = \{1, \dotsc, n\}\)</span> we considered am indexed collection of random variables <span class="math inline">\(\{Y_x\}_{x\in \mathcal X}\)</span>. Let’s call it a <em>stochastic process</em>.</p>
+<p>This stochastic process had the property that the joint distribution was multivariate normal. From that we could use the fact that all the other distributions <span class="math inline">\(P(Y_{x_1}, \dotsc, Y_{x_m})\)</span> were again multivariate normal, what allowed us to do prediction via conditioning (which resulted, again, in multivariate normal distributions).</p>
+<p>Let’s move beyond a finite dimension: take <span class="math inline">\(\mathcal X=\mathbb R\)</span> and consider a stochastic process <span class="math inline">\(\{Y_x\}_{x\in \mathcal X}\)</span>. We will say that it’s a <em>Gaussian process</em> if for every finite set <span class="math inline">\(\{x_1, \dotsc, x_m\}\subseteq \mathcal X\)</span> the joint distribution <span class="math inline">\(P(Y_{x_1}, \dotsc, Y_{x_m})\)</span> is multivariate normal. More generally, we can take other domains <span class="math inline">\(\mathcal X\)</span> (e.g., <span class="math inline">\(\mathbb R^n\)</span>) and speak of <em>Gaussian random fields</em>.</p>
+<p>In either case, the trick is that we never work with infinitely many random variables at once: for example, if we observe values <span class="math inline">\(y_1, \dotsc, y_k\)</span> at locations <span class="math inline">\(x_1, \dotsc, x_k\)</span> and we want to predict the values at points <span class="math inline">\(x'_1, \dotsc, x'_q\)</span>, we will construct the joint multivariate normal distribution <span class="math inline">\(P(Y_{x_1}, \dotsc, Y_{x_m}, Y_{x'_1}, \dotsc, Y_{x'_q})\)</span> and condition on observed values to get the conditional distribution <span class="math inline">\(P(Y_{x'_1}, \dotsc, Y_{x'_q} \mid Y_{x_1} = y_1, \dotsc, Y_{x_k}=y_k)\)</span>.</p>
+<p>Now the questions is: how can we define a consistent stochastic process with these great properties? When <span class="math inline">\(\mathcal X\)</span> was finite, we could just define the joint probability distribution over all variables via mean and covariance. But now <span class="math inline">\(\mathcal X\)</span> is not finite!</p>
+<p>Consider therefore two functions, giving the mean and covariance: <span class="math inline">\(m \colon \mathcal X\to \mathbb R\)</span> and <span class="math inline">\(k\colon \mathcal X\to \mathcal X\to \mathbb R^+\)</span>. The premise is to build multivariate normal distributions <span class="math inline">\(P(Y_{x_1}, \dotsc, Y_{x_m})\)</span> by using the mean vector <span class="math inline">\(\mu_i = m(x_i)\)</span> and covariance matrix <span class="math inline">\(\Sigma_{ij} = k(x_i, x_j)\)</span>.</p>
+<p>First of all, we see that not all covariance functions are suitable: we want covariance matrices to be symmetric and positive-definite, so we should use <a href="https://en.wikipedia.org/wiki/Positive-definite_kernel">positive-definite kernels</a>.</p>
+<p>Secondly, we don’t know if these probability distributions can be coherently glued to a stochastic process. The answer to this problem is provided by <a href="https://en.wikipedia.org/wiki/Kolmogorov_extension_theorem">Daniell-Kolmogorov extension theorem</a>, which says when a family of probability distributions can be coherently glued yielding a stochastic process. In this case parameterising covariances via <span class="math inline">\(\Sigma_{ij}=k(x_i, x_j)\)</span> has the properties mentioned in the theorem. On the other hand, parameterising precision matrices via <span class="math inline">\(k(x_i, x_j)\)</span> doesn’t generally yield a coherent stochastic process.</p>
+<p>There are many important technical details, which I should mention here. Instead, I’ll refer to <a href="https://dansblog.netlify.app/posts/2021-11-03-yes-but-what-is-a-gaussian-process-or-once-twice-three-times-a-definition-or-a-descent-into-madness/yes-but-what-is-a-gaussian-process-or-once-twice-three-times-a-definition-or-a-descent-into-madness">a great introduction to Gaussian processes</a> at <a href="https://dansblog.netlify.app/">Dan Simpson’s blog</a>, and implement something.</p>
+</section>
+<section id="modelling-functions" class="level2">
+<h2 class="anchored" data-anchor-id="modelling-functions">Modelling functions</h2>
+<p>There are many libraries for working with Gaussian processes, including <a href="https://github.com/JaxGaussianProcesses/GPJax">GPJax</a>, <a href="https://gpytorch.ai/">GPyTorch</a> and <a href="https://gpytorch.ai/">GPy</a>. We will however just use the code developed above, plus some simple covariance functions.</p>
+<p>Our task will be the following: we are given some function on the interval <span class="math inline">\((0, 1)\)</span>. We observe some values <span class="math inline">\(M=\{(x_1, y_1), \dotsc, (x_k, y_k)\}\)</span> inside the intervals <span class="math inline">\((0, u)\)</span> and <span class="math inline">\((1-u, 1)\)</span> and we want to predict the function behaviour in the interval <span class="math inline">\((u, 1-u)\)</span>, from which we do not have any data.</p>
+<div class="cell" data-execution_count="6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dataclasses</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclasses.dataclass</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Task:</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  xs_all: Float[Array, <span class="st">" points"</span>]</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  ys_all: Float[Array, <span class="st">" points"</span>]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  xs_obs: Float[Array, <span class="st">" key"</span>]</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  ys_obs: Float[Array, <span class="st">" key"</span>]</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  xs_query: Float[Array, <span class="st">" query"</span>]</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_task(</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  f,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  thresh: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.25</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  k_2: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  n_query: <span class="bu">int</span> <span class="op">=</span> <span class="dv">101</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> Task:</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">assert</span> <span class="fl">0.02</span> <span class="op">&lt;</span> thresh <span class="op">&lt;</span> <span class="fl">0.98</span>, <span class="st">"Threshold should be in (0.02, 0.98)"</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  xs_all <span class="op">=</span> np.linspace(<span class="fl">0.01</span>, <span class="dv">1</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  xs_obs <span class="op">=</span> np.concatenate((np.linspace(<span class="fl">0.01</span>, thresh, k_2), np.linspace(<span class="dv">1</span> <span class="op">-</span> thresh, <span class="fl">0.99</span>, k_2)))</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  xs_query <span class="op">=</span> np.linspace(thresh <span class="op">+</span> <span class="fl">0.01</span>, <span class="fl">0.99</span> <span class="op">-</span> thresh, n_query)</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> Task(</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    xs_all<span class="op">=</span>xs_all,</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    ys_all<span class="op">=</span>f(xs_all),</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    xs_obs<span class="op">=</span>xs_obs,</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    ys_obs<span class="op">=</span>f(xs_obs),</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    xs_query<span class="op">=</span>xs_query,</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_task(ax: plt.Axes, task: Task):</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>  ax.plot(</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    task.xs_all, task.ys_all, linestyle<span class="op">=</span><span class="st">"--"</span>, c<span class="op">=</span><span class="st">"maroon"</span>, linewidth<span class="op">=</span><span class="fl">1.0</span>, alpha<span class="op">=</span><span class="fl">0.8</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>  ax.scatter(task.xs_obs, task.ys_obs, s<span class="op">=</span><span class="dv">8</span>, c<span class="op">=</span><span class="st">"maroon"</span>)</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>  ax.set_xlim(<span class="op">-</span><span class="fl">0.02</span>, <span class="fl">1.02</span>)</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">2.2</span>, <span class="fl">1.4</span>), dpi<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>task1 <span class="op">=</span> create_task(<span class="kw">lambda</span> x: np.cos(<span class="dv">2</span><span class="op">*</span>np.pi <span class="op">*</span> x))</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>plot_task(ax, task1)</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="conditioning-multivariate-normal_files/figure-html/cell-7-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We can approach this problem in two ways: first, we can impute missing values evaluated at some points.</p>
+<p>For example, we can define a grid over <span class="math inline">\((u, 1-u)\)</span> with <span class="math inline">\(q\)</span> query points <span class="math inline">\(x'_1, \dotsc, x'_q\)</span> and sample from the conditional distribution <span class="math inline">\(P(Y_{x'_1}, \dotsc, Y_{x'_q} \mid Y_{x_1}=y_1, \dotsc, Y_{x_k}=y_k)\)</span> several times. This is one good way of plotting, showing us the behaviour of the whole sample at once.</p>
+<p>Another way of plotting, which we also have already seen, is to take a single point <span class="math inline">\(x'\)</span> and look at the normal distribution <span class="math inline">\(P(Y_{x'} \mid Y_{x_1}=y_1, \dotsc, Y_{x_k}=y_k)\)</span>, summarized by the mean and standard deviation: we can plot <span class="math inline">\(\mu(x') \pm 2\sigma(x')\)</span> as a function of <span class="math inline">\(x'\)</span> (similarly to the finite-dimensional case). This approach doesn’t allow us to look at joint behaviour at different locations, but is quite convenient to summarise uncertainty at a single specific point. For example, this may be informative enough to determine a good location of the next sample to collect in Bayesian optimisation framework (unless one wants to consider multiple points).</p>
+<p>Let’s implement an example kernel and plot predictions in both ways:</p>
+<div class="cell" data-execution_count="7">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> kernel(x, x_):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> np.exp(<span class="op">-</span><span class="dv">20</span> <span class="op">*</span> np.square(x<span class="op">-</span>x_))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">2</span><span class="op">*</span><span class="dv">3</span>, <span class="dv">2</span>), dpi<span class="op">=</span><span class="dv">120</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  plot_task(ax, task1)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>xs_eval <span class="op">=</span> np.concatenate((task1.xs_query, task1.xs_obs))</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>cov <span class="op">=</span> kernel(xs_eval[:, <span class="va">None</span>], xs_eval[<span class="va">None</span>, :]) <span class="op">+</span> <span class="fl">1e-6</span> <span class="op">*</span> np.eye(<span class="bu">len</span>(xs_eval))</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>dist <span class="op">=</span> MultivariateNormal(np.zeros_like(xs_eval), cov)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>cond <span class="op">=</span> condition(</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  dist<span class="op">=</span>dist,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  query<span class="op">=</span>np.arange(<span class="bu">len</span>(task1.xs_query)),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  key<span class="op">=</span>np.arange(<span class="bu">len</span>(task1.xs_query), <span class="bu">len</span>(xs_eval)),</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  values<span class="op">=</span>task1.ys_obs</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">1</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> cond.sample(rng, size<span class="op">=</span><span class="dv">30</span>)</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> samples:</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  ax.plot(task1.xs_query, sample, alpha<span class="op">=</span><span class="fl">0.8</span>, color<span class="op">=</span><span class="st">"C1"</span>, linewidth<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>ax.plot(task1.xs_query, cond.mu, c<span class="op">=</span><span class="st">"C1"</span>, linestyle<span class="op">=</span><span class="st">":"</span>)</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>uncert <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> np.sqrt(np.diagonal(cond.cov))</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>ax.fill_between(task1.xs_query, cond.mu <span class="op">-</span> uncert, cond.mu <span class="op">+</span> uncert, color<span class="op">=</span><span class="st">"C1"</span>, alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="conditioning-multivariate-normal_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Nice! I’ve been thinking about showing how different kernels result in differing predictions. But this post is already a bit too long, so I may write another one on this topic. In any case, there’s a <a href="https://www.cs.toronto.edu/~duvenaud/cookbook/">Kernel Cookbook</a> created by David Duvenaud.</p>
+</section>
+<section id="appendix" class="level2">
+<h2 class="anchored" data-anchor-id="appendix">Appendix</h2>
+<section id="matrix-of-regression-coefficients" class="level3">
+<h3 class="anchored" data-anchor-id="matrix-of-regression-coefficients">Matrix of regression coefficients</h3>
+<p>Let’s take a quick look at the <em>matrix of regression coefficients</em>, <span class="math inline">\(\Sigma_{12}\Sigma_{22}^{-1}\)</span>.</p>
+<p>We could implement it via inversion, but <a href="https://peterroelants.github.io/posts/gaussian-process-tutorial/#Predictions-from-posterior">there is a better solution</a>.</p>
+<p>Namely, note that if <span class="math inline">\(X=\Sigma_{12} \Sigma_{22}^{-1}\)</span>, then</p>
+<p><span class="math display">\[
+  \Sigma_{22} X^T = \Sigma_{22} \Sigma_{22}^{-1} \Sigma_{12}^T = \Sigma_{12}^T
+\]</span></p>
+<p>Hence, <span class="math inline">\(X^T\)</span> is a solution to a matrix equation, which we can implement using <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.solve.html"><code>scipy.linalg.solve</code></a>. This is considered a better practice as it increases the numerical precision and can be faster (which is visible for large matrices; for small matrices the solution using matrix inversion was often faster).</p>
+<div class="cell" data-execution_count="8">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy.linalg <span class="im">as</span> npla</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.linalg <span class="im">as</span> spla</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calc_inv(sigma_12, sigma_22):</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> sigma_12 <span class="op">@</span> npla.inv(sigma_22)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calc_solve(sigma_12, sigma_22):</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> spla.solve(sigma_22, sigma_12.T).T</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>n_examples <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>size <span class="op">=</span> <span class="dv">20</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>_coefs <span class="op">=</span> rng.normal(size<span class="op">=</span>(n_examples, size, size))</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>sigmas <span class="op">=</span> np.einsum(<span class="st">"kab,kac-&gt;kbc"</span>, _coefs, _coefs)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sigma <span class="kw">in</span> sigmas:</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">assert</span> np.<span class="bu">min</span>(npla.eigvals(sigma)) <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  sigma_12 <span class="op">=</span> sigma[:m, m:]</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  sigma_22 <span class="op">=</span> sigma[m:, m:]</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  sol1 <span class="op">=</span> calc_inv(sigma_12, sigma_22)</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  sol2 <span class="op">=</span> calc_solve(sigma_12, sigma_22)</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">assert</span> np.allclose(sol1, sol2), <span class="st">"Solutions differ."</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+
+
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>For every non-zero <span class="math inline">\(x\in \mathbb R^n\)</span> we have <span class="math inline">\(x^T\Sigma x &gt; 0\)</span>, where the inequality is strict. As <span class="math inline">\(\Sigma\)</span> is a real symmetric matrix, one of the versions of the spectral theorem yields a decomposition <span class="math inline">\(\Sigma = R^TDR\)</span> for a diagonal matrix <span class="math inline">\(D\)</span> and orthogonal <span class="math inline">\(R\)</span>. Hence, equivalently, we all eigenvalues have to be positive. See <a href="https://en.wikipedia.org/wiki/Definite_matrix">this link</a> for more discussion.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>I like to call them “query”, “keys” and “values” vectors, which makes the language a bit more similar to <a href="../posts/kernel-regression-transformer.html">transformers</a>. From that we just need <a href="https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Conditional_distributions">one conditioning operation</a>:<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Why is it called in this manner? What are the slopes of <span class="math inline">\(\mu'\)</span> change, when we vary observed values <span class="math inline">\(y\)</span>?<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
