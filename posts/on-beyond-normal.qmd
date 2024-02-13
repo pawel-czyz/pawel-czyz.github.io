@@ -46,7 +46,7 @@ Frederic and I started programming[^2] different distributions and transformatio
 
 [^2]: As a byproduct we learned [Snakemake](https://snakemake.readthedocs.io/), which transformed my approach to data science entirely. But this is a different story.
 
-Well, I was wrong: after the manuscript got rejected from ICML, we realized that the most important aspect of our work was actually using the transformed distributions to study the strenghts and limitations of existing estimators[^3].
+Well, I was wrong: after the manuscript got rejected from ICML, we realized that the most important aspect of our work was actually using the transformed distributions to study the strengths and limitations of existing estimators[^3].
 We improved the experiments in the paper and changed the story to [_Beyond normal: on the evaluation of the mutual information estimators_](https://openreview.net/forum?id=25vRtG56YH)[^4], which was accepted to NeurIPS.
 
 [^3]: Also, Frederic figured out that the 3rd question (whether the estimators which are invariant to diffeomorphisms) has a trivial answer. If $\mathcal M$ is a connected smooth manifold of dimension at least 2, then for any two sets of distinct points $\{a_1, \dotsc, a_n\}$ and $\{b_1, \dotsc, b_n\}$ there exists a diffeomorphism $u\colon \mathcal M\to \mathcal M$ such that $b_i = u(a_i)$ (the proof of this fact can be e.g., found in P.W. Michor's and Cornelia Vizman's _$n$-transitivity of certain diffeomorphisms groups_). Hence, if $\mathcal X$ and $\mathcal Y$ fulfil the assumptions above, we can move a finite data set as we wish and the only invariant estimator has to return the same answer for *any* set of input data points.
@@ -96,7 +96,7 @@ However, as discussed above, generally we cannot expect that a normalizing flow 
 #### Do outliers break everything? 
 
 There's no real data without real noise and we wanted to have distributions which can be used in practice. One source of noise are _outliers_, which sometimes can be attributed to errors in data collection or recording (e.g., the equipment was apparently switched off or some piece of experimental setup broke), and are well-known suspects when an estimator behaves badly. 
-In *Beyond normal* we investigated heavy-tailed distributions (either by applying some transformations to multivariate normal distributions to make the tails havier, or by using multivariate Student distributions), but we felt that it was not enough.  
+In *Beyond normal* we investigated heavy-tailed distributions (either by applying some transformations to multivariate normal distributions to make the tails heavier, or by using multivariate Student distributions), but we felt that it was not enough.  
 
 ## The mixtures and the critics
 

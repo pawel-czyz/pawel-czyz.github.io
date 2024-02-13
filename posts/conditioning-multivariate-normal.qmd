@@ -419,10 +419,10 @@ Variable $Y_5$, which is independent of $(Y_1, Y_2, Y_3, Y_4)$, doesn't change: 
 
 ## Gaussian processes
 
-For $\mathcal X = \{1, \dotsc, n\}$ we considered am indexed collection of random variables $\{Y_x\}_{x\in \mathcal X}$. Let's call it a *stochastic process*. 
+For $\mathcal X = \{1, \dotsc, n\}$ we considered an indexed collection of random variables $\{Y_x\}_{x\in \mathcal X}$. Let's call it a *stochastic process*. 
 
-This stochastic process had the property that the joint distribution was multivariate normal.
-From that we could use the fact that all the other distributions $P(Y_{x_1}, \dotsc, Y_{x_m})$ were again multivariate normal, what allowed us to do prediction via conditioning (which resulted, again, in multivariate normal distributions).
+This stochastic process has the property that the joint distribution over all variables was multivariate normal.
+From that we could deduce that distributions $P(Y_{x_1}, \dotsc, Y_{x_m})$ were again multivariate normal, what in turn allowed us to do prediction via conditioning (which resulted, again, in multivariate normal distributions).
 
 Let's move beyond a finite dimension: take $\mathcal X=\mathbb R$ and consider a stochastic process $\{Y_x\}_{x\in \mathcal X}$.
 We will say that it's a *Gaussian process* if for every finite set $\{x_1, \dotsc, x_m\}\subseteq \mathcal X$ the joint distribution $P(Y_{x_1}, \dotsc, Y_{x_m})$ is multivariate normal.

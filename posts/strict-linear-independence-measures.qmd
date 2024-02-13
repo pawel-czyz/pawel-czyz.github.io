@@ -178,7 +178,7 @@ $$
 $$
 from the assumption that the means are different.
 
-#### Asymptotics
+#### Asymptotic behaviour
 Let's do another proof, this time going to the limit, similarly to [this solution](https://math.stackexchange.com/a/1087610/551592).
 
 Without loss of generality, assume $0 < \mu_1 < \mu_2 < \dotsc < \mu_K$.

@@ -22,12 +22,12 @@ We know that each image in this data set corresponds to a unique class (e.g., a 
 
 We got a very good question from the reviewer: if we compare our method to point estimates produced by an [expectation-maximization algorithm](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm) [@Saerens-2001-adjustingtheoutputs] and we are interested in uncertainty quantification, why don't we upgrade this method to a [Gibbs sampler](https://en.wikipedia.org/wiki/Gibbs_sampling)?
 
-I like this question, because it's very natural to ask, yet I overlooked the possibliby of doing it.
+I like this question, because it's very natural to ask, yet I overlooked the possibility of doing it.
 As Richard McElreath explains [here](https://elevanth.org/blog/2017/11/28/build-a-better-markov-chain/), Hamiltonian Markov chain Monte Carlo is usually the preferred way of sampling, but let's see how exactly the expectation-maximization algorithm works in this case and how to adapt it to a Gibbs sampler.
 
 ## Modelling assumptions
 
-Generatively, the model is very similar to the one used in clustering problems: for each object we have an observed random variable $X_i$ (with its realization being the image $x_i$) and a latent random variable $Y_i$, which is valued in the set of labels $\{1, \dotsc, L\}$.
+The model is very similar to the one used in clustering problems: for each object we have an observed random variable $X_i$ (with its realization being the image $x_i$) and a latent random variable $Y_i$, which is valued in the set of labels $\{1, \dotsc, L\}$.
 
 Additionally, there's a latent vector $\pi = (\pi_1, \dotsc, \pi_L)$ with non-negative entries, such that $\pi_1 + \cdots + \pi_L = 1$. In other words, vector $\pi$ is the proportion vector of interest.
 
@@ -109,6 +109,7 @@ $$\begin{align*}
 &= P(\pi) + \sum_{i=1}^N \log P(X_i=x_i\mid \pi).
 \end{align*}
 $$
+
 In particular, by running the optimization procedure several times, we can hope to find the maximum a posteriori estimate (or the maximum likelihood estimate, when the uniform distribution over the simplex is used as $P(\pi)$).
 Interestingly, this optimization procedure will *not* assume that we can compute $\log P(X_i=x_i\mid \pi)$, using instead quantities available to us.
 
@@ -168,7 +169,8 @@ $$
 $$
 under a constraint $\pi_1 + \cdots + \pi_L = 1$.
 
-@Saerens-2001-adjustingtheoutputs use [Lagrange multipliers](https://en.wikipedia.org/wiki/Lagrange_multiplier), but we will use the first $L-1$ coordinates to parameterise the simplex and write $\pi_L = 1 - (\pi_1 + \cdots + \pi_{L-1})$. In this case, if we differentiate with respect to $\pi_l$, we obtain
+@Saerens-2001-adjustingtheoutputs use [Lagrange multipliers](https://en.wikipedia.org/wiki/Lagrange_multiplier), but we will use the first $L-1$ coordinates to parameterise the simplex and write $\pi_L = 1 - (\pi_1 + \cdots + \pi_{L-1})$.
+In this case, if we differentiate with respect to $\pi_l$, we obtain
 $$
 \frac{A_l}{\pi_l} + \frac{A_L}{\pi_L} \cdot (-1) = 0,
 $$

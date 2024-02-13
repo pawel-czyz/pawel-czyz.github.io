@@ -15,7 +15,7 @@ jupyter: python3
 
 I remember that when we read [*Attention is all you need*](https://arxiv.org/abs/1706.03762) at a journal club back in 2020, I did not really understand what attention was[^1].
 
-[^1]: The authors had to explain self-attention, its multi-head variant, the transformer architecture with encoder and decoder block, and positional encodings. All in a short conference paper, so it may indeed appear quite dense in ideas for people new to the domain.
+[^1]: The authors had to explain self-attention, its multi-head variant, the transformer architecture with encoder and decoder block, and positional encoding. All in a short conference paper, so it may indeed appear quite dense in ideas.
 
 Fortunately for me, [*Transformer dissection*](https://arxiv.org/abs/1908.11775) paper and Cosma Shalizi's [post on the topic](http://bactra.org/notebooks/nn-attention-and-transformers.html) appeared, which show the connection between attention and [kernel regression](https://en.wikipedia.org/wiki/Kernel_regression).
 This point of view was exactly what I needed! I like this so much that when I explain attention to other people, I always start from kernel regression.
