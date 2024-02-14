@@ -32,26 +32,38 @@ The model is very similar to the one used in clustering problems: for each objec
 Additionally, there's a latent vector $\pi = (\pi_1, \dotsc, \pi_L)$ with non-negative entries, such that $\pi_1 + \cdots + \pi_L = 1$. In other words, vector $\pi$ is the proportion vector of interest.
 
 We can visualise the assumed dependencies in the following graphical model:
+
 ```{python}
 import daft
 import matplotlib.pyplot as plt
-
-plt.style.use('grayscale')
+plt.style.use("dark_background")
 
 # Instantiate a PGM object
-pgm = daft.PGM()
+pgm = daft.PGM(dpi=200)
 
-# Add nodes. The arguments are (name, label, x-position, y-position)
-pgm.add_node("pi", "$\\pi$", 0, 1)
-pgm.add_node("Y_i", r"$Y_i$", 2, 1)
-pgm.add_node("X_i", r"$X_i$", 4, 1, plot_params={"facecolor": "cornflowerblue"})
+def add_node(id: str, name: str, x: float, y: float, observed: bool = False):
+  if observed:
+    params={"facecolor": "grey"}
+  else:
+    params={"edgecolor": "w"}
+  pgm.add_node(id, name, x, y, plot_params=params)
+
+def add_edge(start: str, end: str):
+  pgm.add_edge(start, end, plot_params={"edgecolor": "w", "facecolor": "w"})
+
+def add_plate(coords, label: str, shift: float):
+  pgm.add_plate(coords, label=label, shift=shift, rect_params={"edgecolor": "w"})
+
+add_node("pi", "$\\pi$", 0, 1)
+add_node("Y_i", r"$Y_i$", 2, 1)
+add_node("X_i", r"$X_i$", 4, 1, observed=True)
 
 # Add edges
-pgm.add_edge("pi", "Y_i")
-pgm.add_edge("Y_i", "X_i")
+add_edge("pi", "Y_i")
+add_edge("Y_i", "X_i")
 
 # Add a plate
-pgm.add_plate([1.5, 0.5, 3, 1.5], label=r"$i = 1, \ldots, N$", shift=-0.1)
+add_plate([1.5, 0.5, 3, 1.5], label=r"$i = 1, \ldots, N$", shift=-0.1)
 
 # Render and show the PGM
 pgm.render()

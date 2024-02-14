@@ -234,30 +234,42 @@ div.csl-indent {
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> daft</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'grayscale'</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Instantiate a PGM object</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>pgm <span class="op">=</span> daft.PGM()</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Add nodes. The arguments are (name, label, x-position, y-position)</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>pgm.add_node(<span class="st">"pi"</span>, <span class="st">"$</span><span class="ch">\\</span><span class="st">pi$"</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>pgm.add_node(<span class="st">"Y_i"</span>, <span class="vs">r"$Y_i$"</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>pgm.add_node(<span class="st">"X_i"</span>, <span class="vs">r"$X_i$"</span>, <span class="dv">4</span>, <span class="dv">1</span>, plot_params<span class="op">=</span>{<span class="st">"facecolor"</span>: <span class="st">"cornflowerblue"</span>})</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Add edges</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>pgm.add_edge(<span class="st">"pi"</span>, <span class="st">"Y_i"</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>pgm.add_edge(<span class="st">"Y_i"</span>, <span class="st">"X_i"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"dark_background"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Instantiate a PGM object</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>pgm <span class="op">=</span> daft.PGM(dpi<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> add_node(<span class="bu">id</span>: <span class="bu">str</span>, name: <span class="bu">str</span>, x: <span class="bu">float</span>, y: <span class="bu">float</span>, observed: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>):</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> observed:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    params<span class="op">=</span>{<span class="st">"facecolor"</span>: <span class="st">"grey"</span>}</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    params<span class="op">=</span>{<span class="st">"edgecolor"</span>: <span class="st">"w"</span>}</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  pgm.add_node(<span class="bu">id</span>, name, x, y, plot_params<span class="op">=</span>params)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> add_edge(start: <span class="bu">str</span>, end: <span class="bu">str</span>):</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  pgm.add_edge(start, end, plot_params<span class="op">=</span>{<span class="st">"edgecolor"</span>: <span class="st">"w"</span>, <span class="st">"facecolor"</span>: <span class="st">"w"</span>})</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a plate</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>pgm.add_plate([<span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="dv">3</span>, <span class="fl">1.5</span>], label<span class="op">=</span><span class="vs">r"$i = 1, \ldots, N$"</span>, shift<span class="op">=-</span><span class="fl">0.1</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> add_plate(coords, label: <span class="bu">str</span>, shift: <span class="bu">float</span>):</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  pgm.add_plate(coords, label<span class="op">=</span>label, shift<span class="op">=</span>shift, rect_params<span class="op">=</span>{<span class="st">"edgecolor"</span>: <span class="st">"w"</span>})</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Render and show the PGM</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>pgm.render()</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>add_node(<span class="st">"pi"</span>, <span class="st">"$</span><span class="ch">\\</span><span class="st">pi$"</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>add_node(<span class="st">"pi"</span>, <span class="st">"$</span><span class="ch">\\</span><span class="st">pi$"</span>, <span class="dv">0</span>, <span class="dv">1</span>, )</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>add_node(<span class="st">"Y_i"</span>, <span class="vs">r"$Y_i$"</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>add_node(<span class="st">"X_i"</span>, <span class="vs">r"$X_i$"</span>, <span class="dv">4</span>, <span class="dv">1</span>, observed<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Add edges</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>add_edge(<span class="st">"pi"</span>, <span class="st">"Y_i"</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>add_edge(<span class="st">"Y_i"</span>, <span class="st">"X_i"</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a plate</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>add_plate([<span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="dv">3</span>, <span class="fl">1.5</span>], label<span class="op">=</span><span class="vs">r"$i = 1, \ldots, N$"</span>, shift<span class="op">=-</span><span class="fl">0.1</span>)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Render and show the PGM</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>pgm.render()</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="em-gibbs-quantification_files/figure-html/cell-2-output-1.png" width="393" height="155"></p>
+<p><img src="em-gibbs-quantification_files/figure-html/cell-2-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 <p>As <span class="math inline">\(\pi\)</span> is simplex-valued, it’s convenient to model it with a Dirichlet prior. Then, <span class="math inline">\(Y_i\mid \pi \sim \mathrm{Categorical}(\pi)\)</span>. Finally, we assume that each class <span class="math inline">\(y\)</span> has a corresponding distribution <span class="math inline">\(D_y\)</span> from which the image is sampled. In other words, <span class="math inline">\(X_i\mid Y_i=y \sim D_y\)</span>.</p>
@@ -558,9 +570,9 @@ Actual:    [0.2 0.8]</code></pre>
 <span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Actual: </span><span class="sc">{</span>n_cases <span class="op">/</span> n_cases<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_173332/3942328187.py:2: DeprecationWarning: jax.random.PRNGKeyArray is deprecated. Use jax.Array for annotations, and jax.dtypes.issubdtype(arr.dtype, jax.dtypes.prng_key) for runtime detection of typed prng keys.
+<pre><code>/tmp/ipykernel_38981/3942328187.py:2: DeprecationWarning: jax.random.PRNGKeyArray is deprecated. Use jax.Array for annotations, and jax.dtypes.issubdtype(arr.dtype, jax.dtypes.prng_key) for runtime detection of typed prng keys.
   key: random.PRNGKeyArray,
-/tmp/ipykernel_173332/3942328187.py:17: DeprecationWarning: jax.random.PRNGKeyArray is deprecated. Use jax.Array for annotations, and jax.dtypes.issubdtype(arr.dtype, jax.dtypes.prng_key) for runtime detection of typed prng keys.
+/tmp/ipykernel_38981/3942328187.py:17: DeprecationWarning: jax.random.PRNGKeyArray is deprecated. Use jax.Array for annotations, and jax.dtypes.issubdtype(arr.dtype, jax.dtypes.prng_key) for runtime detection of typed prng keys.
   key: random.PRNGKeyArray,</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
