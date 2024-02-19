@@ -1,0 +1,390 @@
+---
+title: "Beta-Bernoulli distribution"
+description: "Bernoulli, binomial, beta-binomial... Why don't we talk about the beta-Bernoulli distribution?"
+author: "Paweł Czyż"
+date: "2/19/2024"
+execute:
+  freeze: true
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+I have [already demonstrated](almost-binomial-markov-chain.qmd) that I don't know how to properly toss a coin. Let's do that again.
+
+## Famous Bernoulli and the company
+
+### Counting the distributions
+Before we go any further: how many distributions can give outcomes from the set $\{0, 1\}$?
+
+In other words, we have a measurable space $\{0, 1\}$ (such that all four subsets are measurable) and we would like to know how many probability measures exist on this space.
+We have $P(\varnothing) = 0$ and $P(\{0, 1\}) = 1$ straight from the definition of a probability measure.
+As we need to have $P(\{0\}) + P(\{1\}) = 1$ we see that that there is a bijection between these probability measures and numbers from the set $[0, 1]$, given by $P_b(\{1\}) = b$ for any *bias* $b\in [0, 1]$.
+This distribution is called $\mathrm{Bernoulli}(b)$ and it's easy to prove that if $X\sim \mathrm{Bernoulli}(b)$, then
+$$
+\mathbb E[X] = P(X=1) = b.
+$$
+
+Hence, the first moment fully determines any distribution on $\{0, 1\}$.
+
+Derivation of variance is quite elegant, once one notices that if $X\sim \mathrm{Bernoulli}(b)$, then also $X^2\sim \mathrm{Bernoulli}(b)$, because it has to be *some* Bernoulli and $P(X^2=1) = P(X=1)$.
+Then:
+$$
+\mathbb V[X] = \mathbb E[X^2] - \mathbb E[X]^2 = b - b^2 = b(1-b).
+$$
+
+By considering both cases, we see that for every outcome $x\in \{0, 1\}$, the likelihood is given by
+$$
+\mathrm{Bernoulli}(x\mid b) = b^x(1-b)^{1-x}.
+$$
+
+### A few coins
+This characterization of distributions over $\{0, 1\}$ is very powerful.
+
+Consider the following problem: we have $K$ coins with biases $b_1, \dotsc, b_K$ and we throw a loaded dice which can give $K$ different outcomes, each with probability $d_1, \dotsc, d_K$ (which, of course, sum up to $1$) to decide which coin we will toss.
+What is the outcome of this distribution? It's, of course, a coin toss outcome, that is a number from the set $\{0, 1\}$.
+Hence, this has to be some Bernoulli distribution.
+Which one? Bernoulli distributions are fully determined by their expectations and the expectation in this case is given by a weighted average
+$\bar b = b_1 d_1 + \cdots + b_K d_K$.
+In other words, we can replace a loaded dice and $K$ biased coins with just a single biased coin.
+
+To have more equations, the first procedure corresponds to
+$$\begin{align*}
+D &\sim \mathrm{Categorical}(d_1, \dotsc, d_K)\\
+X \mid D &\sim \mathrm{Bernoulli}(b_D)
+\end{align*}$$
+and the second one to
+$$
+Y \sim \mathrm{Bernoulli}(\bar b),
+$$
+with $\bar b = b_1d_1 + \cdots + b_Kd_K$.
+
+Both of these distributions are the same, i.e., $\mathrm{law}\, X = \mathrm{law}\, Y$.
+
+In particular, the likelihood has to be the same, proving an equality
+$$
+\sum_{k=1}^K d_k\, b_k^x(1-b_k)^{1-x} = \bar b^x(1-\bar b)^{1-x}
+$$
+for every $x\in \{0, 1\}$.
+
+### Even more coins
+Even more interestingly, consider infinitely many coins with different biases, which are chosen according to the beta distribution. Once the coin is chosen, we toss it:
+$$\begin{align*}
+B &\sim \mathrm{Beta}(\alpha, \beta)\\
+X\mid B &\sim \mathrm{Bernoulli}(B) 
+\end{align*}
+$$
+
+This is a continuous mixture, which we could perhaps call $\mathrm{BetaBernoulli}(\alpha, \beta)$... if it wasn't just a plain Bernoulli distribution with bias
+$$
+\mathbb E[X] = \mathbb E[\mathbb E[X\mid B]] = \mathbb E[B] = \frac{\alpha}{\alpha + \beta}.
+$$
+
+### Noisy communication channel
+Let's consider an example involving plain Bernoulli distributions and a noisy communication channel.
+
+Let $X\sim \mathrm{Bernoulli}(b)$ be an input variable.
+The binary output, $Y$, is a noisy version of $X$, with $\alpha$ controlling the false positive rate and $\beta$ the false negative rate:
+$$
+P(Y = 1 \mid X=1) = 1-\beta, \quad P(Y=1\mid X=0) = \alpha.
+$$
+
+We can write this model as:
+$$\begin{align*}
+X &\sim \mathrm{Bernoulli}(b)\\
+Y \mid X &\sim \mathrm{Bernoulli}( X(1-\beta) + (1-X) \alpha)
+\end{align*}
+$$
+
+In fact, we have [already seen](#finite-mixture) this example: we can treat $X$ as a special case of a loaded dice, indexing a finite mixture with just two components.
+Hence, the marginal distribution of $Y$ is
+$$
+Y \sim \mathrm{Bernoulli}(b(1-\beta) + (1-b) \alpha).
+$$
+
+
+### Tossing multiple coins
+
+We know that a single coin toss characterises all probability distributions on the set $\{0, 1\}$.
+However, once we consider $N\ge 2$ coin tosses, yielding outcomes in the set $\{0, 1, 2, \dotsc, N\}$, many *different distributions* will appear.
+
+We mentioned some of these distributions in [this post](almost-binomial-markov-chain.qmd), but just for completeness [at the end](#list-of-distributions) there is a list of standard distributions.
+
+Similarly, if one is interested in modelling binary vectors, which are from the set $\{0, 1\}\times \{0, 1\} \cdots \{0, 1\}$, many different distributions will appear.
+Let's analyse an example below.
+
+## Two deceptively similar distributions
+
+### Denoising problem
+We have a fixed bit $T \in \{0, 1\}$ and we observe its noisy measurements, with false negatives rate $\beta$ and false positive rate $\alpha$ (recall [this section](#noisy-communication-channel)).
+We will write $c_0 = \alpha$ and $c_1 = 1-\beta$ and put some prior on $T$:
+$$\begin{align*}
+  \theta &\sim \mathrm{Beta}(\alpha, \beta)\\
+  T\mid \theta &\sim \mathrm{Bernoulli}(\theta)\\
+  X_n\mid T &\sim \mathrm{Bernoulli}( c_0(1-T) + c_1T) \text{ for } n = 1, \cdots, N
+\end{align*}
+$$
+
+Let's use shorthand notation $\mathbf{X} = (X_1, \dotsc, X_N)$ and note that the likelihood is:
+$$\begin{align*}
+  P(\mathbf{X} \mid T) &= \prod_{n=1}^N P(X_n \mid b(T) ) \\
+  &= \prod_{n=1}^N b(T) ^{X_n} \left(1-b(T)\right)^{1-X_n} \\
+  &= b(T)^S \left(1-b(T)\right)^{N-S}
+\end{align*}
+$$
+
+where $b(T) = c_0(1-T) + c_1T$ and $S = X_1 + \cdots + X_N$.
+
+After reading the [discussion above](#famous-bernoulli-and-the-company), there is a natural question: why is $\theta$ introduced at all?
+For a simple denoising question, i.e., finding $P(T\mid \mathbf{X}) \propto P(\mathbf{X} \mid T) P(T)$ this parameter is not needed at all: $P(T)$ is just a Bernoulli variable, with bias parameter $\bar \theta = \alpha/(\alpha + \beta)$.
+Then, 
+$$
+  P(T=1\mid \mathbf{X}) = \frac{ c_1^S (1-c_1)^{N-S} \cdot \bar \theta }{ c_1^S(1-c_1)^{N-S} \cdot \bar \theta + c_0^S(1-c_0)^{N-S}\cdot (1-\bar \theta) }. 
+$$
+
+This is, of course, simple and correct. The reason for introducing $\theta$ is that we are not only interested in inferring a missing coin throw, but also in learning about the unknown bias $\theta$ of the coin from this experiment.
+For example, if $T$ was directly observed, we would have $P(\theta \mid T) = \mathrm{Beta}(\theta \mid \alpha + T,  \beta + (1-T) )$.
+
+As $T$ is not directly observed, we have to look at $P(\theta \mid \mathbf{X})$:
+$$\begin{align*}
+  P(\theta \mid \mathbf{X}) &= \sum_{t} P(\theta, T=t \mid \mathbf{X}) \\
+  &= \sum_{t} P(\theta \mid T=t,  \mathbf{X})P(T=t\mid \mathbf{X})\\
+  &= \sum_{t} P(\theta \mid T=t) P(T=t\mid \mathbf{X}),
+\end{align*}
+$$
+which is therefore a mixture of $\mathrm{Beta}(\alpha+1, \beta)$ and $\mathrm{Beta}(\alpha, \beta + 1)$ distributions.
+
+But let's look at it from a bit different perspective.
+Let's marginalise $T$ out and formulate likelihood in terms of $\theta$:
+$$\begin{align*}
+  P(\mathbf{X} \mid \theta ) &= \sum_{t} P(\mathbf{X} \mid T=t) P(T=t\mid \theta) \\
+  &= \theta P(\mathbf{X} \mid T=0) + (1-\theta) P( \mathbf{X}\mid T=1) \\
+  &= \theta c_1^{S}(1-c_1)^{N-S} + (1-\theta) c_0^S(1-c_0)^{N-S}.
+\end{align*}
+$$
+
+We have now only one continuous variable and we could use Hamiltonian Monte Carlo to sample from the distribution $P(\theta \mid \mathbf{X})$.
+(But we have already determined it analytically.)
+
+### A bit different model
+
+In the model above for any single observation $X_n$ we had
+$$
+P(X_n\mid \theta) = \theta c_1^{X_n}(1-c_1)^{1-X_n} + (1-\theta) c_0^{X_n}(1-c_0)^{1-X_n}.
+$$
+
+However, the joint likelihood was given by
+
+$$\begin{align*}
+P(\mathbf{X} \mid \theta) &= \theta \prod_{n} c_1^{X_n}(1-c_1)^{1-X_n} + (1-\theta) \prod_{n} c_0^{X_n}(1-c_0)^{1-X_n} \\
+&= \theta c_1^S (1-c_1)^{N-S} + (1-\theta)c_0^S(1-c_0)^S,
+\end{align*}
+$$
+
+which is *not* the product of $\prod_n P(X_n\mid \theta)$, because all variables $X_n$ were noisy observations of a single coin toss outcome $T$.
+
+Let's now consider a deceptively similar model:
+$$\begin{align*}
+  \phi &\sim \mathrm{Beta}(\alpha, \beta)\\
+  U_n \mid \phi &\sim \mathrm{Bernoulli}(\phi) \\
+  Y_n \mid U_n &\sim \mathrm{Bernoulli}(c_0(1-U_n) + c_1U_n)
+\end{align*}
+$$
+
+In this case for each observation $Y_n$ we have *a new coin toss* $U_n$.
+
+We have $U_n\sim \mathrm{Bernoulli}(\alpha/(\alpha + \beta))$, so that $\mathrm{law}\, U_n = \mathrm{law}\, T$.
+Similarly, $P(Y_n \mid \phi)$ and $P(X_n \mid \theta)$ will be very similar:
+$$\begin{align*}
+P(Y_n \mid \phi) &= \sum_{u} P( Y_n \mid U_n=u ) P(U_n=u \mid \phi) \\
+&= \phi c_1^{Y_n}(1-c_1)^{1-Y_n} + (1-\phi) c_0^{Y_n} (1-c_1)^{1-Y_n}.
+\end{align*}
+$$
+
+We see that for $X_n = Y_n$ and $\theta = \phi$ the expressions are exactly the same.
+
+For $N=1$ there is no real difference between these two models.
+However, for $N\ge 2$ a difference appears, because throws $U_n$ are independent and we have
+$$
+P(\mathbf{Y} \mid \phi) = \prod_{n} \left( \phi c_1^{Y_n}(1-c_1)^{1-Y_n} + (1-\phi) c_0^{Y_n} (1-c_1)^{1-Y_n} \right).
+$$
+
+This is substantially *different* from $P(\mathbf{X}\mid \theta)$.
+
+Perhaps the following perspective is useful: the new model, with variables $U_n$ marginalised out, corresponds to the following:
+
+$$\begin{align*}
+  \phi &\sim \mathrm{Beta}(\alpha, \beta)\\
+  Y_n \mid \phi &\sim \mathrm{Bernoulli}(c_0(1-\phi) + c_1\phi)
+\end{align*}
+$$
+
+which is different from the model with a shared latent variable $T$:
+
+$$\begin{align*}
+  \theta &\sim \mathrm{Beta}(\alpha, \beta)\\
+  T\mid \theta &\sim \mathrm{Bernoulli}(\theta)\\
+  Y_n \mid T &\sim \mathrm{Bernoulli}(c_0(1-T) + c_1T)
+\end{align*}
+$$
+
+Hence, although the likelihood functions agree for any single observation, i.e., $P(X_n\mid \theta)$ and $P(Y_n\mid \phi)$ are "the same" (up to relabeling), the likelihood functions constructed using all observed variables, $P(\mathbf{X}\mid \theta)$ and $P(\mathbf{Y}\mid \phi)$, are usually very different.
+
+Also, the posteriors $P(\theta \mid  \mathbf{X})$ and $P(\phi \mid \mathbf{Y})$ will differ: $\phi$ treats each outcome $Y_n$ independently, so that the posterior can shrink quickly if $N$ is large. 
+
+The posterior on $\theta$ assumes that all $X_n$ are noisy versions of a single throw $T$, so it knows that there's not that much information about $\theta$ even if $N$ is very large: the posterior will always be a mixture of $\mathrm{Beta}(\alpha+1, \beta)$ and $\mathrm{Beta}(\alpha, \beta+1)$.
+In particular, if $\alpha = \beta = 1$ the posterior on $\theta$ will still be very diffuse.
+
+## Which model is better for denoising?
+Both models actually answer different questions: the first model tries to estimate $T$, a single coin toss, and slightly updates the information about this coin bias, $\theta$.
+
+The second model assumes independent coin tosses, where the bias is controlled by $\phi$.
+As such, it can quickly shrink the posterior on $\phi$.
+Moreover, it can be used to answer the question to impute individual coin tosses $P(\mathbf{U} \mid \mathbf{Y})$.
+
+Let's think what could happen if we fitted each model to the data generated from the other one: this is working with misspecified models (in the $\mathcal M$-complete setting).
+
+Consider a setting where we have a lot of data, $N\gg 1$ and the false positive and false negative rates are small, with $c_0 \ll c_1$. If the data come from the second model, with individual variables $U_n\sim \mathrm{Bernoulli}(\phi)$, and we have $Y_n\approx U_n$, then the posterior on $T$ will have most mass on the maximum likelihood solution: either $0$ (which should happen for $\phi \ll 0.5$) or $1$ (for $\phi \gg 0.5$).
+This model will be underfitting and the predictive distribution from this model will be quite bad: new $Y_{N+1}$ would again be an approximation to $U_{N+1}$, which is sampled from $\mathrm{Bernoulli}(\phi)$, but the model would just return a noisy version of the inferred $T$.
+
+On the other hand, if we have a lot of data from the first model (with a single $T$ variable) and we fit the second model, the posterior on $\phi$ may have most of the mass near $0$ or $1$, depending on the true value of $T$.
+Hence, although $U_n\sim \mathrm{Bernoulli}(\phi)$ are sampled independently, once $\phi$ is near the true value of $T$ ($0$ or $1$), they can all be approximately equal to $T$.
+
+So, when there is a lot of data, noting where most of the mass of $\phi$ lies can be a good approximation to the maximum likelihood of $T$.
+
+Of course, these $N\gg 1$ settings only tell what happens when we have a lot of data and we didn't discuss the uncertainty: can we use $\phi$ to get well-calibrated uncertainty on $T$?
+
+I generally expect that the $\phi$ model can be a bit better in terms of handling slight misspecification, but doing inference directly on $T$ will provide better results in terms of uncertainty quantification for small $N$.
+But this is just a hypothesis: the simulations are not for today.
+
+## Appendix
+
+### List of distributions
+
+#### Binomial distribution
+The simplest choice: we have a coin with bias $b$ and we toss it $N$ times:
+$$\begin{align*}
+  X_n &\sim \mathrm{Bernoulli}(b) \text{ for } n = 1, \dotsc, N\\
+  S &= X_1 + \cdots + X_N
+\end{align*}
+$$
+
+Then, we have $S \sim \mathrm{Binomial}(N, b)$.
+As the individual throws are independent, it's easy to prove that
+$$
+\mathbb E[S] = Nb, \quad \mathbb V[S] = Nb(1-b).
+$$
+
+#### Finite mixture of binomial distributions
+As [above](#a-few-coins), consider $K$ coins with biases $b_1, \dotsc, b_K$ and a dice used to choose the coin which will be tossed.
+This is a finite mixture of binomial distributions:
+$$\begin{align*}
+  D &\sim \mathrm{Categorical}(d_1, \dotsc, d_K)\\
+  S \mid D &\sim \mathrm{Binomial}(N, b_D)
+\end{align*}
+$$
+
+In this case the expectation is exactly what one can expect:
+$$
+\mathbb E[S] = \sum_{k=1}^K d_k \cdot Nb_k = N\bar b,
+$$
+where $\bar b = d_1b_1 + \cdots + d_Kb_K$.
+
+However, the formula for variance is more complex: from [the law of total variance](https://en.wikipedia.org/wiki/Law_of_total_variance):
+
+$$\begin{align*}
+\mathbb V[S] &= \mathbb E[\mathbb V[S\mid B]] + \mathbb V[ \mathbb E[S\mid B] ] \\
+&= \sum_{k=1}^K d_k N b_k(1-b_k) + \mathbb V[NB(1-B)]
+\end{align*}
+$$
+
+#### Beta-binomial distribution
+
+Similarly as [here](#even-more-coins), we can consider an infinite collection of coins, chosen from the beta distribution. Once we pick a coin, we toss it $N$ times:
+
+$$\begin{align*}
+  B &\sim \mathrm{Beta}(\alpha, \beta)\\
+  S \mid B &\sim \mathrm{Binomial}(N, B)
+\end{align*}
+$$
+
+The marginal distribution is called the [beta-binomial distribution](https://en.wikipedia.org/wiki/Beta-binomial_distribution):
+$$
+S \sim \mathrm{BetaBinomial}(N, \alpha, \beta).
+$$
+
+It's easy to prove that
+$$
+\mathbb E[S] = N \frac{\alpha}{\alpha + \beta},
+$$
+but I don't know an easy derivation of the formula for the variance:
+$$
+\mathbb V[S] = Nb(1-b)\cdot (1 + (N-1)\rho),
+$$
+where
+$b=\alpha/(\alpha + \beta)$ and $\rho=1/(1 + \alpha + \beta)$.
+
+Hence, choosing the coin first incurs additional variance (compared to the binomial distribution).
+
+#### Poisson binomial distribution
+
+That was quite a few examples. Let's do one more: the [Poisson binomial distribution](https://en.wikipedia.org/wiki/Poisson_binomial_distribution), because it is fun.
+
+In this case one has $N$ coins with biases $b_1, \dotsc, b_N$ and tosses each of them exactly once:
+$$\begin{align*}
+  X_n &\sim \mathrm{Bernoulli}(b_n) \text{ for } n=1, \dotsc, N\\
+  S &= X_1 + \cdots + X_N.
+\end{align*}
+$$
+
+We see that if all biases are equal, this reduces to the binomial distribution. However, this one is more flexible, as the expectation and variance are given now by
+$$
+  \mathbb E[S] = \sum_{n=1}^N b_n, \quad \mathbb  V[S] = \sum_{n=1}^N b_n(1-b_n).
+$$
+
+### Beta-Bernoulli sparsity magic
+
+Consider the following prior on coefficients in a linear model:
+$$\begin{align*}
+  \gamma &\sim \mathrm{Beta}(\alpha, \beta)\\
+  \theta_k \mid \gamma &\sim \gamma\, Q_0 + (1-\gamma)\, Q_1 \text{ for } k = 1, \dotsc, K
+\end{align*}
+$$
+
+where $Q_1$ is e.g., a $\mathrm{Normal}(0, 10^2)$ distribution corresponding to "slab" component and $Q_0$, e.g., $\mathrm{Normal}\left(0, 0.01^2\right)$ is the "spike" component.
+
+Intuitively, we expect that fraction $\gamma$ of the parameters will be shrunk to $0$ by the spike component $Q_0$ and the rest (the $1-\gamma$ fraction) of the parameters will be actually used to predict values.
+
+Michael Betancourt wrote an [amazing tutorial](https://betanalpha.github.io/assets/case_studies/modeling_sparsity.html) in which he introduces local latent variables, $\lambda_k$, individually controlling whether $\theta_k$ should be shrunk or not:
+
+$$\begin{align*}
+  \lambda_k &\sim \mathrm{Beta}(\alpha, \beta) \text{ for } k = 1, \dotsc, K\\
+  \theta_k \mid \lambda_k &\sim \lambda_k \, Q_0 + (1-\lambda_k)\, Q_1 \text{ for } k = 1, \dotsc, K.
+\end{align*}
+$$
+
+Using small letters for PDFs, we can marginalise variables $\lambda_k$ as follows:
+$$
+  p(\mathbf{\theta}) = \prod_{k=1}^K p(\theta_k) = \prod_{k=1}^K \left( \int p(\theta_k \mid \lambda_k) \, \mathrm{d}P(\lambda_k) \right)
+$$
+and
+$$\begin{align*}
+  p(\theta_k) &= \int p(\theta_k \mid \lambda_k) \, \mathrm{d}P(\lambda_k) \\
+  &= q_0(\theta_k) \int \lambda_k\, \mathrm{Beta}(\lambda_k \mid \alpha, \beta) \, \mathrm{d}\lambda_k + q_1(\theta_k) \int (1-\lambda_k)\, \mathrm{Beta}(\lambda_k \mid \alpha, \beta)\, \mathrm{d} \lambda_k \\
+  &= q_0(\theta_k) \frac{\alpha}{\alpha + \beta} + q_1(\theta_k) \left( 1 - \frac{\alpha}{\alpha + \beta} \right),
+\end{align*}
+$$
+so that
+$$
+  \theta_k \sim \gamma\, Q_0 + (1-\gamma)\, Q_1,
+$$
+
+where $\gamma = \alpha / (\alpha + \beta)$.
+
+Beta-Bernoulli distribution offers the following perspective: draw latent indicator variables $T_k \mid \lambda_k \sim \mathrm{Bernoulli}(\lambda_k)$, so that $\theta_k \mid T_k \sim T_k\, Q_0 + (1-T_k) \, Q_1$.
+
+We recognise that $T_k \sim \mathrm{BetaBernoulli}(\alpha, \beta)$ which is just $\mathrm{Bernoulli}(\gamma)$ for $\gamma =\alpha/(\alpha+\beta)$. By integrating out $T_k$ variables (which is just trivial summation!) we have
+$$
+  \theta_k \sim \gamma\, Q_0 + (1-\gamma)\, Q_1.
+$$

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Paweł Czyż">
+<meta name="dcterms.date" content="2024-02-19">
+<meta name="description" content="Bernoulli, binomial, beta-binomial… Why don’t we talk about the beta-Bernoulli distribution?">
+
+<title>Paweł Czyż - Beta-Bernoulli distribution</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Paweł Czyż</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../blog.html" rel="" target="">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../publications.html" rel="" target="">
+ <span class="menu-text">Publications</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#famous-bernoulli-and-the-company" id="toc-famous-bernoulli-and-the-company" class="nav-link active" data-scroll-target="#famous-bernoulli-and-the-company">Famous Bernoulli and the company</a>
+  <ul class="collapse">
+  <li><a href="#counting-the-distributions" id="toc-counting-the-distributions" class="nav-link" data-scroll-target="#counting-the-distributions">Counting the distributions</a></li>
+  <li><a href="#a-few-coins" id="toc-a-few-coins" class="nav-link" data-scroll-target="#a-few-coins">A few coins</a></li>
+  <li><a href="#even-more-coins" id="toc-even-more-coins" class="nav-link" data-scroll-target="#even-more-coins">Even more coins</a></li>
+  <li><a href="#noisy-communication-channel" id="toc-noisy-communication-channel" class="nav-link" data-scroll-target="#noisy-communication-channel">Noisy communication channel</a></li>
+  <li><a href="#tossing-multiple-coins" id="toc-tossing-multiple-coins" class="nav-link" data-scroll-target="#tossing-multiple-coins">Tossing multiple coins</a></li>
+  </ul></li>
+  <li><a href="#two-deceptively-similar-distributions" id="toc-two-deceptively-similar-distributions" class="nav-link" data-scroll-target="#two-deceptively-similar-distributions">Two deceptively similar distributions</a>
+  <ul class="collapse">
+  <li><a href="#denoising-problem" id="toc-denoising-problem" class="nav-link" data-scroll-target="#denoising-problem">Denoising problem</a></li>
+  <li><a href="#a-bit-different-model" id="toc-a-bit-different-model" class="nav-link" data-scroll-target="#a-bit-different-model">A bit different model</a></li>
+  </ul></li>
+  <li><a href="#which-model-is-better-for-denoising" id="toc-which-model-is-better-for-denoising" class="nav-link" data-scroll-target="#which-model-is-better-for-denoising">Which model is better for denoising?</a></li>
+  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
+  <ul class="collapse">
+  <li><a href="#list-of-distributions" id="toc-list-of-distributions" class="nav-link" data-scroll-target="#list-of-distributions">List of distributions</a></li>
+  <li><a href="#beta-bernoulli-sparsity-magic" id="toc-beta-bernoulli-sparsity-magic" class="nav-link" data-scroll-target="#beta-bernoulli-sparsity-magic">Beta-Bernoulli sparsity magic</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Beta-Bernoulli distribution</h1>
+</div>
+
+<div>
+  <div class="description">
+    Bernoulli, binomial, beta-binomial… Why don’t we talk about the beta-Bernoulli distribution?
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Paweł Czyż </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 19, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<p>I have <a href="../posts/almost-binomial-markov-chain.html">already demonstrated</a> that I don’t know how to properly toss a coin. Let’s do that again.</p>
+<section id="famous-bernoulli-and-the-company" class="level2">
+<h2 class="anchored" data-anchor-id="famous-bernoulli-and-the-company">Famous Bernoulli and the company</h2>
+<section id="counting-the-distributions" class="level3">
+<h3 class="anchored" data-anchor-id="counting-the-distributions">Counting the distributions</h3>
+<p>Before we go any further: how many distributions can give outcomes from the set <span class="math inline">\(\{0, 1\}\)</span>?</p>
+<p>In other words, we have a measurable space <span class="math inline">\(\{0, 1\}\)</span> (such that all four subsets are measurable) and we would like to know how many probability measures exist on this space. We have <span class="math inline">\(P(\varnothing) = 0\)</span> and <span class="math inline">\(P(\{0, 1\}) = 1\)</span> straight from the definition of a probability measure. As we need to have <span class="math inline">\(P(\{0\}) + P(\{1\}) = 1\)</span> we see that that there is a bijection between these probability measures and numbers from the set <span class="math inline">\([0, 1]\)</span>, given by <span class="math inline">\(P_b(\{1\}) = b\)</span> for any <em>bias</em> <span class="math inline">\(b\in [0, 1]\)</span>. This distribution is called <span class="math inline">\(\mathrm{Bernoulli}(b)\)</span> and it’s easy to prove that if <span class="math inline">\(X\sim \mathrm{Bernoulli}(b)\)</span>, then <span class="math display">\[
+\mathbb E[X] = P(X=1) = b.
+\]</span></p>
+<p>Hence, the first moment fully determines any distribution on <span class="math inline">\(\{0, 1\}\)</span>.</p>
+<p>Derivation of variance is quite elegant, once one notices that if <span class="math inline">\(X\sim \mathrm{Bernoulli}(b)\)</span>, then also <span class="math inline">\(X^2\sim \mathrm{Bernoulli}(b)\)</span>, because it has to be <em>some</em> Bernoulli and <span class="math inline">\(P(X^2=1) = P(X=1)\)</span>. Then: <span class="math display">\[
+\mathbb V[X] = \mathbb E[X^2] - \mathbb E[X]^2 = b - b^2 = b(1-b).
+\]</span></p>
+<p>By considering both cases, we see that for every outcome <span class="math inline">\(x\in \{0, 1\}\)</span>, the likelihood is given by <span class="math display">\[
+\mathrm{Bernoulli}(x\mid b) = b^x(1-b)^{1-x}.
+\]</span></p>
+</section>
+<section id="a-few-coins" class="level3">
+<h3 class="anchored" data-anchor-id="a-few-coins">A few coins</h3>
+<p>This characterization of distributions over <span class="math inline">\(\{0, 1\}\)</span> is very powerful.</p>
+<p>Consider the following problem: we have <span class="math inline">\(K\)</span> coins with biases <span class="math inline">\(b_1, \dotsc, b_K\)</span> and we throw a loaded dice which can give <span class="math inline">\(K\)</span> different outcomes, each with probability <span class="math inline">\(d_1, \dotsc, d_K\)</span> (which, of course, sum up to <span class="math inline">\(1\)</span>) to decide which coin we will toss. What is the outcome of this distribution? It’s, of course, a coin toss outcome, that is a number from the set <span class="math inline">\(\{0, 1\}\)</span>. Hence, this has to be some Bernoulli distribution. Which one? Bernoulli distributions are fully determined by their expectations and the expectation in this case is given by a weighted average <span class="math inline">\(\bar b = b_1 d_1 + \cdots + b_K d_K\)</span>. In other words, we can replace a loaded dice and <span class="math inline">\(K\)</span> biased coins with just a single biased coin.</p>
+<p>To have more equations, the first procedure corresponds to <span class="math display">\[\begin{align*}
+D &amp;\sim \mathrm{Categorical}(d_1, \dotsc, d_K)\\
+X \mid D &amp;\sim \mathrm{Bernoulli}(b_D)
+\end{align*}\]</span> and the second one to <span class="math display">\[
+Y \sim \mathrm{Bernoulli}(\bar b),
+\]</span> with <span class="math inline">\(\bar b = b_1d_1 + \cdots + b_Kd_K\)</span>.</p>
+<p>Both of these distributions are the same, i.e., <span class="math inline">\(\mathrm{law}\, X = \mathrm{law}\, Y\)</span>.</p>
+<p>In particular, the likelihood has to be the same, proving an equality <span class="math display">\[
+\sum_{k=1}^K d_k\, b_k^x(1-b_k)^{1-x} = \bar b^x(1-\bar b)^{1-x}
+\]</span> for every <span class="math inline">\(x\in \{0, 1\}\)</span>.</p>
+</section>
+<section id="even-more-coins" class="level3">
+<h3 class="anchored" data-anchor-id="even-more-coins">Even more coins</h3>
+<p>Even more interestingly, consider infinitely many coins with different biases, which are chosen according to the beta distribution. Once the coin is chosen, we toss it: <span class="math display">\[\begin{align*}
+B &amp;\sim \mathrm{Beta}(\alpha, \beta)\\
+X\mid B &amp;\sim \mathrm{Bernoulli}(B)
+\end{align*}
+\]</span></p>
+<p>This is a continuous mixture, which we could perhaps call <span class="math inline">\(\mathrm{BetaBernoulli}(\alpha, \beta)\)</span>… if it wasn’t just a plain Bernoulli distribution with bias <span class="math display">\[
+\mathbb E[X] = \mathbb E[\mathbb E[X\mid B]] = \mathbb E[B] = \frac{\alpha}{\alpha + \beta}.
+\]</span></p>
+</section>
+<section id="noisy-communication-channel" class="level3">
+<h3 class="anchored" data-anchor-id="noisy-communication-channel">Noisy communication channel</h3>
+<p>Let’s consider an example involving plain Bernoulli distributions and a noisy communication channel.</p>
+<p>Let <span class="math inline">\(X\sim \mathrm{Bernoulli}(b)\)</span> be an input variable. The binary output, <span class="math inline">\(Y\)</span>, is a noisy version of <span class="math inline">\(X\)</span>, with <span class="math inline">\(\alpha\)</span> controlling the false positive rate and <span class="math inline">\(\beta\)</span> the false negative rate: <span class="math display">\[
+P(Y = 1 \mid X=1) = 1-\beta, \quad P(Y=1\mid X=0) = \alpha.
+\]</span></p>
+<p>We can write this model as: <span class="math display">\[\begin{align*}
+X &amp;\sim \mathrm{Bernoulli}(b)\\
+Y \mid X &amp;\sim \mathrm{Bernoulli}( X(1-\beta) + (1-X) \alpha)
+\end{align*}
+\]</span></p>
+<p>In fact, we have <a href="#finite-mixture">already seen</a> this example: we can treat <span class="math inline">\(X\)</span> as a special case of a loaded dice, indexing a finite mixture with just two components. Hence, the marginal distribution of <span class="math inline">\(Y\)</span> is <span class="math display">\[
+Y \sim \mathrm{Bernoulli}(b(1-\beta) + (1-b) \alpha).
+\]</span></p>
+</section>
+<section id="tossing-multiple-coins" class="level3">
+<h3 class="anchored" data-anchor-id="tossing-multiple-coins">Tossing multiple coins</h3>
+<p>We know that a single coin toss characterises all probability distributions on the set <span class="math inline">\(\{0, 1\}\)</span>. However, once we consider <span class="math inline">\(N\ge 2\)</span> coin tosses, yielding outcomes in the set <span class="math inline">\(\{0, 1, 2, \dotsc, N\}\)</span>, many <em>different distributions</em> will appear.</p>
+<p>We mentioned some of these distributions in <a href="../posts/almost-binomial-markov-chain.html">this post</a>, but just for completeness <a href="#list-of-distributions">at the end</a> there is a list of standard distributions.</p>
+<p>Similarly, if one is interested in modelling binary vectors, which are from the set <span class="math inline">\(\{0, 1\}\times \{0, 1\} \cdots \{0, 1\}\)</span>, many different distributions will appear. Let’s analyse an example below.</p>
+</section>
+</section>
+<section id="two-deceptively-similar-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="two-deceptively-similar-distributions">Two deceptively similar distributions</h2>
+<section id="denoising-problem" class="level3">
+<h3 class="anchored" data-anchor-id="denoising-problem">Denoising problem</h3>
+<p>We have a fixed bit <span class="math inline">\(T \in \{0, 1\}\)</span> and we observe its noisy measurements, with false negatives rate <span class="math inline">\(\beta\)</span> and false positive rate <span class="math inline">\(\alpha\)</span> (recall <a href="#noisy-communication-channel">this section</a>). We will write <span class="math inline">\(c_0 = \alpha\)</span> and <span class="math inline">\(c_1 = 1-\beta\)</span> and put some prior on <span class="math inline">\(T\)</span>: <span class="math display">\[\begin{align*}
+  \theta &amp;\sim \mathrm{Beta}(\alpha, \beta)\\
+  T\mid \theta &amp;\sim \mathrm{Bernoulli}(\theta)\\
+  X_n\mid T &amp;\sim \mathrm{Bernoulli}( c_0(1-T) + c_1T) \text{ for } n = 1, \cdots, N
+\end{align*}
+\]</span></p>
+<p>Let’s use shorthand notation <span class="math inline">\(\mathbf{X} = (X_1, \dotsc, X_N)\)</span> and note that the likelihood is: <span class="math display">\[\begin{align*}
+  P(\mathbf{X} \mid T) &amp;= \prod_{n=1}^N P(X_n \mid b(T) ) \\
+  &amp;= \prod_{n=1}^N b(T) ^{X_n} \left(1-b(T)\right)^{1-X_n} \\
+  &amp;= b(T)^S \left(1-b(T)\right)^{N-S}
+\end{align*}
+\]</span></p>
+<p>where <span class="math inline">\(b(T) = c_0(1-T) + c_1T\)</span> and <span class="math inline">\(S = X_1 + \cdots + X_N\)</span>.</p>
+<p>After reading the <a href="#famous-bernoulli-and-the-company">discussion above</a>, there is a natural question: why is <span class="math inline">\(\theta\)</span> introduced at all? For a simple denoising question, i.e., finding <span class="math inline">\(P(T\mid \mathbf{X}) \propto P(\mathbf{X} \mid T) P(T)\)</span> this parameter is not needed at all: <span class="math inline">\(P(T)\)</span> is just a Bernoulli variable, with bias parameter <span class="math inline">\(\bar \theta = \alpha/(\alpha + \beta)\)</span>. Then, <span class="math display">\[
+  P(T=1\mid \mathbf{X}) = \frac{ c_1^S (1-c_1)^{N-S} \cdot \bar \theta }{ c_1^S(1-c_1)^{N-S} \cdot \bar \theta + c_0^S(1-c_0)^{N-S}\cdot (1-\bar \theta) }.
+\]</span></p>
+<p>This is, of course, simple and correct. The reason for introducing <span class="math inline">\(\theta\)</span> is that we are not only interested in inferring a missing coin throw, but also in learning about the unknown bias <span class="math inline">\(\theta\)</span> of the coin from this experiment. For example, if <span class="math inline">\(T\)</span> was directly observed, we would have <span class="math inline">\(P(\theta \mid T) = \mathrm{Beta}(\theta \mid \alpha + T, \beta + (1-T) )\)</span>.</p>
+<p>As <span class="math inline">\(T\)</span> is not directly observed, we have to look at <span class="math inline">\(P(\theta \mid \mathbf{X})\)</span>: <span class="math display">\[\begin{align*}
+  P(\theta \mid \mathbf{X}) &amp;= \sum_{t} P(\theta, T=t \mid \mathbf{X}) \\
+  &amp;= \sum_{t} P(\theta \mid T=t,  \mathbf{X})P(T=t\mid \mathbf{X})\\
+  &amp;= \sum_{t} P(\theta \mid T=t) P(T=t\mid \mathbf{X}),
+\end{align*}
+\]</span> which is therefore a mixture of <span class="math inline">\(\mathrm{Beta}(\alpha+1, \beta)\)</span> and <span class="math inline">\(\mathrm{Beta}(\alpha, \beta + 1)\)</span> distributions.</p>
+<p>But let’s look at it from a bit different perspective. Let’s marginalise <span class="math inline">\(T\)</span> out and formulate likelihood in terms of <span class="math inline">\(\theta\)</span>: <span class="math display">\[\begin{align*}
+  P(\mathbf{X} \mid \theta ) &amp;= \sum_{t} P(\mathbf{X} \mid T=t) P(T=t\mid \theta) \\
+  &amp;= \theta P(\mathbf{X} \mid T=0) + (1-\theta) P( \mathbf{X}\mid T=1) \\
+  &amp;= \theta c_1^{S}(1-c_1)^{N-S} + (1-\theta) c_0^S(1-c_0)^{N-S}.
+\end{align*}
+\]</span></p>
+<p>We have now only one continuous variable and we could use Hamiltonian Monte Carlo to sample from the distribution <span class="math inline">\(P(\theta \mid \mathbf{X})\)</span>. (But we have already determined it analytically.)</p>
+</section>
+<section id="a-bit-different-model" class="level3">
+<h3 class="anchored" data-anchor-id="a-bit-different-model">A bit different model</h3>
+<p>In the model above for any single observation <span class="math inline">\(X_n\)</span> we had <span class="math display">\[
+P(X_n\mid \theta) = \theta c_1^{X_n}(1-c_1)^{1-X_n} + (1-\theta) c_0^{X_n}(1-c_0)^{1-X_n}.
+\]</span></p>
+<p>However, the joint likelihood was given by</p>
+<p><span class="math display">\[\begin{align*}
+P(\mathbf{X} \mid \theta) &amp;= \theta \prod_{n} c_1^{X_n}(1-c_1)^{1-X_n} + (1-\theta) \prod_{n} c_0^{X_n}(1-c_0)^{1-X_n} \\
+&amp;= \theta c_1^S (1-c_1)^{N-S} + (1-\theta)c_0^S(1-c_0)^S,
+\end{align*}
+\]</span></p>
+<p>which is <em>not</em> the product of <span class="math inline">\(\prod_n P(X_n\mid \theta)\)</span>, because all variables <span class="math inline">\(X_n\)</span> were noisy observations of a single coin toss outcome <span class="math inline">\(T\)</span>.</p>
+<p>Let’s now consider a deceptively similar model: <span class="math display">\[\begin{align*}
+  \phi &amp;\sim \mathrm{Beta}(\alpha, \beta)\\
+  U_n \mid \phi &amp;\sim \mathrm{Bernoulli}(\phi) \\
+  Y_n \mid U_n &amp;\sim \mathrm{Bernoulli}(c_0(1-U_n) + c_1U_n)
+\end{align*}
+\]</span></p>
+<p>In this case for each observation <span class="math inline">\(Y_n\)</span> we have <em>a new coin toss</em> <span class="math inline">\(U_n\)</span>.</p>
+<p>We have <span class="math inline">\(U_n\sim \mathrm{Bernoulli}(\alpha/(\alpha + \beta))\)</span>, so that <span class="math inline">\(\mathrm{law}\, U_n = \mathrm{law}\, T\)</span>. Similarly, <span class="math inline">\(P(Y_n \mid \phi)\)</span> and <span class="math inline">\(P(X_n \mid \theta)\)</span> will be very similar: <span class="math display">\[\begin{align*}
+P(Y_n \mid \phi) &amp;= \sum_{u} P( Y_n \mid U_n=u ) P(U_n=u \mid \phi) \\
+&amp;= \phi c_1^{Y_n}(1-c_1)^{1-Y_n} + (1-\phi) c_0^{Y_n} (1-c_1)^{1-Y_n}.
+\end{align*}
+\]</span></p>
+<p>We see that for <span class="math inline">\(X_n = Y_n\)</span> and <span class="math inline">\(\theta = \phi\)</span> the expressions are exactly the same.</p>
+<p>For <span class="math inline">\(N=1\)</span> there is no real difference between these two models. However, for <span class="math inline">\(N\ge 2\)</span> a difference appears, because throws <span class="math inline">\(U_n\)</span> are independent and we have <span class="math display">\[
+P(\mathbf{Y} \mid \phi) = \prod_{n} \left( \phi c_1^{Y_n}(1-c_1)^{1-Y_n} + (1-\phi) c_0^{Y_n} (1-c_1)^{1-Y_n} \right).
+\]</span></p>
+<p>This is substantially <em>different</em> from <span class="math inline">\(P(\mathbf{X}\mid \theta)\)</span>.</p>
+<p>Perhaps the following perspective is useful: the new model, with variables <span class="math inline">\(U_n\)</span> marginalised out, corresponds to the following:</p>
+<p><span class="math display">\[\begin{align*}
+  \phi &amp;\sim \mathrm{Beta}(\alpha, \beta)\\
+  Y_n \mid \phi &amp;\sim \mathrm{Bernoulli}(c_0(1-\phi) + c_1\phi)
+\end{align*}
+\]</span></p>
+<p>which is different from the model with a shared latent variable <span class="math inline">\(T\)</span>:</p>
+<p><span class="math display">\[\begin{align*}
+  \theta &amp;\sim \mathrm{Beta}(\alpha, \beta)\\
+  T\mid \theta &amp;\sim \mathrm{Bernoulli}(\theta)\\
+  Y_n \mid T &amp;\sim \mathrm{Bernoulli}(c_0(1-T) + c_1T)
+\end{align*}
+\]</span></p>
+<p>Hence, although the likelihood functions agree for any single observation, i.e., <span class="math inline">\(P(X_n\mid \theta)\)</span> and <span class="math inline">\(P(Y_n\mid \phi)\)</span> are “the same” (up to relabeling), the likelihood functions constructed using all observed variables, <span class="math inline">\(P(\mathbf{X}\mid \theta)\)</span> and <span class="math inline">\(P(\mathbf{Y}\mid \phi)\)</span>, are usually very different.</p>
+<p>Also, the posteriors <span class="math inline">\(P(\theta \mid \mathbf{X})\)</span> and <span class="math inline">\(P(\phi \mid \mathbf{Y})\)</span> will differ: <span class="math inline">\(\phi\)</span> treats each outcome <span class="math inline">\(Y_n\)</span> independently, so that the posterior can shrink quickly if <span class="math inline">\(N\)</span> is large.</p>
+<p>The posterior on <span class="math inline">\(\theta\)</span> assumes that all <span class="math inline">\(X_n\)</span> are noisy versions of a single throw <span class="math inline">\(T\)</span>, so it knows that there’s not that much information about <span class="math inline">\(\theta\)</span> even if <span class="math inline">\(N\)</span> is very large: the posterior will always be a mixture of <span class="math inline">\(\mathrm{Beta}(\alpha+1, \beta)\)</span> and <span class="math inline">\(\mathrm{Beta}(\alpha, \beta+1)\)</span>. In particular, if <span class="math inline">\(\alpha = \beta = 1\)</span> the posterior on <span class="math inline">\(\theta\)</span> will still be very diffuse.</p>
+</section>
+</section>
+<section id="which-model-is-better-for-denoising" class="level2">
+<h2 class="anchored" data-anchor-id="which-model-is-better-for-denoising">Which model is better for denoising?</h2>
+<p>Both models actually answer different questions: the first model tries to estimate <span class="math inline">\(T\)</span>, a single coin toss, and slightly updates the information about this coin bias, <span class="math inline">\(\theta\)</span>.</p>
+<p>The second model assumes independent coin tosses, where the bias is controlled by <span class="math inline">\(\phi\)</span>. As such, it can quickly shrink the posterior on <span class="math inline">\(\phi\)</span>. Moreover, it can be used to answer the question to impute individual coin tosses <span class="math inline">\(P(\mathbf{U} \mid \mathbf{Y})\)</span>.</p>
+<p>Let’s think what could happen if we fitted each model to the data generated from the other one: this is working with misspecified models (in the <span class="math inline">\(\mathcal M\)</span>-complete setting).</p>
+<p>Consider a setting where we have a lot of data, <span class="math inline">\(N\gg 1\)</span> and the false positive and false negative rates are small, with <span class="math inline">\(c_0 \ll c_1\)</span>. If the data come from the second model, with individual variables <span class="math inline">\(U_n\sim \mathrm{Bernoulli}(\phi)\)</span>, and we have <span class="math inline">\(Y_n\approx U_n\)</span>, then the posterior on <span class="math inline">\(T\)</span> will have most mass on the maximum likelihood solution: either <span class="math inline">\(0\)</span> (which should happen for <span class="math inline">\(\phi \ll 0.5\)</span>) or <span class="math inline">\(1\)</span> (for <span class="math inline">\(\phi \gg 0.5\)</span>). This model will be underfitting and the predictive distribution from this model will be quite bad: new <span class="math inline">\(Y_{N+1}\)</span> would again be an approximation to <span class="math inline">\(U_{N+1}\)</span>, which is sampled from <span class="math inline">\(\mathrm{Bernoulli}(\phi)\)</span>, but the model would just return a noisy version of the inferred <span class="math inline">\(T\)</span>.</p>
+<p>On the other hand, if we have a lot of data from the first model (with a single <span class="math inline">\(T\)</span> variable) and we fit the second model, the posterior on <span class="math inline">\(\phi\)</span> may have most of the mass near <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>, depending on the true value of <span class="math inline">\(T\)</span>. Hence, although <span class="math inline">\(U_n\sim \mathrm{Bernoulli}(\phi)\)</span> are sampled independently, once <span class="math inline">\(\phi\)</span> is near the true value of <span class="math inline">\(T\)</span> (<span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>), they can all be approximately equal to <span class="math inline">\(T\)</span>.</p>
+<p>So, when there is a lot of data, noting where most of the mass of <span class="math inline">\(\phi\)</span> lies can be a good approximation to the maximum likelihood of <span class="math inline">\(T\)</span>.</p>
+<p>Of course, these <span class="math inline">\(N\gg 1\)</span> settings only tell what happens when we have a lot of data and we didn’t discuss the uncertainty: can we use <span class="math inline">\(\phi\)</span> to get well-calibrated uncertainty on <span class="math inline">\(T\)</span>?</p>
+<p>I generally expect that the <span class="math inline">\(\phi\)</span> model can be a bit better in terms of handling slight misspecification, but doing inference directly on <span class="math inline">\(T\)</span> will provide better results in terms of uncertainty quantification for small <span class="math inline">\(N\)</span>. But this is just a hypothesis: the simulations are not for today.</p>
+</section>
+<section id="appendix" class="level2">
+<h2 class="anchored" data-anchor-id="appendix">Appendix</h2>
+<section id="list-of-distributions" class="level3">
+<h3 class="anchored" data-anchor-id="list-of-distributions">List of distributions</h3>
+<section id="binomial-distribution" class="level4">
+<h4 class="anchored" data-anchor-id="binomial-distribution">Binomial distribution</h4>
+<p>The simplest choice: we have a coin with bias <span class="math inline">\(b\)</span> and we toss it <span class="math inline">\(N\)</span> times: <span class="math display">\[\begin{align*}
+  X_n &amp;\sim \mathrm{Bernoulli}(b) \text{ for } n = 1, \dotsc, N\\
+  S &amp;= X_1 + \cdots + X_N
+\end{align*}
+\]</span></p>
+<p>Then, we have <span class="math inline">\(S \sim \mathrm{Binomial}(N, b)\)</span>. As the individual throws are independent, it’s easy to prove that <span class="math display">\[
+\mathbb E[S] = Nb, \quad \mathbb V[S] = Nb(1-b).
+\]</span></p>
+</section>
+<section id="finite-mixture-of-binomial-distributions" class="level4">
+<h4 class="anchored" data-anchor-id="finite-mixture-of-binomial-distributions">Finite mixture of binomial distributions</h4>
+<p>As <a href="#a-few-coins">above</a>, consider <span class="math inline">\(K\)</span> coins with biases <span class="math inline">\(b_1, \dotsc, b_K\)</span> and a dice used to choose the coin which will be tossed. This is a finite mixture of binomial distributions: <span class="math display">\[\begin{align*}
+  D &amp;\sim \mathrm{Categorical}(d_1, \dotsc, d_K)\\
+  S \mid D &amp;\sim \mathrm{Binomial}(N, b_D)
+\end{align*}
+\]</span></p>
+<p>In this case the expectation is exactly what one can expect: <span class="math display">\[
+\mathbb E[S] = \sum_{k=1}^K d_k \cdot Nb_k = N\bar b,
+\]</span> where <span class="math inline">\(\bar b = d_1b_1 + \cdots + d_Kb_K\)</span>.</p>
+<p>However, the formula for variance is more complex: from <a href="https://en.wikipedia.org/wiki/Law_of_total_variance">the law of total variance</a>:</p>
+<p><span class="math display">\[\begin{align*}
+\mathbb V[S] &amp;= \mathbb E[\mathbb V[S\mid B]] + \mathbb V[ \mathbb E[S\mid B] ] \\
+&amp;= \sum_{k=1}^K d_k N b_k(1-b_k) + \mathbb V[NB(1-B)]
+\end{align*}
+\]</span></p>
+</section>
+<section id="beta-binomial-distribution" class="level4">
+<h4 class="anchored" data-anchor-id="beta-binomial-distribution">Beta-binomial distribution</h4>
+<p>Similarly as <a href="#even-more-coins">here</a>, we can consider an infinite collection of coins, chosen from the beta distribution. Once we pick a coin, we toss it <span class="math inline">\(N\)</span> times:</p>
+<p><span class="math display">\[\begin{align*}
+  B &amp;\sim \mathrm{Beta}(\alpha, \beta)\\
+  S \mid B &amp;\sim \mathrm{Binomial}(N, B)
+\end{align*}
+\]</span></p>
+<p>The marginal distribution is called the <a href="https://en.wikipedia.org/wiki/Beta-binomial_distribution">beta-binomial distribution</a>: <span class="math display">\[
+S \sim \mathrm{BetaBinomial}(N, \alpha, \beta).
+\]</span></p>
+<p>It’s easy to prove that <span class="math display">\[
+\mathbb E[S] = N \frac{\alpha}{\alpha + \beta},
+\]</span> but I don’t know an easy derivation of the formula for the variance: <span class="math display">\[
+\mathbb V[S] = Nb(1-b)\cdot (1 + (N-1)\rho),
+\]</span> where <span class="math inline">\(b=\alpha/(\alpha + \beta)\)</span> and <span class="math inline">\(\rho=1/(1 + \alpha + \beta)\)</span>.</p>
+<p>Hence, choosing the coin first incurs additional variance (compared to the binomial distribution).</p>
+</section>
+<section id="poisson-binomial-distribution" class="level4">
+<h4 class="anchored" data-anchor-id="poisson-binomial-distribution">Poisson binomial distribution</h4>
+<p>That was quite a few examples. Let’s do one more: the <a href="https://en.wikipedia.org/wiki/Poisson_binomial_distribution">Poisson binomial distribution</a>, because it is fun.</p>
+<p>In this case one has <span class="math inline">\(N\)</span> coins with biases <span class="math inline">\(b_1, \dotsc, b_N\)</span> and tosses each of them exactly once: <span class="math display">\[\begin{align*}
+  X_n &amp;\sim \mathrm{Bernoulli}(b_n) \text{ for } n=1, \dotsc, N\\
+  S &amp;= X_1 + \cdots + X_N.
+\end{align*}
+\]</span></p>
+<p>We see that if all biases are equal, this reduces to the binomial distribution. However, this one is more flexible, as the expectation and variance are given now by <span class="math display">\[
+  \mathbb E[S] = \sum_{n=1}^N b_n, \quad \mathbb  V[S] = \sum_{n=1}^N b_n(1-b_n).
+\]</span></p>
+</section>
+</section>
+<section id="beta-bernoulli-sparsity-magic" class="level3">
+<h3 class="anchored" data-anchor-id="beta-bernoulli-sparsity-magic">Beta-Bernoulli sparsity magic</h3>
+<p>Consider the following prior on coefficients in a linear model: <span class="math display">\[\begin{align*}
+  \gamma &amp;\sim \mathrm{Beta}(\alpha, \beta)\\
+  \theta_k \mid \gamma &amp;\sim \gamma\, Q_0 + (1-\gamma)\, Q_1 \text{ for } k = 1, \dotsc, K
+\end{align*}
+\]</span></p>
+<p>where <span class="math inline">\(Q_1\)</span> is e.g., a <span class="math inline">\(\mathrm{Normal}(0, 10^2)\)</span> distribution corresponding to “slab” component and <span class="math inline">\(Q_0\)</span>, e.g., <span class="math inline">\(\mathrm{Normal}\left(0, 0.01^2\right)\)</span> is the “spike” component.</p>
+<p>Intuitively, we expect that fraction <span class="math inline">\(\gamma\)</span> of the parameters will be shrunk to <span class="math inline">\(0\)</span> by the spike component <span class="math inline">\(Q_0\)</span> and the rest (the <span class="math inline">\(1-\gamma\)</span> fraction) of the parameters will be actually used to predict values.</p>
+<p>Michael Betancourt wrote an <a href="https://betanalpha.github.io/assets/case_studies/modeling_sparsity.html">amazing tutorial</a> in which he introduces local latent variables, <span class="math inline">\(\lambda_k\)</span>, individually controlling whether <span class="math inline">\(\theta_k\)</span> should be shrunk or not:</p>
+<p><span class="math display">\[\begin{align*}
+  \lambda_k &amp;\sim \mathrm{Beta}(\alpha, \beta) \text{ for } k = 1, \dotsc, K\\
+  \theta_k \mid \lambda_k &amp;\sim \lambda_k \, Q_0 + (1-\lambda_k)\, Q_1 \text{ for } k = 1, \dotsc, K.
+\end{align*}
+\]</span></p>
+<p>Using small letters for PDFs, we can marginalise variables <span class="math inline">\(\lambda_k\)</span> as follows: <span class="math display">\[
+  p(\mathbf{\theta}) = \prod_{k=1}^K p(\theta_k) = \prod_{k=1}^K \left( \int p(\theta_k \mid \lambda_k) \, \mathrm{d}P(\lambda_k) \right)
+\]</span> and <span class="math display">\[\begin{align*}
+  p(\theta_k) &amp;= \int p(\theta_k \mid \lambda_k) \, \mathrm{d}P(\lambda_k) \\
+  &amp;= q_0(\theta_k) \int \lambda_k\, \mathrm{Beta}(\lambda_k \mid \alpha, \beta) \, \mathrm{d}\lambda_k + q_1(\theta_k) \int (1-\lambda_k)\, \mathrm{Beta}(\lambda_k \mid \alpha, \beta)\, \mathrm{d} \lambda_k \\
+  &amp;= q_0(\theta_k) \frac{\alpha}{\alpha + \beta} + q_1(\theta_k) \left( 1 - \frac{\alpha}{\alpha + \beta} \right),
+\end{align*}
+\]</span> so that <span class="math display">\[
+  \theta_k \sim \gamma\, Q_0 + (1-\gamma)\, Q_1,
+\]</span></p>
+<p>where <span class="math inline">\(\gamma = \alpha / (\alpha + \beta)\)</span>.</p>
+<p>Beta-Bernoulli distribution offers the following perspective: draw latent indicator variables <span class="math inline">\(T_k \mid \lambda_k \sim \mathrm{Bernoulli}(\lambda_k)\)</span>, so that <span class="math inline">\(\theta_k \mid T_k \sim T_k\, Q_0 + (1-T_k) \, Q_1\)</span>.</p>
+<p>We recognise that <span class="math inline">\(T_k \sim \mathrm{BetaBernoulli}(\alpha, \beta)\)</span> which is just <span class="math inline">\(\mathrm{Bernoulli}(\gamma)\)</span> for <span class="math inline">\(\gamma =\alpha/(\alpha+\beta)\)</span>. By integrating out <span class="math inline">\(T_k\)</span> variables (which is just trivial summation!) we have <span class="math display">\[
+  \theta_k \sim \gamma\, Q_0 + (1-\gamma)\, Q_1.
+\]</span></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
