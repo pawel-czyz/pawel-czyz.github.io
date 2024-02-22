@@ -85,7 +85,7 @@ $$
 is the half-width of the confidence interval.
 
 In this way we have constructed a confidence interval with coverage $1-\alpha$. Note that $u$ coresponds to the $(1-\alpha/2)$th quantile.
-For example, if we want coverage $\alpha = 95\%$, we take $\alpha=5\%$
+For example, if we want coverage of $95\%$, we take $\alpha=5\%$
 and $u$ will be the 97.5th percentile.
 
 ### Hypothesis testing
@@ -137,8 +137,9 @@ $$
 
 so that we can compare the $p$-value $\Pi$ against false discovery rate $\alpha$.
 
-Both comparisons are equivalent and equally hard to compute: the hard of comparing $|T_0|$ against $u$ is calculation of $u$ from $\alpha$ (which requires the access to the CDF).
+Both comparisons are equivalent and equally hard to compute: the hard part of comparing $|T_0|$ against $u$ is calculation of $u$ from $\alpha$ (which requires the access to the CDF).
 The hard part of comparing the $p$-value $\Pi$ against $\alpha$ is calculation of $\Pi$ from $|T_0|$ (which requires the access to the CDF).
+I should also add that, as we will see below, the CDF is actually easy to access in Python.  
 
 Let's also observe that we have
 $$
@@ -392,7 +393,7 @@ for nobs in [5, 10]:
       power_ = TTestPower().power(
         effect_size=effect_size, nobs=nobs, alpha=alpha, alternative="two-sided")
       
-      if abs(power - power) > 0.001:
+      if abs(power - power_) > 0.001:
         raise ValueError(f"For {nobs=} {alpha=} {effect_size=} we noted discrepancy {power} != {power_}")
 ```
 
@@ -464,7 +465,7 @@ p_values = np.asarray([calculate_p_value_from_data(x) for x in samples])
 print(f"Power from simulation: {100 * np.mean(p_values < alpha):.2f}%")
 ```
 
-(As a side note, I already regret not implementing $p$-value calculation in JAX.)
+(As a side note, I already regret not implementing $p$-value calculation in JAX – I can't use `vmap`!)
 
 ```{python}
 fig, axs = plt.subplots(1, 2, figsize=(5, 2), dpi=150, sharex=True)

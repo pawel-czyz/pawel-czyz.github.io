@@ -241,7 +241,7 @@ P(\mu \in ( M - \delta, M + \delta )) = 1 - \alpha,
 \]</span> where <span class="math display">\[
 \delta = u \cdot\frac{S}{\sqrt{n}}
 \]</span> is the half-width of the confidence interval.</p>
-<p>In this way we have constructed a confidence interval with coverage <span class="math inline">\(1-\alpha\)</span>. Note that <span class="math inline">\(u\)</span> coresponds to the <span class="math inline">\((1-\alpha/2)\)</span>th quantile. For example, if we want coverage <span class="math inline">\(\alpha = 95\%\)</span>, we take <span class="math inline">\(\alpha=5\%\)</span> and <span class="math inline">\(u\)</span> will be the 97.5th percentile.</p>
+<p>In this way we have constructed a confidence interval with coverage <span class="math inline">\(1-\alpha\)</span>. Note that <span class="math inline">\(u\)</span> coresponds to the <span class="math inline">\((1-\alpha/2)\)</span>th quantile. For example, if we want coverage of <span class="math inline">\(95\%\)</span>, we take <span class="math inline">\(\alpha=5\%\)</span> and <span class="math inline">\(u\)</span> will be the 97.5th percentile.</p>
 <section id="hypothesis-testing" class="level3">
 <h3 class="anchored" data-anchor-id="hypothesis-testing">Hypothesis testing</h3>
 <p>Consider a hypothesis <span class="math inline">\(H_0\colon \mu = 0\)</span>.</p>
@@ -271,7 +271,7 @@ P(T_0 \in (-u, u) \mid H_0 ) = P( |T_0| &lt; u \mid H_0 ) = 1-\alpha
 \end{align*}
 \]</span></p>
 <p>so that we can compare the <span class="math inline">\(p\)</span>-value <span class="math inline">\(\Pi\)</span> against false discovery rate <span class="math inline">\(\alpha\)</span>.</p>
-<p>Both comparisons are equivalent and equally hard to compute: the hard of comparing <span class="math inline">\(|T_0|\)</span> against <span class="math inline">\(u\)</span> is calculation of <span class="math inline">\(u\)</span> from <span class="math inline">\(\alpha\)</span> (which requires the access to the CDF). The hard part of comparing the <span class="math inline">\(p\)</span>-value <span class="math inline">\(\Pi\)</span> against <span class="math inline">\(\alpha\)</span> is calculation of <span class="math inline">\(\Pi\)</span> from <span class="math inline">\(|T_0|\)</span> (which requires the access to the CDF).</p>
+<p>Both comparisons are equivalent and equally hard to compute: the hard part of comparing <span class="math inline">\(|T_0|\)</span> against <span class="math inline">\(u\)</span> is calculation of <span class="math inline">\(u\)</span> from <span class="math inline">\(\alpha\)</span> (which requires the access to the CDF). The hard part of comparing the <span class="math inline">\(p\)</span>-value <span class="math inline">\(\Pi\)</span> against <span class="math inline">\(\alpha\)</span> is calculation of <span class="math inline">\(\Pi\)</span> from <span class="math inline">\(|T_0|\)</span> (which requires the access to the CDF). I should also add that, as we will see below, the CDF is actually easy to access in Python.</p>
 <p>Let’s also observe that we have <span class="math display">\[
 P( \Pi \le \alpha \mid H_0 ) = P( |T_0| \ge u \mid H_0 ) = \alpha,
 \]</span> meaning that if the null hypothesis is true, then <span class="math inline">\(\Pi\)</span> has the uniform distribution over the interval <span class="math inline">\((0, 1)\)</span>.</p>
@@ -515,7 +515,7 @@ P(|T_0| &gt; u \mid H_\mu) &amp;= P(T_0 &gt; u \mid H_\mu ) + P(T_0 &lt; -u \mid
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>      power_ <span class="op">=</span> TTestPower().power(</span>
 <span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        effect_size<span class="op">=</span>effect_size, nobs<span class="op">=</span>nobs, alpha<span class="op">=</span>alpha, alternative<span class="op">=</span><span class="st">"two-sided"</span>)</span>
 <span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="bu">abs</span>(power <span class="op">-</span> power) <span class="op">&gt;</span> <span class="fl">0.001</span>:</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="bu">abs</span>(power <span class="op">-</span> power_) <span class="op">&gt;</span> <span class="fl">0.001</span>:</span>
 <span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"For </span><span class="sc">{</span>nobs<span class="op">=</span><span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>alpha<span class="op">=</span><span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>effect_size<span class="op">=</span><span class="sc">}</span><span class="ss"> we noted discrepancy </span><span class="sc">{</span>power<span class="sc">}</span><span class="ss"> != </span><span class="sc">{</span>power_<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -604,7 +604,7 @@ P(|T_0| &gt; u \mid H_\mu) &amp;= P(T_0 &gt; u \mid H_\mu ) + P(T_0 &lt; -u \mid
 <pre><code>Power from simulation: 5.97%</code></pre>
 </div>
 </div>
-<p>(As a side note, I already regret not implementing <span class="math inline">\(p\)</span>-value calculation in JAX.)</p>
+<p>(As a side note, I already regret not implementing <span class="math inline">\(p\)</span>-value calculation in JAX – I can’t use <code>vmap</code>!)</p>
 <div class="cell" data-execution_count="8">
 <details>
 <summary>Code</summary>
