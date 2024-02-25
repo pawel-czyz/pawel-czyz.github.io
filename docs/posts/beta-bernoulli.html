@@ -23,6 +23,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -258,20 +292,296 @@ Y \sim \mathrm{Bernoulli}(b(1-\beta) + (1-b) \alpha).
 <p>After reading the <a href="#famous-bernoulli-and-the-company">discussion above</a>, there is a natural question: why is <span class="math inline">\(\theta\)</span> introduced at all? For a simple denoising question, i.e., finding <span class="math inline">\(P(T\mid \mathbf{X}) \propto P(\mathbf{X} \mid T) P(T)\)</span> this parameter is not needed at all: <span class="math inline">\(P(T)\)</span> is just a Bernoulli variable, with bias parameter <span class="math inline">\(\bar \theta = \alpha/(\alpha + \beta)\)</span>. Then, <span class="math display">\[
   P(T=1\mid \mathbf{X}) = \frac{ c_1^S (1-c_1)^{N-S} \cdot \bar \theta }{ c_1^S(1-c_1)^{N-S} \cdot \bar \theta + c_0^S(1-c_0)^{N-S}\cdot (1-\bar \theta) }.
 \]</span></p>
-<p>This is, of course, simple and correct. The reason for introducing <span class="math inline">\(\theta\)</span> is that we are not only interested in inferring a missing coin throw, but also in learning about the unknown bias <span class="math inline">\(\theta\)</span> of the coin from this experiment. For example, if <span class="math inline">\(T\)</span> was directly observed, we would have <span class="math inline">\(P(\theta \mid T) = \mathrm{Beta}(\theta \mid \alpha + T, \beta + (1-T) )\)</span>.</p>
+<p>Let’s quickly implement this formula and see how the posterior looks like if we start with an unbiased coin (i.e., <span class="math inline">\(\bar \theta=0.5\)</span>), observe <span class="math inline">\(S=N-1\)</span> successes and we vary noise level <span class="math inline">\(\alpha = \beta = c_0 = 1 - c_1\)</span>:</p>
+<div class="cell" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Callable, NamedTuple</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpyro</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpyro.distributions <span class="im">as</span> dist</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"dark_background"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _binomial_loglikelihood(n: <span class="bu">int</span>, s: <span class="bu">int</span>, bias: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> s <span class="op">*</span> jnp.log(bias) <span class="op">+</span> (n <span class="op">-</span> s) <span class="op">*</span> jnp.log1p(<span class="op">-</span>bias)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LikelihoodArgs(NamedTuple):</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  n: <span class="bu">int</span>  <span class="co"># Number of throws</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  s: <span class="bu">int</span>  <span class="co"># Number of successes, 0 &lt;= s &lt;= n</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  c0: <span class="bu">float</span>  <span class="co"># Probability of observing success if T = 0 (false positive rate) </span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  c1: <span class="bu">float</span>  <span class="co"># Probability of observing success if T = 1 (true positive rate)</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BetaPriorArgs(NamedTuple):</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  alpha: <span class="bu">float</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  beta: <span class="bu">float</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">@property</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> mean(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">self</span>.alpha <span class="op">/</span> (<span class="va">self</span>.alpha <span class="op">+</span> <span class="va">self</span>.beta)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> posterior_t(</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  bias: <span class="bu">float</span>,</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  like: LikelihoodArgs,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  <span class="co">"""Calculates P(T | data),</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="co">  where the prior is given by T ~ Bernoulli(bias)."""</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  n, s, c0, c1 <span class="op">=</span> like.n, like.s, like.c0, like.c1</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  log_0 <span class="op">=</span> _binomial_loglikelihood(n<span class="op">=</span>n, s<span class="op">=</span>s, bias<span class="op">=</span>c0) <span class="op">+</span> jnp.log1p(<span class="op">-</span>bias)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  log_1 <span class="op">=</span> _binomial_loglikelihood(n<span class="op">=</span>n, s<span class="op">=</span>s, bias<span class="op">=</span>c1) <span class="op">+</span> jnp.log(bias)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> jax.nn.softmax(jnp.array([log_0, log_1]))</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span>, <span class="dv">3</span>, dpi<span class="op">=</span><span class="dv">120</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">2.4</span>), sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  ax.set_xticks([<span class="dv">0</span>, <span class="dv">1</span>])</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>  ax.set_xlim([<span class="op">-</span><span class="fl">0.5</span>, <span class="fl">1.5</span>])</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>  ax.set_ylim([<span class="op">-</span><span class="fl">0.1</span>, <span class="fl">1.1</span>])</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  ax.set_yticks([<span class="dv">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="dv">1</span>])</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax, n <span class="kw">in</span> <span class="bu">zip</span>(axs, [<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">5</span>]):</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>  ax.set_title(<span class="ss">f"$N = </span><span class="sc">{</span>n<span class="sc">}</span><span class="ss">$, $S = </span><span class="sc">{</span>n<span class="op">-</span><span class="dv">1</span><span class="sc">}</span><span class="ss">$"</span>)</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> i, noise <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.45</span>]):</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>    like <span class="op">=</span> LikelihoodArgs(</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>      n<span class="op">=</span>n,</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>      s<span class="op">=</span>n <span class="op">-</span> <span class="dv">1</span>,</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>      c0<span class="op">=</span>noise,</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>      c1<span class="op">=</span><span class="dv">1</span><span class="op">-</span>noise,</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>    posterior <span class="op">=</span> posterior_t(bias<span class="op">=</span><span class="fl">0.5</span>, like<span class="op">=</span>like)</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>    ax.plot([<span class="dv">0</span>, <span class="dv">1</span>], posterior, label<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>noise<span class="sc">:.2f}</span><span class="ss">"</span>, c<span class="op">=</span><span class="ss">f"C</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>    ax.scatter([<span class="dv">0</span>, <span class="dv">1</span>], posterior, c<span class="op">=</span><span class="ss">f"C</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span>, s<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>, bbox_to_anchor<span class="op">=</span>(<span class="fl">1.05</span>, <span class="dv">1</span>))</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="beta-bernoulli_files/figure-html/cell-2-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>This formula is elegant: we can use it to solve the denoising problem, i.e., infer the value of the <span class="math inline">\(T\)</span> variable. Why did we introduce the <span class="math inline">\(\theta\)</span> variable with its own prior? We may be interested not only in inferring a missing coin throw, but also in learning about the unknown bias <span class="math inline">\(\theta\)</span> of the coin from this experiment.</p>
+<p>For example, if <span class="math inline">\(T\)</span> was directly observed, we would have <span class="math inline">\(P(\theta \mid T) = \mathrm{Beta}(\theta \mid \alpha + T, \beta + (1-T) )\)</span>:</p>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">5</span>, <span class="fl">2.3</span>), dpi<span class="op">=</span><span class="dv">200</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  ax.set_xlim([<span class="op">-</span><span class="fl">0.02</span>, <span class="fl">1.02</span>])</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>bins <span class="op">=</span> jnp.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">31</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>key <span class="op">=</span> jax.random.PRNGKey(<span class="dv">1</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>key, <span class="op">*</span>subkeys <span class="op">=</span> jax.random.split(key, <span class="dv">4</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Prior</span><span class="ch">\n</span><span class="st">Beta(1, 1)"</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> dist.Beta(<span class="dv">1</span>, <span class="dv">1</span>).sample(subkeys[<span class="dv">0</span>], sample_shape<span class="op">=</span>(<span class="dv">10_000</span>,))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>ax.hist(samples, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Posterior for $T=0$</span><span class="ch">\n</span><span class="st">Beta(1, 2)"</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> dist.Beta(<span class="dv">1</span>, <span class="dv">2</span>).sample(subkeys[<span class="dv">0</span>], sample_shape<span class="op">=</span>(<span class="dv">10_000</span>,))</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>ax.hist(samples, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">2</span>]</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Posterior for $T=1$</span><span class="ch">\n</span><span class="st">Beta(2, 1)"</span>)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> dist.Beta(<span class="dv">2</span>, <span class="dv">1</span>).sample(subkeys[<span class="dv">0</span>], sample_shape<span class="op">=</span>(<span class="dv">10_000</span>,))</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>ax.hist(samples, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="beta-bernoulli_files/figure-html/cell-3-output-1.png" class="img-fluid"></p>
+</div>
+</div>
 <p>As <span class="math inline">\(T\)</span> is not directly observed, we have to look at <span class="math inline">\(P(\theta \mid \mathbf{X})\)</span>: <span class="math display">\[\begin{align*}
   P(\theta \mid \mathbf{X}) &amp;= \sum_{t} P(\theta, T=t \mid \mathbf{X}) \\
   &amp;= \sum_{t} P(\theta \mid T=t,  \mathbf{X})P(T=t\mid \mathbf{X})\\
   &amp;= \sum_{t} P(\theta \mid T=t) P(T=t\mid \mathbf{X}),
 \end{align*}
-\]</span> which is therefore a mixture of <span class="math inline">\(\mathrm{Beta}(\alpha+1, \beta)\)</span> and <span class="math inline">\(\mathrm{Beta}(\alpha, \beta + 1)\)</span> distributions.</p>
-<p>But let’s look at it from a bit different perspective. Let’s marginalise <span class="math inline">\(T\)</span> out and formulate likelihood in terms of <span class="math inline">\(\theta\)</span>: <span class="math display">\[\begin{align*}
+\]</span> which is therefore a mixture of <span class="math inline">\(\mathrm{Beta}(\alpha+1, \beta)\)</span> and <span class="math inline">\(\mathrm{Beta}(\alpha, \beta + 1)\)</span> distributions:</p>
+<div class="cell" data-execution_count="3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>_noise <span class="op">=</span> <span class="fl">0.2</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_posterior_theta(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  prior: BetaPriorArgs,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  like: LikelihoodArgs,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  mixing <span class="op">=</span> dist.Categorical(</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    probs<span class="op">=</span>posterior_t(</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>      bias<span class="op">=</span>prior.mean, like<span class="op">=</span>like</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> dist.MixtureSameFamily(</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    mixing_distribution<span class="op">=</span>mixing,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    component_distribution<span class="op">=</span>dist.Beta(</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>      <span class="co"># alpha</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>      concentration1<span class="op">=</span>jnp.array([prior.alpha, prior.alpha <span class="op">+</span> <span class="dv">1</span>]),</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>      <span class="co"># beta</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>      concentration0<span class="op">=</span>jnp.array([prior.beta <span class="op">+</span> <span class="dv">1</span>, prior.beta]),</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">5</span>, <span class="fl">2.3</span>), dpi<span class="op">=</span><span class="dv">200</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  ax.set_xlim([<span class="op">-</span><span class="fl">0.02</span>, <span class="fl">1.02</span>])</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>key, <span class="op">*</span>subkeys <span class="op">=</span> jax.random.split(key, <span class="dv">4</span>)</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"$N=S=1$"</span>)</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> create_posterior_theta(</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  prior<span class="op">=</span>BetaPriorArgs(alpha<span class="op">=</span><span class="fl">1.0</span>, beta<span class="op">=</span><span class="fl">1.0</span>),</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  like<span class="op">=</span>LikelihoodArgs(</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    n<span class="op">=</span><span class="dv">1</span>, s<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    c0<span class="op">=</span>_noise, c1<span class="op">=</span><span class="dv">1</span><span class="op">-</span>_noise,</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> d.sample(subkeys[<span class="dv">0</span>], sample_shape<span class="op">=</span>(<span class="dv">10_000</span>,))</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>ax.hist(samples, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"$N=S=2$"</span>)</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> create_posterior_theta(</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>  prior<span class="op">=</span>BetaPriorArgs(alpha<span class="op">=</span><span class="fl">1.0</span>, beta<span class="op">=</span><span class="fl">1.0</span>),</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>  like<span class="op">=</span>LikelihoodArgs(</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    n<span class="op">=</span><span class="dv">2</span>, s<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    c0<span class="op">=</span>_noise, c1<span class="op">=</span><span class="dv">1</span><span class="op">-</span>_noise,</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> d.sample(subkeys[<span class="dv">0</span>], sample_shape<span class="op">=</span>(<span class="dv">10_000</span>,))</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>ax.hist(samples, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">2</span>]</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"$N=S=100$"</span>)</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> create_posterior_theta(</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>  prior<span class="op">=</span>BetaPriorArgs(alpha<span class="op">=</span><span class="fl">1.0</span>, beta<span class="op">=</span><span class="fl">1.0</span>),</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>  like<span class="op">=</span>LikelihoodArgs(</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>    n<span class="op">=</span><span class="dv">100</span>, s<span class="op">=</span><span class="dv">100</span>,</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>    c0<span class="op">=</span>_noise, c1<span class="op">=</span><span class="dv">1</span><span class="op">-</span>_noise,</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> d.sample(subkeys[<span class="dv">0</span>], sample_shape<span class="op">=</span>(<span class="dv">10_000</span>,))</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>ax.hist(samples, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="beta-bernoulli_files/figure-html/cell-4-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Importantly, we see that the posterior on <span class="math inline">\(\theta\)</span> won’t shrink even for large <span class="math inline">\(N\)</span>: increasing <span class="math inline">\(N\)</span> affects how well we can determine the outcome of the throw <span class="math inline">\(T\)</span>. But even if we observe <span class="math inline">\(T\)</span> perfectly, it’s only one throw, so it doesn’t give too much information on the bias <span class="math inline">\(\theta\)</span>.</p>
+<p>Let’s now look at this problem also from a bit different perspective. If we want to update <span class="math inline">\(\theta\)</span> directly from the observed data <span class="math inline">\(\mathbf{X}\)</span>, we can marginalise <span class="math inline">\(T\)</span> out in the likelihood: <span class="math display">\[\begin{align*}
   P(\mathbf{X} \mid \theta ) &amp;= \sum_{t} P(\mathbf{X} \mid T=t) P(T=t\mid \theta) \\
-  &amp;= \theta P(\mathbf{X} \mid T=0) + (1-\theta) P( \mathbf{X}\mid T=1) \\
+  &amp;= \theta P(\mathbf{X} \mid T=1) + (1-\theta) P( \mathbf{X}\mid T=0) \\
   &amp;= \theta c_1^{S}(1-c_1)^{N-S} + (1-\theta) c_0^S(1-c_0)^{N-S}.
 \end{align*}
 \]</span></p>
-<p>We have now only one continuous variable and we could use Hamiltonian Monte Carlo to sample from the distribution <span class="math inline">\(P(\theta \mid \mathbf{X})\)</span>. (But we have already determined it analytically.)</p>
+<p>We have now only one continuous variable and we could use Hamiltonian Monte Carlo to sample from the distribution <span class="math inline">\(P(\theta \mid \mathbf{X})\)</span>. We have already determined it analytically, as a mixture of beta distributions, but let’s quickly compare the results:</p>
+<div class="cell" data-execution_count="4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> numpyro.infer <span class="im">import</span> MCMC, NUTS</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_model(like: LikelihoodArgs, prior: BetaPriorArgs):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  theta <span class="op">=</span> numpyro.sample(<span class="st">"theta"</span>, </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    dist.Beta(concentration1<span class="op">=</span>prior.alpha, concentration0<span class="op">=</span>prior.beta)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  log1 <span class="op">=</span> _binomial_loglikelihood(n<span class="op">=</span>like.n, s<span class="op">=</span>like.s, bias<span class="op">=</span>like.c1) <span class="op">+</span> jnp.log(theta)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  log0 <span class="op">=</span> _binomial_loglikelihood(n<span class="op">=</span>like.n, s<span class="op">=</span>like.s, bias<span class="op">=</span>like.c0) <span class="op">+</span> jnp.log1p(<span class="op">-</span>theta)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  numpyro.factor(<span class="st">"loglikelihood"</span>, jnp.logaddexp(log1, log0))</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>prior_args <span class="op">=</span> BetaPriorArgs(</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  alpha<span class="op">=</span><span class="fl">1.0</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  beta<span class="op">=</span><span class="fl">1.0</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>like_args <span class="op">=</span> LikelihoodArgs(</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  n<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  s<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  c0<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  c1<span class="op">=</span><span class="fl">0.9</span>,</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">5</span>, <span class="fl">2.3</span>), dpi<span class="op">=</span><span class="dv">200</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  ax.set_xlim([<span class="op">-</span><span class="fl">0.02</span>, <span class="fl">1.02</span>])</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>key, <span class="op">*</span>subkeys <span class="op">=</span> jax.random.split(key, <span class="dv">4</span>)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"$P(</span><span class="ch">\\</span><span class="st">theta </span><span class="ch">\\</span><span class="st">mid T=1)$"</span>)</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> dist.Beta(<span class="dv">2</span>, <span class="dv">1</span>).sample(subkeys[<span class="dv">0</span>], sample_shape<span class="op">=</span>(<span class="dv">100_000</span>,))</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>ax.hist(samples, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"C2"</span>)</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"$P(</span><span class="ch">\\</span><span class="st">theta</span><span class="ch">\\</span><span class="st">mid </span><span class="ch">\\</span><span class="st">mathbf</span><span class="sc">{X}</span><span class="st">)$</span><span class="ch">\n</span><span class="st">(explicit)"</span>)</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> create_posterior_theta(</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>  like<span class="op">=</span>like_args,</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>  prior<span class="op">=</span>prior_args,</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> d.sample(subkeys[<span class="dv">1</span>], sample_shape<span class="op">=</span>(<span class="dv">100_000</span>,))</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>ax.hist(samples, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">2</span>]</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"$P(</span><span class="ch">\\</span><span class="st">theta</span><span class="ch">\\</span><span class="st">mid </span><span class="ch">\\</span><span class="st">mathbf</span><span class="sc">{X}</span><span class="st">)$</span><span class="ch">\n</span><span class="st">(HMC)"</span>)</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>nuts_kernel <span class="op">=</span> NUTS(create_model)</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>mcmc <span class="op">=</span> MCMC(nuts_kernel, num_warmup<span class="op">=</span><span class="dv">1000</span>, num_samples<span class="op">=</span><span class="dv">10_000</span>, num_chains<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>mcmc.run(subkeys[<span class="dv">2</span>], like<span class="op">=</span>like_args, prior<span class="op">=</span>prior_args)</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> mcmc.get_samples()[<span class="st">"theta"</span>]</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>ax.hist(samples, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>/tmp/ipykernel_47585/1934137946.py:51: UserWarning: There are not enough devices to run parallel chains: expected 2 but got 1. Chains will be drawn sequentially. If you are running MCMC in CPU, consider using `numpyro.set_host_device_count(2)` at the beginning of your program. You can double-check how many devices are available in your system using `jax.local_device_count()`.
+  mcmc = MCMC(nuts_kernel, num_warmup=1000, num_samples=10_000, num_chains=2)
+  0%|          | 0/11000 [00:00&lt;?, ?it/s]warmup:   0%|          | 1/11000 [00:00&lt;3:01:55,  1.01it/s, 3 steps of size 1.40e+01. acc. prob=0.98]warmup:   6%|▌         | 642/11000 [00:01&lt;00:12, 807.37it/s, 1 steps of size 1.58e+00. acc. prob=0.79]sample:  12%|█▏        | 1287/11000 [00:01&lt;00:05, 1666.83it/s, 3 steps of size 9.13e-01. acc. prob=0.91]sample:  18%|█▊        | 1936/11000 [00:01&lt;00:03, 2528.66it/s, 1 steps of size 9.13e-01. acc. prob=0.91]sample:  24%|██▎       | 2585/11000 [00:01&lt;00:02, 3333.24it/s, 3 steps of size 9.13e-01. acc. prob=0.91]sample:  29%|██▉       | 3233/11000 [00:01&lt;00:01, 4040.97it/s, 7 steps of size 9.13e-01. acc. prob=0.92]sample:  35%|███▌      | 3873/11000 [00:01&lt;00:01, 4614.79it/s, 1 steps of size 9.13e-01. acc. prob=0.91]sample:  41%|████      | 4517/11000 [00:01&lt;00:01, 5084.11it/s, 1 steps of size 9.13e-01. acc. prob=0.91]sample:  47%|████▋     | 5158/11000 [00:01&lt;00:01, 5439.79it/s, 1 steps of size 9.13e-01. acc. prob=0.91]sample:  53%|█████▎    | 5800/11000 [00:01&lt;00:00, 5709.75it/s, 3 steps of size 9.13e-01. acc. prob=0.91]sample:  59%|█████▊    | 6445/11000 [00:01&lt;00:00, 5917.71it/s, 1 steps of size 9.13e-01. acc. prob=0.91]sample:  64%|██████▍   | 7088/11000 [00:02&lt;00:00, 6063.36it/s, 3 steps of size 9.13e-01. acc. prob=0.91]sample:  70%|███████   | 7733/11000 [00:02&lt;00:00, 6175.46it/s, 1 steps of size 9.13e-01. acc. prob=0.91]sample:  76%|███████▌  | 8376/11000 [00:02&lt;00:00, 6249.90it/s, 3 steps of size 9.13e-01. acc. prob=0.91]sample:  82%|████████▏ | 9018/11000 [00:02&lt;00:00, 6297.99it/s, 3 steps of size 9.13e-01. acc. prob=0.91]sample:  88%|████████▊ | 9660/11000 [00:02&lt;00:00, 6267.00it/s, 3 steps of size 9.13e-01. acc. prob=0.91]sample:  94%|█████████▎| 10295/11000 [00:02&lt;00:00, 6258.64it/s, 7 steps of size 9.13e-01. acc. prob=0.91]sample:  99%|█████████▉| 10927/11000 [00:02&lt;00:00, 6256.46it/s, 3 steps of size 9.13e-01. acc. prob=0.91]sample: 100%|██████████| 11000/11000 [00:02&lt;00:00, 4055.54it/s, 1 steps of size 9.13e-01. acc. prob=0.91]
+  0%|          | 0/11000 [00:00&lt;?, ?it/s]warmup:   6%|▌         | 653/11000 [00:00&lt;00:01, 6526.47it/s, 1 steps of size 1.27e+00. acc. prob=0.79]sample:  12%|█▏        | 1307/11000 [00:00&lt;00:01, 6531.20it/s, 3 steps of size 1.01e+00. acc. prob=0.89]sample:  18%|█▊        | 1961/11000 [00:00&lt;00:01, 6530.24it/s, 3 steps of size 1.01e+00. acc. prob=0.89]sample:  24%|██▍       | 2624/11000 [00:00&lt;00:01, 6566.90it/s, 3 steps of size 1.01e+00. acc. prob=0.89]sample:  30%|██▉       | 3281/11000 [00:00&lt;00:01, 6525.99it/s, 1 steps of size 1.01e+00. acc. prob=0.89]sample:  36%|███▌      | 3934/11000 [00:00&lt;00:01, 6506.50it/s, 1 steps of size 1.01e+00. acc. prob=0.89]sample:  42%|████▏     | 4587/11000 [00:00&lt;00:00, 6511.28it/s, 3 steps of size 1.01e+00. acc. prob=0.89]sample:  48%|████▊     | 5240/11000 [00:00&lt;00:00, 6516.41it/s, 3 steps of size 1.01e+00. acc. prob=0.89]sample:  54%|█████▎    | 5892/11000 [00:00&lt;00:00, 6501.81it/s, 3 steps of size 1.01e+00. acc. prob=0.89]sample:  60%|█████▉    | 6552/11000 [00:01&lt;00:00, 6529.73it/s, 3 steps of size 1.01e+00. acc. prob=0.89]sample:  66%|██████▌   | 7212/11000 [00:01&lt;00:00, 6549.27it/s, 1 steps of size 1.01e+00. acc. prob=0.89]sample:  72%|███████▏  | 7874/11000 [00:01&lt;00:00, 6568.25it/s, 1 steps of size 1.01e+00. acc. prob=0.89]sample:  78%|███████▊  | 8531/11000 [00:01&lt;00:00, 6539.46it/s, 1 steps of size 1.01e+00. acc. prob=0.89]sample:  84%|████████▎ | 9196/11000 [00:01&lt;00:00, 6570.76it/s, 1 steps of size 1.01e+00. acc. prob=0.89]sample:  90%|████████▉ | 9854/11000 [00:01&lt;00:00, 6532.52it/s, 3 steps of size 1.01e+00. acc. prob=0.89]sample:  96%|█████████▌| 10517/11000 [00:01&lt;00:00, 6559.21it/s, 3 steps of size 1.01e+00. acc. prob=0.89]sample: 100%|██████████| 11000/11000 [00:01&lt;00:00, 6538.11it/s, 3 steps of size 1.01e+00. acc. prob=0.89]</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>(array([0.24749999, 0.28499999, 0.31799995, 0.39600002, 0.43200003,
+        0.5084998 , 0.55500003, 0.64650004, 0.63000004, 0.77400005,
+        0.81750005, 0.79799933, 0.86250005, 0.86850005, 1.00800096,
+        1.08899909, 1.08749909, 1.2570012 , 1.22699898, 1.25250119,
+        1.26899894, 1.34400128, 1.36049886, 1.4324988 , 1.53300146,
+        1.48199876, 1.48800142, 1.60799866, 1.74450166, 1.6785016 ]),
+ array([0.        , 0.03333334, 0.06666667, 0.10000001, 0.13333334,
+        0.16666667, 0.20000002, 0.23333335, 0.26666668, 0.30000001,
+        0.33333334, 0.36666667, 0.40000004, 0.43333337, 0.4666667 ,
+        0.5       , 0.53333336, 0.56666672, 0.60000002, 0.63333338,
+        0.66666669, 0.70000005, 0.73333335, 0.76666671, 0.80000007,
+        0.83333337, 0.86666673, 0.90000004, 0.9333334 , 0.9666667 ,
+        1.        ]),
+ &lt;BarContainer object of 30 artists&gt;)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="beta-bernoulli_files/figure-html/cell-5-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+<p>HMC agrees well with the mixture of beta distributions. We see that <span class="math inline">\(P(\theta \mid \mathbf{X})\)</span> is slightly more diffuse compared with the case when <span class="math inline">\(T\)</span> is directly observed.</p>
 </section>
 <section id="a-bit-different-model" class="level3">
 <h3 class="anchored" data-anchor-id="a-bit-different-model">A bit different model</h3>
@@ -312,24 +622,104 @@ P(\mathbf{Y} \mid \phi) = \prod_{n} \left( \phi c_1^{Y_n}(1-c_1)^{1-Y_n} + (1-\p
 <p><span class="math display">\[\begin{align*}
   \theta &amp;\sim \mathrm{Beta}(\alpha, \beta)\\
   T\mid \theta &amp;\sim \mathrm{Bernoulli}(\theta)\\
-  Y_n \mid T &amp;\sim \mathrm{Bernoulli}(c_0(1-T) + c_1T)
+  X_n \mid T &amp;\sim \mathrm{Bernoulli}(c_0(1-T) + c_1T)
 \end{align*}
 \]</span></p>
-<p>Hence, although the likelihood functions agree for any single observation, i.e., <span class="math inline">\(P(X_n\mid \theta)\)</span> and <span class="math inline">\(P(Y_n\mid \phi)\)</span> are “the same” (up to relabeling), the likelihood functions constructed using all observed variables, <span class="math inline">\(P(\mathbf{X}\mid \theta)\)</span> and <span class="math inline">\(P(\mathbf{Y}\mid \phi)\)</span>, are usually very different.</p>
+<p>Hence, although the likelihood functions agree for any <em>single observation</em>, i.e., for every <span class="math inline">\(x\in \{0, 1\}\)</span>, the likelihood functions <span class="math inline">\(P(X_n=x\mid \theta)\)</span> and <span class="math inline">\(P(Y_n=x\mid \phi)\)</span> are the same, the likelihood functions constructed using <em>all</em> observed variables, <span class="math inline">\(P(\mathbf{X}\mid \theta)\)</span> and <span class="math inline">\(P(\mathbf{Y}\mid \phi)\)</span>, are usually very <em>different</em>.</p>
 <p>Also, the posteriors <span class="math inline">\(P(\theta \mid \mathbf{X})\)</span> and <span class="math inline">\(P(\phi \mid \mathbf{Y})\)</span> will differ: <span class="math inline">\(\phi\)</span> treats each outcome <span class="math inline">\(Y_n\)</span> independently, so that the posterior can shrink quickly if <span class="math inline">\(N\)</span> is large.</p>
-<p>The posterior on <span class="math inline">\(\theta\)</span> assumes that all <span class="math inline">\(X_n\)</span> are noisy versions of a single throw <span class="math inline">\(T\)</span>, so it knows that there’s not that much information about <span class="math inline">\(\theta\)</span> even if <span class="math inline">\(N\)</span> is very large: the posterior will always be a mixture of <span class="math inline">\(\mathrm{Beta}(\alpha+1, \beta)\)</span> and <span class="math inline">\(\mathrm{Beta}(\alpha, \beta+1)\)</span>. In particular, if <span class="math inline">\(\alpha = \beta = 1\)</span> the posterior on <span class="math inline">\(\theta\)</span> will still be very diffuse.</p>
+<p>Compare this with the posterior on <span class="math inline">\(\theta\)</span>, which assumes that all <span class="math inline">\(X_n\)</span> are noisy versions of a single throw <span class="math inline">\(T\)</span>, so it knows that there’s not that much information about <span class="math inline">\(\theta\)</span> even if <span class="math inline">\(N\)</span> is very large: the posterior will always be a mixture of <span class="math inline">\(\mathrm{Beta}(\alpha+1, \beta)\)</span> and <span class="math inline">\(\mathrm{Beta}(\alpha, \beta+1)\)</span>. In particular, if <span class="math inline">\(\alpha = \beta = 1\)</span> the posterior on <span class="math inline">\(\theta\)</span> will still be very diffuse.</p>
+<p>For example, consider <span class="math inline">\(T = 1\)</span>. We toss the coin <span class="math inline">\(N=10\)</span> times, but due to the noise <span class="math inline">\(c_0 = 1-c_1 = 0.1\)</span> we observed <span class="math inline">\(S=8\)</span>. We have the following <span class="math inline">\(P(T=1\mid \mathbf{X})\)</span>:</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>prior <span class="op">=</span> BetaPriorArgs(<span class="fl">1.0</span>, <span class="fl">1.0</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>like <span class="op">=</span> LikelihoodArgs(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  n<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  s<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  c0<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  c1<span class="op">=</span><span class="fl">0.9</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>posterior_t_value <span class="op">=</span> posterior_t(</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  bias<span class="op">=</span>prior.mean,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  like<span class="op">=</span>like,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P(T=1 | X) = </span><span class="sc">{</span>posterior_t_value[<span class="dv">1</span>]<span class="sc">:.7f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>P(T=1 | X) = 0.9999981</code></pre>
+</div>
+</div>
+<p>How would the posteriors on <span class="math inline">\(\theta\)</span> and <span class="math inline">\(\phi\)</span> look like? We will plot the above value as a dashed line:</p>
+<div class="cell" data-execution_count="6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> new_model(prior: BetaPriorArgs, like: LikelihoodArgs):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  phi <span class="op">=</span> numpyro.sample(<span class="st">"phi"</span>, dist.Beta(prior.alpha, prior.beta))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  bias <span class="op">=</span> like.c0 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> phi) <span class="op">+</span> like.c1 <span class="op">*</span> phi</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  numpyro.factor(<span class="st">"loglikelihood"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    _binomial_loglikelihood(n<span class="op">=</span>like.n, s<span class="op">=</span>like.s, bias<span class="op">=</span>bias)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">5</span>, <span class="fl">2.3</span>), dpi<span class="op">=</span><span class="dv">200</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs:</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">'top'</span>, <span class="st">'right'</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  ax.set_xlim([<span class="op">-</span><span class="fl">0.02</span>, <span class="fl">1.02</span>])</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  ax.axvline(posterior_t_value[<span class="dv">1</span>], c<span class="op">=</span><span class="st">"white"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>key, <span class="op">*</span>subkeys <span class="op">=</span> jax.random.split(key, <span class="dv">4</span>)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"$P(</span><span class="ch">\\</span><span class="st">theta </span><span class="ch">\\</span><span class="st">mid T=1)$"</span>)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> dist.Beta(<span class="dv">2</span>, <span class="dv">1</span>).sample(subkeys[<span class="dv">0</span>], sample_shape<span class="op">=</span>(<span class="dv">100_000</span>,))</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>ax.hist(samples, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"C2"</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"$P(</span><span class="ch">\\</span><span class="st">theta</span><span class="ch">\\</span><span class="st">mid </span><span class="ch">\\</span><span class="st">mathbf</span><span class="sc">{X}</span><span class="st">=</span><span class="ch">\\</span><span class="st">mathbf</span><span class="sc">{x}</span><span class="st">)$"</span>)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> create_posterior_theta(</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  like<span class="op">=</span>like_args,</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>  prior<span class="op">=</span>prior_args,</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> d.sample(subkeys[<span class="dv">1</span>], sample_shape<span class="op">=</span>(<span class="dv">100_000</span>,))</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>ax.hist(samples, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">2</span>]</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"$P(</span><span class="ch">\\</span><span class="st">phi</span><span class="ch">\\</span><span class="st">mid </span><span class="ch">\\</span><span class="st">mathbf</span><span class="sc">{Y}</span><span class="st">=</span><span class="ch">\\</span><span class="st">mathbf</span><span class="sc">{x}</span><span class="st">)$"</span>)</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>nuts_kernel <span class="op">=</span> NUTS(new_model)</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>mcmc <span class="op">=</span> MCMC(nuts_kernel, num_warmup<span class="op">=</span><span class="dv">1000</span>, num_samples<span class="op">=</span><span class="dv">5_000</span>, num_chains<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>mcmc.run(subkeys[<span class="dv">2</span>], like<span class="op">=</span>like, prior<span class="op">=</span>prior)</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>samples <span class="op">=</span> mcmc.get_samples()[<span class="st">"phi"</span>]</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>ax.hist(samples, bins<span class="op">=</span>bins, density<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"C4"</span>)</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>/tmp/ipykernel_47585/3633385242.py:36: UserWarning: There are not enough devices to run parallel chains: expected 2 but got 1. Chains will be drawn sequentially. If you are running MCMC in CPU, consider using `numpyro.set_host_device_count(2)` at the beginning of your program. You can double-check how many devices are available in your system using `jax.local_device_count()`.
+  mcmc = MCMC(nuts_kernel, num_warmup=1000, num_samples=5_000, num_chains=2)
+  0%|          | 0/6000 [00:00&lt;?, ?it/s]warmup:   0%|          | 1/6000 [00:00&lt;1:33:23,  1.07it/s, 3 steps of size 8.10e+00. acc. prob=0.68]warmup:  11%|█         | 643/6000 [00:01&lt;00:06, 852.33it/s, 1 steps of size 2.66e+00. acc. prob=0.79]sample:  21%|██        | 1274/6000 [00:01&lt;00:02, 1721.39it/s, 3 steps of size 7.26e-01. acc. prob=0.93]sample:  32%|███▏      | 1910/6000 [00:01&lt;00:01, 2580.47it/s, 3 steps of size 7.26e-01. acc. prob=0.92]sample:  42%|████▏     | 2549/6000 [00:01&lt;00:01, 3377.24it/s, 3 steps of size 7.26e-01. acc. prob=0.92]sample:  53%|█████▎    | 3204/6000 [00:01&lt;00:00, 4106.89it/s, 1 steps of size 7.26e-01. acc. prob=0.92]sample:  64%|██████▍   | 3857/6000 [00:01&lt;00:00, 4705.36it/s, 3 steps of size 7.26e-01. acc. prob=0.92]sample:  75%|███████▌  | 4508/6000 [00:01&lt;00:00, 5175.87it/s, 7 steps of size 7.26e-01. acc. prob=0.92]sample:  86%|████████▌ | 5162/6000 [00:01&lt;00:00, 5546.17it/s, 1 steps of size 7.26e-01. acc. prob=0.92]sample:  97%|█████████▋| 5800/6000 [00:01&lt;00:00, 5642.21it/s, 3 steps of size 7.26e-01. acc. prob=0.92]sample: 100%|██████████| 6000/6000 [00:01&lt;00:00, 3200.78it/s, 3 steps of size 7.26e-01. acc. prob=0.92]
+  0%|          | 0/6000 [00:00&lt;?, ?it/s]warmup:  11%|█         | 666/6000 [00:00&lt;00:00, 6652.36it/s, 3 steps of size 1.40e+00. acc. prob=0.79]sample:  22%|██▏       | 1342/6000 [00:00&lt;00:00, 6710.71it/s, 3 steps of size 7.83e-01. acc. prob=0.92]sample:  34%|███▎      | 2016/6000 [00:00&lt;00:00, 6720.75it/s, 7 steps of size 7.83e-01. acc. prob=0.92]sample:  45%|████▍     | 2689/6000 [00:00&lt;00:00, 6703.26it/s, 3 steps of size 7.83e-01. acc. prob=0.92]sample:  56%|█████▌    | 3360/6000 [00:00&lt;00:00, 6687.27it/s, 3 steps of size 7.83e-01. acc. prob=0.92]sample:  67%|██████▋   | 4030/6000 [00:00&lt;00:00, 6689.24it/s, 3 steps of size 7.83e-01. acc. prob=0.92]sample:  78%|███████▊  | 4699/6000 [00:00&lt;00:00, 6670.51it/s, 1 steps of size 7.83e-01. acc. prob=0.92]sample:  90%|████████▉ | 5374/6000 [00:00&lt;00:00, 6694.52it/s, 3 steps of size 7.83e-01. acc. prob=0.92]sample: 100%|██████████| 6000/6000 [00:00&lt;00:00, 6705.25it/s, 1 steps of size 7.83e-01. acc. prob=0.92]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="beta-bernoulli_files/figure-html/cell-7-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>As we expected, the posterior on <span class="math inline">\(\phi\)</span> is much more precise than posterior on <span class="math inline">\(\theta\)</span>. It also is shifted towards the value <span class="math inline">\(T=1\)</span>, so (in this case) it behaves as sort of an approximation to <span class="math inline">\(T\)</span>.</p>
 </section>
 </section>
 <section id="which-model-is-better-for-denoising" class="level2">
 <h2 class="anchored" data-anchor-id="which-model-is-better-for-denoising">Which model is better for denoising?</h2>
 <p>Both models actually answer different questions: the first model tries to estimate <span class="math inline">\(T\)</span>, a single coin toss, and slightly updates the information about this coin bias, <span class="math inline">\(\theta\)</span>.</p>
-<p>The second model assumes independent coin tosses, where the bias is controlled by <span class="math inline">\(\phi\)</span>. As such, it can quickly shrink the posterior on <span class="math inline">\(\phi\)</span>. Moreover, it can be used to answer the question to impute individual coin tosses <span class="math inline">\(P(\mathbf{U} \mid \mathbf{Y})\)</span>.</p>
+<p>The second model assumes independent coin tosses, where the bias is controlled by <span class="math inline">\(\phi\)</span>. As such, it can quickly shrink the posterior on <span class="math inline">\(\phi\)</span>. Moreover, it can be used to answer the question to impute individual coin tosses, <span class="math inline">\(P(\mathbf{U} \mid \mathbf{Y})\)</span>.</p>
 <p>Let’s think what could happen if we fitted each model to the data generated from the other one: this is working with misspecified models (in the <span class="math inline">\(\mathcal M\)</span>-complete setting).</p>
 <p>Consider a setting where we have a lot of data, <span class="math inline">\(N\gg 1\)</span> and the false positive and false negative rates are small, with <span class="math inline">\(c_0 \ll c_1\)</span>. If the data come from the second model, with individual variables <span class="math inline">\(U_n\sim \mathrm{Bernoulli}(\phi)\)</span>, and we have <span class="math inline">\(Y_n\approx U_n\)</span>, then the posterior on <span class="math inline">\(T\)</span> will have most mass on the maximum likelihood solution: either <span class="math inline">\(0\)</span> (which should happen for <span class="math inline">\(\phi \ll 0.5\)</span>) or <span class="math inline">\(1\)</span> (for <span class="math inline">\(\phi \gg 0.5\)</span>). This model will be underfitting and the predictive distribution from this model will be quite bad: new <span class="math inline">\(Y_{N+1}\)</span> would again be an approximation to <span class="math inline">\(U_{N+1}\)</span>, which is sampled from <span class="math inline">\(\mathrm{Bernoulli}(\phi)\)</span>, but the model would just return a noisy version of the inferred <span class="math inline">\(T\)</span>.</p>
 <p>On the other hand, if we have a lot of data from the first model (with a single <span class="math inline">\(T\)</span> variable) and we fit the second model, the posterior on <span class="math inline">\(\phi\)</span> may have most of the mass near <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>, depending on the true value of <span class="math inline">\(T\)</span>. Hence, although <span class="math inline">\(U_n\sim \mathrm{Bernoulli}(\phi)\)</span> are sampled independently, once <span class="math inline">\(\phi\)</span> is near the true value of <span class="math inline">\(T\)</span> (<span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>), they can all be approximately equal to <span class="math inline">\(T\)</span>.</p>
 <p>So, when there is a lot of data, noting where most of the mass of <span class="math inline">\(\phi\)</span> lies can be a good approximation to the maximum likelihood of <span class="math inline">\(T\)</span>.</p>
 <p>Of course, these <span class="math inline">\(N\gg 1\)</span> settings only tell what happens when we have a lot of data and we didn’t discuss the uncertainty: can we use <span class="math inline">\(\phi\)</span> to get well-calibrated uncertainty on <span class="math inline">\(T\)</span>?</p>
-<p>I generally expect that the <span class="math inline">\(\phi\)</span> model can be a bit better in terms of handling slight misspecification, but doing inference directly on <span class="math inline">\(T\)</span> will provide better results in terms of uncertainty quantification for small <span class="math inline">\(N\)</span>. But this is just a hypothesis: the simulations are not for today.</p>
+<p>I generally expect that the <span class="math inline">\(\phi\)</span> model can be a bit better in terms of handling slight misspecification, but doing inference directly on <span class="math inline">\(T\)</span> will provide better results in terms of uncertainty quantification for small <span class="math inline">\(N\)</span>. But this is just a hypothesis: extensive simulations are not for today.</p>
 </section>
 <section id="appendix" class="level2">
 <h2 class="anchored" data-anchor-id="appendix">Appendix</h2>
