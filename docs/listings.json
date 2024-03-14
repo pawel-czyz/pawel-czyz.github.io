@@ -11,6 +11,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/fishers-noncentral-hypergeometric-distribution-and-elementary-symmetric-polynomials.html",
       "/posts/beta-bernoulli.html",
       "/posts/conditioning-multivariate-normal.html",
       "/posts/setting-up-repository.html",
