@@ -12,7 +12,26 @@ categories:
   - distribution shift
 ---
 
+## Abstract
+
+Understanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art.
+
+
+## Acknowledgments
+
+I had a lot of great time working on this! This is mostly due to Albert Ziegler and Ian Wright, who were wonderful mentors to work with. I am also grateful to Semmle/GitHub UK and the ETH AI Center for funding this work.
+
+
+## Links
+
+- The Bayesian quantification manuscript is available [here](https://arxiv.org/abs/2302.09159). It evolved from [unsupervised recalibration](https://arxiv.org/abs/1908.09157), as we arrived to the quantification coming from the related problem of classifier recalibration under prior probability shifts.
+- The experiments are fully reproducible thanks to Snakemake workflows! Check out the [code](https://github.com/pawel-czyz/labelshift).
+- Bayesian quantification is available in the [QuaPy package](https://github.com/HLT-ISTI/QuaPy)! Many thanks to [Alejandro Moreo Fernández](https://scholar.google.es/citations?user=4RIy5E4AAAAJ) for his kindness and contributions in pull requests [28](https://github.com/HLT-ISTI/QuaPy/pull/28) and [29](https://github.com/HLT-ISTI/QuaPy/pull/29).
+- We discussed quantification in the post on [Gibbs sampling and EM algorithm](../posts/em-gibbs-quantification.qmd).
+
+
 ## Citation
+
 ```
 @misc{bayesian-quantification,
       title={Bayesian Quantification with Black-Box Estimators}, 
@@ -24,5 +43,3 @@ categories:
 }
 ```
 
-## Abstract
-Understanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art.

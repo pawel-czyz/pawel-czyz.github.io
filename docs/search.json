@@ -60,21 +60,35 @@
     "href": "publications/bayesian-quantification.html",
     "title": "Bayesian quantification with black-box estimators",
     "section": "",
-    "text": "@misc{bayesian-quantification,\n      title={Bayesian Quantification with Black-Box Estimators}, \n      author={Albert Ziegler and Paweł Czyż},\n      year={2023},\n      eprint={2302.09159},\n      archivePrefix={arXiv},\n      primaryClass={stat.ML}\n}"
-  },
-  {
-    "objectID": "publications/bayesian-quantification.html#citation",
-    "href": "publications/bayesian-quantification.html#citation",
-    "title": "Bayesian quantification with black-box estimators",
-    "section": "",
-    "text": "@misc{bayesian-quantification,\n      title={Bayesian Quantification with Black-Box Estimators}, \n      author={Albert Ziegler and Paweł Czyż},\n      year={2023},\n      eprint={2302.09159},\n      archivePrefix={arXiv},\n      primaryClass={stat.ML}\n}"
+    "text": "Understanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art."
   },
   {
     "objectID": "publications/bayesian-quantification.html#abstract",
     "href": "publications/bayesian-quantification.html#abstract",
     "title": "Bayesian quantification with black-box estimators",
-    "section": "Abstract",
-    "text": "Abstract\nUnderstanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art."
+    "section": "",
+    "text": "Understanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art."
+  },
+  {
+    "objectID": "publications/bayesian-quantification.html#acknowledgments",
+    "href": "publications/bayesian-quantification.html#acknowledgments",
+    "title": "Bayesian quantification with black-box estimators",
+    "section": "Acknowledgments",
+    "text": "Acknowledgments\nI had a lot of great time working on this! This is mostly due to Albert Ziegler and Ian Wright, who were wonderful mentors to work with. I am also grateful to Semmle/GitHub UK and the ETH AI Center for funding this work."
+  },
+  {
+    "objectID": "publications/bayesian-quantification.html#links",
+    "href": "publications/bayesian-quantification.html#links",
+    "title": "Bayesian quantification with black-box estimators",
+    "section": "Links",
+    "text": "Links\n\nThe Bayesian quantification manuscript is available here. It evolved from unsupervised recalibration, as we arrived to the quantification coming from the related problem of classifier recalibration under prior probability shifts.\nThe experiments are fully reproducible thanks to Snakemake workflows! Check out the code.\nBayesian quantification is available in the QuaPy package! Many thanks to Alejandro Moreo Fernández for his kindness and contributions in pull requests 28 and 29.\nWe discussed quantification in the post on Gibbs sampling and EM algorithm."
+  },
+  {
+    "objectID": "publications/bayesian-quantification.html#citation",
+    "href": "publications/bayesian-quantification.html#citation",
+    "title": "Bayesian quantification with black-box estimators",
+    "section": "Citation",
+    "text": "Citation\n@misc{bayesian-quantification,\n      title={Bayesian Quantification with Black-Box Estimators}, \n      author={Albert Ziegler and Paweł Czyż},\n      year={2023},\n      eprint={2302.09159},\n      archivePrefix={arXiv},\n      primaryClass={stat.ML}\n}"
   },
   {
     "objectID": "posts/strict-linear-independence-measures.html",
@@ -704,13 +718,13 @@
     "href": "blog.html",
     "title": "Blog",
     "section": "",
-    "text": "The following posts have evolved from my digital garden1 into a bit longer form. Note that these posts may be incomplete, written from a subjective point of view or contain errors. I’d be grateful for feedback on how to improve them."
+    "text": "These posts have evolved from my digital garden1 into a bit longer form. Their main role is to educate myself and they may be incomplete, written from a very subjective point of view, or contain errors. I’d be grateful for feedback on how to improve them!"
   },
   {
     "objectID": "blog.html#footnotes",
     "href": "blog.html#footnotes",
     "title": "Blog",
     "section": "Footnotes",
-    "text": "Footnotes\n\n\nSee this post for a difference. If you know how to integrate Obsidian together with Quarto, I’d very interested to hear.↩︎"
+    "text": "Footnotes\n\n\nSee this link for a difference. I maintain my digital garden in Obsidian. Please, let me know if you know a good way of integrating Obsidian with Quarto!↩︎"
   }
 ]

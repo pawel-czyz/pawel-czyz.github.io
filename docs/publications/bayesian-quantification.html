@@ -136,6 +136,23 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
+<section id="abstract" class="level2">
+<h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
+<p>Understanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art.</p>
+</section>
+<section id="acknowledgments" class="level2">
+<h2 class="anchored" data-anchor-id="acknowledgments">Acknowledgments</h2>
+<p>I had a lot of great time working on this! This is mostly due to Albert Ziegler and Ian Wright, who were wonderful mentors to work with. I am also grateful to Semmle/GitHub UK and the ETH AI Center for funding this work.</p>
+</section>
+<section id="links" class="level2">
+<h2 class="anchored" data-anchor-id="links">Links</h2>
+<ul>
+<li>The Bayesian quantification manuscript is available <a href="https://arxiv.org/abs/2302.09159">here</a>. It evolved from <a href="https://arxiv.org/abs/1908.09157">unsupervised recalibration</a>, as we arrived to the quantification coming from the related problem of classifier recalibration under prior probability shifts.</li>
+<li>The experiments are fully reproducible thanks to Snakemake workflows! Check out the <a href="https://github.com/pawel-czyz/labelshift">code</a>.</li>
+<li>Bayesian quantification is available in the <a href="https://github.com/HLT-ISTI/QuaPy">QuaPy package</a>! Many thanks to <a href="https://scholar.google.es/citations?user=4RIy5E4AAAAJ">Alejandro Moreo Fernández</a> for his kindness and contributions in pull requests <a href="https://github.com/HLT-ISTI/QuaPy/pull/28">28</a> and <a href="https://github.com/HLT-ISTI/QuaPy/pull/29">29</a>.</li>
+<li>We discussed quantification in the post on <a href="../posts/em-gibbs-quantification.html">Gibbs sampling and EM algorithm</a>.</li>
+</ul>
+</section>
 <section id="citation" class="level2">
 <h2 class="anchored" data-anchor-id="citation">Citation</h2>
 <pre><code>@misc{bayesian-quantification,
@@ -146,10 +163,6 @@ ul.task-list li input[type="checkbox"] {
       archivePrefix={arXiv},
       primaryClass={stat.ML}
 }</code></pre>
-</section>
-<section id="abstract" class="level2">
-<h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
-<p>Understanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art.</p>
 
 
 </section>

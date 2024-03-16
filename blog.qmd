@@ -7,8 +7,9 @@ listing:
   categories: true
 ---
 
-The following posts have evolved from my digital garden[^1] into a bit longer form.
-Note that these posts may be incomplete, written from a subjective point of view or contain errors.
-I'd be grateful for feedback on how to improve them.
+These posts have evolved from my digital garden[^1] into a bit longer form.
+Their main role is [to educate myself](https://rgiordan.github.io/meta/2019/07/26/why.html) and they may be incomplete, written from a very subjective point of view, or contain errors.
+I'd be grateful for feedback on how to improve them!
 
-[^1]: See [this post](https://github.com/pawel-czyz/channel-capacity-estimator) for a difference. If you know how to integrate [Obsidian](https://obsidian.md/) together with [Quarto](https://quarto.org/), I'd very interested to hear.
+[^1]: See [this link](https://joelhooks.com/digital-garden/) for a difference. I maintain my digital garden in [Obsidian](https://obsidian.md/). Please, let me know if you know a good way of integrating Obsidian with [Quarto](https://quarto.org/)!
+
