@@ -2,106 +2,110 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://pawel-czyz.github.io/publications.html</loc>
-    <lastmod>2024-03-16T19:26:06.745Z</lastmod>
+    <lastmod>2024-03-26T09:35:49.994Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/private/prezenty.html</loc>
-    <lastmod>2024-03-16T19:25:55.513Z</lastmod>
+    <lastmod>2024-03-26T09:35:48.794Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/publications/limits-mapk.html</loc>
-    <lastmod>2024-03-16T19:25:55.089Z</lastmod>
+    <lastmod>2024-03-26T09:35:48.382Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/publications/bayesian-quantification.html</loc>
-    <lastmod>2024-03-16T19:26:09.617Z</lastmod>
+    <lastmod>2024-03-26T09:35:47.950Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/strict-linear-independence-measures.html</loc>
-    <lastmod>2024-03-16T19:25:54.257Z</lastmod>
+    <lastmod>2024-03-26T09:35:47.494Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/conditioning-multivariate-normal.html</loc>
-    <lastmod>2024-03-16T19:25:53.417Z</lastmod>
+    <lastmod>2024-03-26T09:35:46.630Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/no-free-lunch-in-research.html</loc>
-    <lastmod>2024-03-16T19:25:51.889Z</lastmod>
+    <lastmod>2024-03-26T09:35:45.034Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/getting-started-with-Bayesian-statistics.html</loc>
-    <lastmod>2024-03-16T19:25:51.241Z</lastmod>
+    <lastmod>2024-03-26T09:35:44.370Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/dirichlet-process.html</loc>
-    <lastmod>2024-03-16T19:25:50.461Z</lastmod>
+    <lastmod>2024-03-26T09:35:43.558Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/beta-bernoulli.html</loc>
-    <lastmod>2024-03-16T19:25:49.645Z</lastmod>
-  </url>
-  <url>
-    <loc>https://pawel-czyz.github.io/posts/kernel-regression-transformer.html</loc>
-    <lastmod>2024-03-16T19:25:48.221Z</lastmod>
-  </url>
-  <url>
-    <loc>https://pawel-czyz.github.io/posts/board-games-monte-carlo.html</loc>
-    <lastmod>2024-03-16T19:25:47.165Z</lastmod>
-  </url>
-  <url>
-    <loc>https://pawel-czyz.github.io/posts/em-gibbs-quantification.html</loc>
-    <lastmod>2024-03-16T19:26:14.861Z</lastmod>
-  </url>
-  <url>
-    <loc>https://pawel-czyz.github.io/posts/histograms-vs-density-estimation.html</loc>
-    <lastmod>2024-03-16T19:25:45.185Z</lastmod>
-  </url>
-  <url>
-    <loc>https://pawel-czyz.github.io/posts/regression-to-the-mean-bias-rejoinder.html</loc>
-    <lastmod>2024-03-16T19:25:46.649Z</lastmod>
-  </url>
-  <url>
-    <loc>https://pawel-czyz.github.io/posts/expectations-student-mentorship.html</loc>
-    <lastmod>2024-03-16T19:25:47.585Z</lastmod>
+    <lastmod>2024-03-26T09:35:42.670Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/triangle-distributions.html</loc>
-    <lastmod>2024-03-16T19:25:48.745Z</lastmod>
+    <lastmod>2024-03-26T09:35:41.218Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/posts/expectations-student-mentorship.html</loc>
+    <lastmod>2024-03-26T09:35:40.038Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/posts/regression-to-the-mean-bias-rejoinder.html</loc>
+    <lastmod>2024-03-26T09:35:39.070Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/posts/histograms-vs-density-estimation.html</loc>
+    <lastmod>2024-03-26T09:35:37.610Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/posts/em-gibbs-quantification.html</loc>
+    <lastmod>2024-03-26T09:35:38.366Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/posts/board-games-monte-carlo.html</loc>
+    <lastmod>2024-03-26T09:35:39.590Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/posts/kernel-regression-transformer.html</loc>
+    <lastmod>2024-03-26T09:35:40.682Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/posts/clustering-exponential-family-softmax.html</loc>
+    <lastmod>2024-03-26T09:35:54.378Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/determinant-multilinear.html</loc>
-    <lastmod>2024-03-16T19:25:50.081Z</lastmod>
+    <lastmod>2024-03-26T09:35:43.154Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/almost-binomial-markov-chain.html</loc>
-    <lastmod>2024-03-16T19:25:50.969Z</lastmod>
+    <lastmod>2024-03-26T09:35:44.074Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/setting-up-repository.html</loc>
-    <lastmod>2024-03-16T19:25:51.641Z</lastmod>
+    <lastmod>2024-03-26T09:35:44.782Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/small-power.html</loc>
-    <lastmod>2024-03-16T19:25:52.645Z</lastmod>
+    <lastmod>2024-03-26T09:35:45.818Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/on-beyond-normal.html</loc>
-    <lastmod>2024-03-16T19:25:53.877Z</lastmod>
+    <lastmod>2024-03-26T09:35:47.118Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/index.html</loc>
-    <lastmod>2024-03-16T19:26:04.821Z</lastmod>
+    <lastmod>2024-03-26T09:35:47.706Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/publications/pmi-profiles.html</loc>
-    <lastmod>2024-03-16T19:25:54.873Z</lastmod>
+    <lastmod>2024-03-26T09:35:48.158Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/publications/beyond-normal.html</loc>
-    <lastmod>2024-03-16T19:25:55.313Z</lastmod>
+    <lastmod>2024-03-26T09:35:48.594Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/blog.html</loc>
-    <lastmod>2024-03-16T19:25:56.425Z</lastmod>
+    <lastmod>2024-03-26T09:35:55.410Z</lastmod>
   </url>
 </urlset>
