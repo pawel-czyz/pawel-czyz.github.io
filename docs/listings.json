@@ -11,6 +11,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/irrational-pi-and-e.html",
       "/posts/clustering-exponential-family-softmax.html",
       "/posts/beta-bernoulli.html",
       "/posts/conditioning-multivariate-normal.html",

@@ -719,5 +719,47 @@
     "title": "Blog",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nSee this link for a difference. I maintain my digital garden in Obsidian. Please, let me know if you know a good way of integrating Obsidian with Quarto!↩︎"
+  },
+  {
+    "objectID": "posts/irrational-pi-and-e.html",
+    "href": "posts/irrational-pi-and-e.html",
+    "title": "Proofs that pi and e are irrational",
+    "section": "",
+    "text": "Timothy Chow wrote a great paper A well-motivated proof that pi is irrational, where he explains a proof of irrationality of \\(e\\) (attributed to Fourier) and a proof of irrationality of \\(\\pi\\), which originally appeared in the I. Niven’s brilliant one-page article.\nIn this post I’ll just recall both proofs, so I can remember them: original articles will be more informative."
+  },
+  {
+    "objectID": "posts/irrational-pi-and-e.html#irrationality-of-e",
+    "href": "posts/irrational-pi-and-e.html#irrationality-of-e",
+    "title": "Proofs that pi and e are irrational",
+    "section": "Irrationality of \\(e\\)",
+    "text": "Irrationality of \\(e\\)\nSuppose that \\(e=a/b\\) for positive integers \\(a\\) and \\(b\\). We can write \\[\ne = \\sum_{n=0}^{\\infty} \\frac{1}{n!}\n\\]\nand reach a contradiction by studying an integer:\n\\[\n0 &lt; b!\\cdot e - b!\\sum_{n=0}^b \\frac{1}{n!} = \\sum_{k=1}^{\\infty} \\frac{b!}{(b+k)!} &lt; \\sum_{k=1}^{\\infty} \\frac{1}{(b+1)^k} = \\frac{1}{b} \\le 1.\n\\]\nHence, this integer would lie strictly between \\(0\\) and \\(1\\), what is impossible.\nMore generally, T. Chow shows that a similar argument applies to prove irrationality for \\(e^r\\), where \\(r\\) is a positive integer. From there, it’s easy to show that"
+  },
+  {
+    "objectID": "posts/irrational-pi-and-e.html#irrationality-of-pi",
+    "href": "posts/irrational-pi-and-e.html#irrationality-of-pi",
+    "title": "Proofs that pi and e are irrational",
+    "section": "Irrationality of \\(\\pi\\)",
+    "text": "Irrationality of \\(\\pi\\)\nSuppose that \\(\\pi=a/b\\) for positive integers \\(a\\) and \\(b\\). Let \\(n\\) be be a positive integer and define \\[\nf(x)=\\frac{x^n(a-bx)^n}{n!}\n\\]\nThe main idea of I. Niven’s proof is to show that the definite integral \\[\nI := \\int \\limits_0^\\pi f(x) \\sin x\\, \\mathrm{d}x\n\\]\nis an integer. But for \\(0 &lt; x &lt; \\pi\\) there are bounds \\[\n0 &lt; f(x) \\sin x &lt; \\frac{\\pi^n\\cdot (a-0)^n}{n!} = \\frac{ (\\pi a)^n }{n!},\n\\]\nso that for sufficiently large \\(n\\) we have \\(0 &lt; I &lt; 1\\).\nHence, the whole difficulty lies in proving that \\(I \\in \\mathbb Z\\).\nDefine \\[\nF(x) = f(x) - f''(x) + f^{(4)}(x) - \\cdots + (-1)^n f^{(2n)}(x),\n\\]\nwhere \\(f^{(k)}\\) is the \\(k\\)-th derivative of \\(f\\). We have\n\\[\\begin{align*}\n\\frac{\\mathrm{d}}{\\mathrm{d} x}\\left( F'(x) \\sin x - F(x) \\cos x \\right) &= F''(x) \\sin x + F'(x) \\cos x - F'(x) \\cos x + F(x) \\sin x\\\\\n&= (F(x) + F''(x)) \\sin x = f(x) \\sin x,\n\\end{align*}\\] so that \\[\n\\int\\limits_0^\\pi f(x) \\sin x\\, \\mathrm{d}x = \\big[F'(x) \\sin x - F(x) \\cos x\\big]_0^\\pi = F(0) + F(\\pi).\n\\]\nWe can prove that \\(F(0) + F(\\pi)\\) is an integer by proving that all derivatives \\(f^{(k)}_n(0)\\) and \\(f^{(k)}_n(\\pi)\\) are integers.\nFirst, note that \\(f_n(x) = f_n(a/b - x) = f_n(\\pi - x)\\), so that \\(f^{(k)}_n(0) = \\pm f^{(k)}_n(\\pi)\\). To prove that \\(f^{(k)}_n(0)\\) is an integer, observe that each summand in \\(f_n\\) has a form \\(u x^{n+r} / n!\\), where \\(u\\) is an integer and \\(r \\ge 0\\). If we differentiate it \\(k\\) times and evaluate it at \\(x=0\\) we will either have \\(0\\) (for \\(k \\neq n+r\\)) or \\(u \\cdot (n+r)! / n!\\) for \\(k=n+r\\), which is an integer."
+  },
+  {
+    "objectID": "posts/irrational-pi-and-e.html#links",
+    "href": "posts/irrational-pi-and-e.html#links",
+    "title": "Proofs that pi and e are irrational",
+    "section": "Links",
+    "text": "Links\n\nI. Niven, A simple proof that \\(\\pi\\) is irrational, 1947: a one-page proof that \\(\\pi\\) is irrational.\nKostya_I, Exposition of Niven’s proof, 2023: a short note connecting Niven’s proof to orthogonal polynomials.\nT. Chow, A well-motivated proof that pi is irrational, 2024: proof of irrationality of \\(\\pi\\) and \\(e^r\\) for nonzero rational \\(r\\)."
+  },
+  {
+    "objectID": "posts/irrational-pi-and-e.html#appendix-important-theorems-of-transcendental-number-theory",
+    "href": "posts/irrational-pi-and-e.html#appendix-important-theorems-of-transcendental-number-theory",
+    "title": "Proofs that pi and e are irrational",
+    "section": "Appendix: important theorems of transcendental number theory",
+    "text": "Appendix: important theorems of transcendental number theory\nI often forget the names of major results of transcendental number theory. Let’s quickly recall them:\nLindemann–Weierstrass theorem: if \\(\\alpha_1, \\dotsc, \\alpha_n\\) are algebraic numbers linearly independent over \\(\\mathbb Q\\), then \\(e^{\\alpha_1}, \\dotsc, e^{\\alpha_n}\\) are algebraically independent over \\(\\mathbb Q\\)."
+  },
+  {
+    "objectID": "posts/irrational-pi-and-e.html#appendix-some-theorems-of-transcendental-number-theory",
+    "href": "posts/irrational-pi-and-e.html#appendix-some-theorems-of-transcendental-number-theory",
+    "title": "Proofs that pi and e are irrational",
+    "section": "Appendix: some theorems of transcendental number theory",
+    "text": "Appendix: some theorems of transcendental number theory\nI often forget the names of major results of transcendental number theory. Let’s quickly recall them:\nLindemann–Weierstrass theorem: if \\(\\alpha_1, \\dotsc, \\alpha_n\\) are algebraic numbers linearly independent over \\(\\mathbb Q\\), then \\(e^{\\alpha_1}, \\dotsc, e^{\\alpha_n}\\) are algebraically independent over \\(\\mathbb Q\\).\nGelfond–Schneider theorem: let \\(a \\in \\mathbb C\\setminus \\{0, 1\\}\\) be a complex algebraic number. If \\(b \\in \\mathbb C\\setminus (\\mathbb Q\\times \\{0\\})\\) is an irrational complex algebraic number, then \\(a^b = \\exp(b\\log a)\\) is transendental (independently on the branches of the functions used)."
   }
 ]
