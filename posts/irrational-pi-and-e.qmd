@@ -26,8 +26,6 @@ $$
 
 Hence, this integer would lie strictly between $0$ and $1$, what is impossible.
 
-More generally, T. Chow shows that a similar argument applies to prove irrationality for $e^r$, where $r$ is a positive integer. From there, it's easy to show that 
-
 ## Irrationality of $\pi$
 
 Suppose that $\pi=a/b$ for positive integers $a$ and $b$. Let $n$ be be a positive integer and define

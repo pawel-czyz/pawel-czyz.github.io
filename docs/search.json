@@ -732,7 +732,7 @@
     "href": "posts/irrational-pi-and-e.html#irrationality-of-e",
     "title": "Proofs that pi and e are irrational",
     "section": "Irrationality of \\(e\\)",
-    "text": "Irrationality of \\(e\\)\nSuppose that \\(e=a/b\\) for positive integers \\(a\\) and \\(b\\). We can write \\[\ne = \\sum_{n=0}^{\\infty} \\frac{1}{n!}\n\\]\nand reach a contradiction by studying an integer:\n\\[\n0 &lt; b!\\cdot e - b!\\sum_{n=0}^b \\frac{1}{n!} = \\sum_{k=1}^{\\infty} \\frac{b!}{(b+k)!} &lt; \\sum_{k=1}^{\\infty} \\frac{1}{(b+1)^k} = \\frac{1}{b} \\le 1.\n\\]\nHence, this integer would lie strictly between \\(0\\) and \\(1\\), what is impossible.\nMore generally, T. Chow shows that a similar argument applies to prove irrationality for \\(e^r\\), where \\(r\\) is a positive integer. From there, it’s easy to show that"
+    "text": "Irrationality of \\(e\\)\nSuppose that \\(e=a/b\\) for positive integers \\(a\\) and \\(b\\). We can write \\[\ne = \\sum_{n=0}^{\\infty} \\frac{1}{n!}\n\\]\nand reach a contradiction by studying an integer:\n\\[\n0 &lt; b!\\cdot e - b!\\sum_{n=0}^b \\frac{1}{n!} = \\sum_{k=1}^{\\infty} \\frac{b!}{(b+k)!} &lt; \\sum_{k=1}^{\\infty} \\frac{1}{(b+1)^k} = \\frac{1}{b} \\le 1.\n\\]\nHence, this integer would lie strictly between \\(0\\) and \\(1\\), what is impossible."
   },
   {
     "objectID": "posts/irrational-pi-and-e.html#irrationality-of-pi",
