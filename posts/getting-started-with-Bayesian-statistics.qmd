@@ -3,8 +3,6 @@ title: "Getting started with Bayesian statistics"
 description: "From time to time I receive a question from students and collaborators how to get started with Bayesian statistics. So here it comes: the list of my favourite resources!"
 author: "Paweł Czyż"
 date: "10/14/2023"
-categories:
-  - Bayesian statistics
 ---
 
 ### Getting started

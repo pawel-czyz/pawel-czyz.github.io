@@ -3,11 +3,6 @@ title: "The mutual information saga"
 description: "Behind the scenes of our mutual information research."
 author: "Paweł Czyż"
 date: "11/20/2023"
-categories:
-  - Mutual information
-  - Monte Carlo
-  - Clustering
-  - Bayesian statistics
 bibliography: references.bib
 execute:
   freeze: true

@@ -3,8 +3,6 @@ title: "Two distributions on a triangle"
 description: "Sometimes if you misunderstand something, you can have two interesting distributions, rather than only one."
 author: "Paweł Czyż"
 date: "8/31/2023"
-categories:
-  - Mutual information
 execute:
   freeze: true
 format: 

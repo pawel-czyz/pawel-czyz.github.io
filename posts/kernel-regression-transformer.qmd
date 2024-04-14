@@ -3,8 +3,6 @@ title: "From kernel regression to the transformer"
 description: "We'll go from kernel regression to attention."
 author: "Paweł Czyż"
 date: "1/26/2024"
-categories:
-  - Deep learning
 execute:
   freeze: true
 format: 

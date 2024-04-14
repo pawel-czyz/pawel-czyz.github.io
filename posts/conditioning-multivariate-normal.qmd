@@ -3,8 +3,6 @@ title: "Starting (on finite domains) with Gaussian processes"
 description: "Gaussian processes are wonderful. Let's take a look at the machinery behind them in the simplest case: when they are just a multivariate normal distribution."
 author: "Paweł Czyż"
 date: "2/12/2024"
-categories:
-  - Bayesian nonparametrics
 execute:
   freeze: true
 format: 

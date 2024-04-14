@@ -3,9 +3,6 @@ title: "Expectation-maximization and Gibbs sampling in quantification"
 description: "Let's analyse how to estimate how many cats and dogs can be found in an unlabeled data set."
 author: "Paweł Czyż"
 date: "1/21/2024"
-categories:
-  - Markov chain Monte Carlo
-  - Bayesian statistics
 execute:
   freeze: true
 bibliography: references.bib

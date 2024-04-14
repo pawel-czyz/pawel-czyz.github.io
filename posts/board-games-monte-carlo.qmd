@@ -3,8 +3,6 @@ title: "Understanding board games with Monte Carlo simulations"
 description: "We look at several simple situations occurring in board games and analyse them with Monte Carlo simulations."
 author: "Paweł Czyż"
 date: "7/9/2023"
-categories:
-  - Monte Carlo
 execute:
   freeze: true
 format: 

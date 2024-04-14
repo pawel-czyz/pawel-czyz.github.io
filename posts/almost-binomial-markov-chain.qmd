@@ -3,9 +3,6 @@ title: "An almost binomial Markov chain"
 description: "Everybody knows how to toss a coin. This time we'll toss it a few times."
 author: "Paweł Czyż"
 date: "1/19/2024"
-categories:
-  - Markov chains
-  - Markov chain Monte Carlo
 execute:
   freeze: true
 format: 

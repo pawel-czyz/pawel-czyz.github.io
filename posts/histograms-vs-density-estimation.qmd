@@ -3,8 +3,6 @@ title: "Histograms or kernel density estimators?"
 description: "We take a look at summarizing samples with histograms and kernel density estimators."
 author: "Paweł Czyż"
 date: "8/1/2023"
-categories:
-  - Visualisation
 execute:
   freeze: true
 format: 

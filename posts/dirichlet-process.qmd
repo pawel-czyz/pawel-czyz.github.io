@@ -3,9 +3,6 @@ title: "The Dirichlet process"
 description: "In an informal fashion we introduce several constructions of the Dirichlet process."
 author: "Paweł Czyż"
 date: "7/11/2023"
-categories:
-  - Bayesian nonparametrics
-  - Clustering
 bibliography: references.bib
 execute:
   freeze: auto

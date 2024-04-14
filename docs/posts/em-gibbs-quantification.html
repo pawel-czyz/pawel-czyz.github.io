@@ -186,11 +186,7 @@ div.csl-indent {
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">Expectation-maximization and Gibbs sampling in quantification</h1>
-  <div class="quarto-categories">
-    <div class="quarto-category">Markov chain Monte Carlo</div>
-    <div class="quarto-category">Bayesian statistics</div>
-  </div>
-  </div>
+</div>
 
 <div>
   <div class="description">
@@ -253,20 +249,19 @@ div.csl-indent {
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  pgm.add_plate(coords, label<span class="op">=</span>label, shift<span class="op">=</span>shift, rect_params<span class="op">=</span>{<span class="st">"edgecolor"</span>: <span class="st">"w"</span>})</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>add_node(<span class="st">"pi"</span>, <span class="st">"$</span><span class="ch">\\</span><span class="st">pi$"</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>add_node(<span class="st">"pi"</span>, <span class="st">"$</span><span class="ch">\\</span><span class="st">pi$"</span>, <span class="dv">0</span>, <span class="dv">1</span>, )</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>add_node(<span class="st">"Y_i"</span>, <span class="vs">r"$Y_i$"</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>add_node(<span class="st">"X_i"</span>, <span class="vs">r"$X_i$"</span>, <span class="dv">4</span>, <span class="dv">1</span>, observed<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Add edges</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>add_edge(<span class="st">"pi"</span>, <span class="st">"Y_i"</span>)</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>add_edge(<span class="st">"Y_i"</span>, <span class="st">"X_i"</span>)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a plate</span></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>add_plate([<span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="dv">3</span>, <span class="fl">1.5</span>], label<span class="op">=</span><span class="vs">r"$i = 1, \ldots, N$"</span>, shift<span class="op">=-</span><span class="fl">0.1</span>)</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Render and show the PGM</span></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>pgm.render()</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>add_node(<span class="st">"Y_i"</span>, <span class="vs">r"$Y_i$"</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>add_node(<span class="st">"X_i"</span>, <span class="vs">r"$X_i$"</span>, <span class="dv">4</span>, <span class="dv">1</span>, observed<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Add edges</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>add_edge(<span class="st">"pi"</span>, <span class="st">"Y_i"</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>add_edge(<span class="st">"Y_i"</span>, <span class="st">"X_i"</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a plate</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>add_plate([<span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="dv">3</span>, <span class="fl">1.5</span>], label<span class="op">=</span><span class="vs">r"$i = 1, \ldots, N$"</span>, shift<span class="op">=-</span><span class="fl">0.1</span>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Render and show the PGM</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>pgm.render()</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <p><img src="em-gibbs-quantification_files/figure-html/cell-2-output-1.png" class="img-fluid"></p>
@@ -570,9 +565,9 @@ Actual:    [0.2 0.8]</code></pre>
 <span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Actual: </span><span class="sc">{</span>n_cases <span class="op">/</span> n_cases<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_38981/3942328187.py:2: DeprecationWarning: jax.random.PRNGKeyArray is deprecated. Use jax.Array for annotations, and jax.dtypes.issubdtype(arr.dtype, jax.dtypes.prng_key) for runtime detection of typed prng keys.
+<pre><code>/tmp/ipykernel_43705/3942328187.py:2: DeprecationWarning: jax.random.PRNGKeyArray is deprecated. Use jax.Array for annotations, and jax.dtypes.issubdtype(arr.dtype, jax.dtypes.prng_key) for runtime detection of typed prng keys.
   key: random.PRNGKeyArray,
-/tmp/ipykernel_38981/3942328187.py:17: DeprecationWarning: jax.random.PRNGKeyArray is deprecated. Use jax.Array for annotations, and jax.dtypes.issubdtype(arr.dtype, jax.dtypes.prng_key) for runtime detection of typed prng keys.
+/tmp/ipykernel_43705/3942328187.py:17: DeprecationWarning: jax.random.PRNGKeyArray is deprecated. Use jax.Array for annotations, and jax.dtypes.issubdtype(arr.dtype, jax.dtypes.prng_key) for runtime detection of typed prng keys.
   key: random.PRNGKeyArray,</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
