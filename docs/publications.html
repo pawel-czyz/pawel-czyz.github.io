@@ -71,7 +71,7 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-project','listing-website','listing-format','listing-language','listing-title','listing-type','listing-author','listing-year','listing-publication','listing-preprint','listing-materials','listing-toc','listing-categories','listing-path','listing-outputHref','listing-description','listing-filename','listing-file-modified','listing-reading-time','listing-doi',{ data: ['index'] },{ data: ['categories'] }],
+      valueNames: ['listing-project','listing-website','listing-format','listing-language','listing-title','listing-type','listing-author','listing-year','listing-venue','listing-preprint','listing-code','listing-toc','listing-path','listing-outputHref','listing-description','listing-filename','listing-file-modified','listing-reading-time','listing-publication',{ data: ['index'] },{ data: ['categories'] }],
       
       searchColumns: ["listing-title","listing-author","listing-publication","listing-year"],
     };
@@ -97,7 +97,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -137,8 +137,7 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(4)</span></div><div class="category" data-category="Bayesian statistics">Bayesian statistics <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Monte Carlo">Monte Carlo <span class="quarto-category-count">(1)</span></div><div class="category" data-category="distribution shift">distribution shift <span class="quarto-category-count">(1)</span></div><div class="category" data-category="mutual information">mutual information <span class="quarto-category-count">(3)</span></div><div class="category" data-category="systems biology">systems biology <span class="quarto-category-count">(1)</span></div></div></div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -186,10 +185,10 @@ ul.task-list li input[type="checkbox"] {
     </div>
 </div>
 <ul class="pub-list list">
-  <li data-index="0" data-categories="Bayesian statistics,distribution shift" data-listing-file-modified-sort="1710617138638" data-listing-reading-time-sort="2">
+  <li data-index="0" data-listing-file-modified-sort="1713619292580" data-listing-reading-time-sort="3">
     <span class="listing-title lead">Bayesian quantification with black-box estimators</span><br>
     <span class="listing-author">A. Ziegler, P. Czyż</span><br>
-    <span class="listing-publication fst-italic ">Preprint, submitted</span>
+    <span class="listing-venue fst-italic ">Preprint, submitted</span>
     <span class="listing-year">(2023)</span><br>
     <a href="./publications/bayesian-quantification.html" class="btn btn-primary">
       Details
@@ -198,31 +197,28 @@ ul.task-list li input[type="checkbox"] {
       <i class="bi bi-file-earmark-text"></i> Preprint
     </a>
     <a href="https://github.com/pawel-czyz/labelshift" class="btn btn-light" target="_blank" rel="noopener noreferrer">
-      <i class="bi bi-file-earmark-zip"></i> Materials
+      <i class="bi bi-code-slash"></i> Code
     </a>
   </li>
-  <li data-index="1" data-categories="mutual information" data-listing-file-modified-sort="1706783336592" data-listing-reading-time-sort="1">
+  <li data-index="1" data-listing-file-modified-sort="1713617899105" data-listing-reading-time-sort="2">
     <span class="listing-title lead">Beyond normal: on the evaluation of mutual information estimators</span><br>
     <span class="listing-author">P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx</span><br>
-    <span class="listing-publication fst-italic ">NeurIPS</span>
+    <span class="listing-venue fst-italic ">NeurIPS</span>
     <span class="listing-year">(2023)</span><br>
     <a href="./publications/beyond-normal.html" class="btn btn-primary">
       Details
     </a>
     <a href="https://neurips.cc/virtual/2023/poster/72978" class="btn btn-light" target="_blank" rel="noopener noreferrer">
-      DOI
-    </a>
-    <a href="https://arxiv.org/abs/2306.11078" class="btn btn-light" target="_blank" rel="noopener noreferrer">
-      <i class="bi bi-file-earmark-text"></i> Preprint
+      <i class="bi bi-file-earmark-text"></i> Publication
     </a>
     <a href="https://github.com/cbg-ethz/bmi" class="btn btn-light" target="_blank" rel="noopener noreferrer">
-      <i class="bi bi-file-earmark-zip"></i> Materials
+      <i class="bi bi-code-slash"></i> Code
     </a>
   </li>
-  <li data-index="2" data-categories="mutual information,Bayesian statistics,Monte Carlo" data-listing-file-modified-sort="1706783336592" data-listing-reading-time-sort="1">
+  <li data-index="2" data-listing-file-modified-sort="1713619310609" data-listing-reading-time-sort="2">
     <span class="listing-title lead">On the properties and estimation of pointwise mutual information profiles</span><br>
     <span class="listing-author">P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx</span><br>
-    <span class="listing-publication fst-italic ">Preprint, submitted</span>
+    <span class="listing-venue fst-italic ">Preprint, submitted</span>
     <span class="listing-year">(2023)</span><br>
     <a href="./publications/pmi-profiles.html" class="btn btn-primary">
       Details
@@ -231,25 +227,22 @@ ul.task-list li input[type="checkbox"] {
       <i class="bi bi-file-earmark-text"></i> Preprint
     </a>
     <a href="https://github.com/cbg-ethz/bmi" class="btn btn-light" target="_blank" rel="noopener noreferrer">
-      <i class="bi bi-file-earmark-zip"></i> Materials
+      <i class="bi bi-code-slash"></i> Code
     </a>
   </li>
-  <li data-index="3" data-categories="mutual information,systems biology" data-listing-file-modified-sort="1706783336592" data-listing-reading-time-sort="2">
+  <li data-index="3" data-listing-file-modified-sort="1713618189106" data-listing-reading-time-sort="2">
     <span class="listing-title lead">Limits to the rate of information transmission through the MAPK pathway</span><br>
     <span class="listing-author">F. Grabowski, P. Czyż, M. Kochańczyk, T. Lipniacki</span><br>
-    <span class="listing-publication fst-italic ">J. R. Soc. Interface</span>
+    <span class="listing-venue fst-italic ">J. R. Soc. Interface</span>
     <span class="listing-year">(2019)</span><br>
     <a href="./publications/limits-mapk.html" class="btn btn-primary">
       Details
     </a>
     <a href="https://doi.org/10.1098/rsif.2018.0792" class="btn btn-light" target="_blank" rel="noopener noreferrer">
-      DOI
-    </a>
-    <a href="https://www.biorxiv.org/content/10.1101/402750v1" class="btn btn-light" target="_blank" rel="noopener noreferrer">
-      <i class="bi bi-file-earmark-text"></i> Preprint
+      <i class="bi bi-file-earmark-text"></i> Publication
     </a>
     <a href="https://github.com/pawel-czyz/channel-capacity-estimator" class="btn btn-light" target="_blank" rel="noopener noreferrer">
-      <i class="bi bi-file-earmark-zip"></i> Materials
+      <i class="bi bi-code-slash"></i> Code
     </a>
   </li>
 </ul>

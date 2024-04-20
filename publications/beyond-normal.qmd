@@ -3,14 +3,28 @@ title: "Beyond normal: on the evaluation of mutual information estimators"
 type: "article"
 author: "P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx"
 year: "2023"
-publication: "NeurIPS"
-preprint: "https://arxiv.org/abs/2306.11078"
-doi: "https://neurips.cc/virtual/2023/poster/72978"
-materials: "https://github.com/cbg-ethz/bmi"
-toc: false
-categories:
-  - mutual information
+venue: "NeurIPS"
+# preprint: "https://arxiv.org/abs/2306.11078"
+publication: "https://neurips.cc/virtual/2023/poster/72978"
+code: "https://github.com/cbg-ethz/bmi"
+toc: true
 ---
+
+## Premise
+
+How reliably can we estimate mutual information from non-Gaussian data? 
+
+## Abstract
+
+Mutual information is a general statistical dependency measure which has found applications in representation learning, causality, domain generalization and computational biology.
+However, mutual information estimators are typically evaluated on simple families of probability distributions, namely multivariate normal distribution and selected distributions with one-dimensional random variables.
+In this paper, we show how to construct a diverse family of distributions with known ground-truth mutual information and propose a language-independent benchmarking platform for mutual information estimators. We discuss the general applicability and limitations of classical and neural estimators in settings involving high dimensions, sparse interactions, long-tailed distributions, and high mutual information.
+Finally, we provide guidelines for practitioners on how to select appropriate estimator adapted to the difficulty of problem considered and issues one needs to consider when applying an estimator to a new data set.
+
+## Links
+
+- The story behind this project has appeared on the [blog](../posts/on-beyond-normal.qmd).
+- We have written a [follow-up paper](pmi-profiles.qmd) with new insights! It's a bit more theoretical than this one, but I like its premise more. 
 
 ## Citation
 ```
@@ -21,11 +35,3 @@ categories:
   year={2023}
 }
 ```
-
-
-## Abstract
-
-Mutual information is a general statistical dependency measure which has found applications in representation learning, causality, domain generalization and computational biology.
-However, mutual information estimators are typically evaluated on simple families of probability distributions, namely multivariate normal distribution and selected distributions with one-dimensional random variables.
-In this paper, we show how to construct a diverse family of distributions with known ground-truth mutual information and propose a language-independent benchmarking platform for mutual information estimators. We discuss the general applicability and limitations of classical and neural estimators in settings involving high dimensions, sparse interactions, long-tailed distributions, and high mutual information.
-Finally, we provide guidelines for practitioners on how to select appropriate estimator adapted to the difficulty of problem considered and issues one needs to consider when applying an estimator to a new data set.

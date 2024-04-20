@@ -65,7 +65,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -105,44 +105,56 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#premise" id="toc-premise" class="nav-link active" data-scroll-target="#premise">Premise</a></li>
+  <li><a href="#abstract" id="toc-abstract" class="nav-link" data-scroll-target="#abstract">Abstract</a></li>
+  <li><a href="#links" id="toc-links" class="nav-link" data-scroll-target="#links">Links</a></li>
+  <li><a href="#citation" id="toc-citation" class="nav-link" data-scroll-target="#citation">Citation</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Beyond normal: on the evaluation of mutual information estimators</h1>
-  <div class="quarto-categories">
-    <div class="quarto-category">mutual information</div>
-  </div>
-  </div>
+<header id="title-block-header">
+
+<h1 class="title display-7">Beyond normal: on the evaluation of mutual information estimators</h1>
+
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <p>Authors: P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx</p>
+    <p>NeurIPS (2023)</p>
+</div>
+
+<a href="https://neurips.cc/virtual/2023/poster/72978" class="btn btn-light" target="_blank" rel="noopener noreferrer">
+    <i class="bi bi-file-earmark-text"></i> Publication
+</a>
 
 
-
-<div class="quarto-title-meta">
-
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx </p>
-          </div>
-  </div>
-    
-  
-    
-    <div>
-    <div class="quarto-title-meta-heading">Doi</div>
-    <div class="quarto-title-meta-contents">
-      <p class="doi">
-        <a href="https://doi.org/https://neurips.cc/virtual/2023/poster/72978">https://neurips.cc/virtual/2023/poster/72978</a>
-      </p>
-    </div>
-  </div>
-  </div>
-  
+<a href="https://github.com/cbg-ethz/bmi" class="btn btn-light" target="_blank" rel="noopener noreferrer">
+    <i class="bi bi-code-slash"></i> Code
+</a>
 
 </header>
 
+<section id="premise" class="level2">
+<h2 class="anchored" data-anchor-id="premise">Premise</h2>
+<p>How reliably can we estimate mutual information from non-Gaussian data?</p>
+</section>
+<section id="abstract" class="level2">
+<h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
+<p>Mutual information is a general statistical dependency measure which has found applications in representation learning, causality, domain generalization and computational biology. However, mutual information estimators are typically evaluated on simple families of probability distributions, namely multivariate normal distribution and selected distributions with one-dimensional random variables. In this paper, we show how to construct a diverse family of distributions with known ground-truth mutual information and propose a language-independent benchmarking platform for mutual information estimators. We discuss the general applicability and limitations of classical and neural estimators in settings involving high dimensions, sparse interactions, long-tailed distributions, and high mutual information. Finally, we provide guidelines for practitioners on how to select appropriate estimator adapted to the difficulty of problem considered and issues one needs to consider when applying an estimator to a new data set.</p>
+</section>
+<section id="links" class="level2">
+<h2 class="anchored" data-anchor-id="links">Links</h2>
+<ul>
+<li>The story behind this project has appeared on the <a href="../posts/on-beyond-normal.html">blog</a>.</li>
+<li>We have written a <a href="../publications/pmi-profiles.html">follow-up paper</a> with new insights! It’s a bit more theoretical than this one, but I like its premise more.</li>
+</ul>
+</section>
 <section id="citation" class="level2">
 <h2 class="anchored" data-anchor-id="citation">Citation</h2>
 <pre><code>@inproceedings{beyond-normal-2023,
@@ -151,10 +163,6 @@ ul.task-list li input[type="checkbox"] {
   booktitle={Thirty-seventh Conference on Neural Information Processing Systems},
   year={2023}
 }</code></pre>
-</section>
-<section id="abstract" class="level2">
-<h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
-<p>Mutual information is a general statistical dependency measure which has found applications in representation learning, causality, domain generalization and computational biology. However, mutual information estimators are typically evaluated on simple families of probability distributions, namely multivariate normal distribution and selected distributions with one-dimensional random variables. In this paper, we show how to construct a diverse family of distributions with known ground-truth mutual information and propose a language-independent benchmarking platform for mutual information estimators. We discuss the general applicability and limitations of classical and neural estimators in settings involving high dimensions, sparse interactions, long-tailed distributions, and high mutual information. Finally, we provide guidelines for practitioners on how to select appropriate estimator adapted to the difficulty of problem considered and issues one needs to consider when applying an estimator to a new data set.</p>
 
 
 </section>

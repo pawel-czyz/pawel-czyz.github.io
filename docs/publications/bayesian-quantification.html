@@ -65,7 +65,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -105,52 +105,57 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#premise" id="toc-premise" class="nav-link active" data-scroll-target="#premise">Premise</a></li>
+  <li><a href="#abstract" id="toc-abstract" class="nav-link" data-scroll-target="#abstract">Abstract</a></li>
+  <li><a href="#links" id="toc-links" class="nav-link" data-scroll-target="#links">Links</a></li>
+  <li><a href="#citation" id="toc-citation" class="nav-link" data-scroll-target="#citation">Citation</a></li>
+  <li><a href="#acknowledgments" id="toc-acknowledgments" class="nav-link" data-scroll-target="#acknowledgments">Acknowledgments</a></li>
+  <li><a href="#behind-the-scenes" id="toc-behind-the-scenes" class="nav-link" data-scroll-target="#behind-the-scenes">Behind the scenes</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Bayesian quantification with black-box estimators</h1>
-  <div class="quarto-categories">
-    <div class="quarto-category">Bayesian statistics</div>
-    <div class="quarto-category">distribution shift</div>
-  </div>
-  </div>
+<header id="title-block-header">
+
+<h1 class="title display-7">Bayesian quantification with black-box estimators</h1>
+
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <p>Authors: A. Ziegler, P. Czyż</p>
+    <p>Preprint, submitted (2023)</p>
+</div>
 
 
+<a href="https://arxiv.org/abs/2302.09159" class="btn btn-light" target="_blank" rel="noopener noreferrer">
+    <i class="bi bi-file-earmark-text"></i> Preprint
+</a>
 
-<div class="quarto-title-meta">
-
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>A. Ziegler, P. Czyż </p>
-          </div>
-  </div>
-    
-  
-    
-  </div>
-  
+<a href="https://github.com/pawel-czyz/labelshift" class="btn btn-light" target="_blank" rel="noopener noreferrer">
+    <i class="bi bi-code-slash"></i> Code
+</a>
 
 </header>
 
+<section id="premise" class="level2">
+<h2 class="anchored" data-anchor-id="premise">Premise</h2>
+<p>We have an unlabeled data set and an imperfect classifier. Can we provide Bayesian estimates of the class prevalence vector?</p>
+</section>
 <section id="abstract" class="level2">
 <h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
 <p>Understanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art.</p>
 </section>
-<section id="acknowledgments" class="level2">
-<h2 class="anchored" data-anchor-id="acknowledgments">Acknowledgments</h2>
-<p>I had a lot of great time working on this! This is mostly due to Albert Ziegler and Ian Wright, who were wonderful mentors to work with. I am also grateful to Semmle/GitHub UK and the ETH AI Center for funding this work.</p>
-</section>
 <section id="links" class="level2">
 <h2 class="anchored" data-anchor-id="links">Links</h2>
 <ul>
-<li>The Bayesian quantification manuscript is available <a href="https://arxiv.org/abs/2302.09159">here</a>. It evolved from <a href="https://arxiv.org/abs/1908.09157">unsupervised recalibration</a>, as we arrived to the quantification coming from the related problem of classifier recalibration under prior probability shifts.</li>
-<li>The experiments are fully reproducible thanks to Snakemake workflows! Check out the <a href="https://github.com/pawel-czyz/labelshift">code</a>.</li>
+<li>We have already discussed quantification in the post on <a href="../posts/em-gibbs-quantification.html">Gibbs sampling and EM algorithm</a>. It is also related to the <a href="../posts/strict-linear-independence-measures.html">strict linear independence of measures</a>.</li>
+<li>Bayesian quantification originated in the form of <a href="https://arxiv.org/abs/1908.09157">unsupervised recalibration</a>. Albert described the background story (and related problems) at <a href="https://humansofai.transistor.fm/episodes/19-the-evolution-of-ai-in-software-development-with-albert-ziegler">the Humans of AI podcast</a> (18:15–25:45).</li>
 <li>Bayesian quantification is available in the <a href="https://github.com/HLT-ISTI/QuaPy">QuaPy package</a>! Many thanks to <a href="https://scholar.google.es/citations?user=4RIy5E4AAAAJ">Alejandro Moreo Fernández</a> for his kindness and contributions in pull requests <a href="https://github.com/HLT-ISTI/QuaPy/pull/28">28</a> and <a href="https://github.com/HLT-ISTI/QuaPy/pull/29">29</a>.</li>
-<li>We discussed quantification in the post on <a href="../posts/em-gibbs-quantification.html">Gibbs sampling and EM algorithm</a>.</li>
 </ul>
 </section>
 <section id="citation" class="level2">
@@ -163,6 +168,17 @@ ul.task-list li input[type="checkbox"] {
       archivePrefix={arXiv},
       primaryClass={stat.ML}
 }</code></pre>
+</section>
+<section id="acknowledgments" class="level2">
+<h2 class="anchored" data-anchor-id="acknowledgments">Acknowledgments</h2>
+<p>I had a lot of great time working on this! This is mostly due to Albert Ziegler and Ian Wright, who were wonderful mentors to work with. I am also grateful to Semmle/GitHub UK and the ETH AI Center for funding this work.</p>
+</section>
+<section id="behind-the-scenes" class="level2">
+<h2 class="anchored" data-anchor-id="behind-the-scenes">Behind the scenes</h2>
+<ul>
+<li>I’m grateful for this experience, especially as this was my entry point to probabilistic machine learning and statistical inference. There were quite a few versions of this paper and it may be tricky to see how the project has changed, but it started with asymptotic consistency guarantees in large-data limit, then we moved to a version of a maximum likelihood approach (and then to a penalised maximum likelihood, to regularise the predictions), and finally we formalised the problem in terms of probabilistic graphical models and employed Bayesian inference.</li>
+<li>The project started in July 2018, what (as of April 2024) makes it my personal record for the time needed to publish a project. When I don’t want to feel to bad about this, I tell to myself that (a) I needed to learn many new things to be able to reach the final version of the paper; (b) for most of this time it was a side project, and (c) hey, as the great <a href="https://en.wikipedia.org/wiki/Leslie_Lamport">Leslie Lamport</a> <a href="https://lamport.azurewebsites.net/pubs/pubs.html#lamport-paxos">explains on his website</a>, he submitted the paper introducing <a href="https://en.wikipedia.org/wiki/Paxos_(computer_science)">Paxos algorithm</a> for the first time in 1990 and finally published it in 1998. Of course, Paxos is in an entirely different league than our paper, but it’s good to know for an early-career researcher that even the greatest scientists with the best ideas also sometimes have to spend years trying to publish.</li>
+</ul>
 
 
 </section>

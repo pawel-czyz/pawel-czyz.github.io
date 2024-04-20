@@ -65,7 +65,7 @@ ul.task-list li input[type="checkbox"] {
 <link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -105,38 +105,51 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#abstract" id="toc-abstract" class="nav-link active" data-scroll-target="#abstract">Abstract</a></li>
+  <li><a href="#links" id="toc-links" class="nav-link" data-scroll-target="#links">Links</a></li>
+  <li><a href="#citation" id="toc-citation" class="nav-link" data-scroll-target="#citation">Citation</a></li>
+  <li><a href="#behind-the-scenes" id="toc-behind-the-scenes" class="nav-link" data-scroll-target="#behind-the-scenes">Behind the scenes</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">On the properties and estimation of pointwise mutual information profiles</h1>
-  <div class="quarto-categories">
-    <div class="quarto-category">mutual information</div>
-    <div class="quarto-category">Bayesian statistics</div>
-    <div class="quarto-category">Monte Carlo</div>
-  </div>
-  </div>
+<header id="title-block-header">
+
+<h1 class="title display-7">On the properties and estimation of pointwise mutual information profiles</h1>
+
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <p>Authors: P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx</p>
+    <p>Preprint, submitted (2023)</p>
+</div>
 
 
+<a href="https://arxiv.org/abs/2310.10240" class="btn btn-light" target="_blank" rel="noopener noreferrer">
+    <i class="bi bi-file-earmark-text"></i> Preprint
+</a>
 
-<div class="quarto-title-meta">
-
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx </p>
-          </div>
-  </div>
-    
-  
-    
-  </div>
-  
+<a href="https://github.com/cbg-ethz/bmi" class="btn btn-light" target="_blank" rel="noopener noreferrer">
+    <i class="bi bi-code-slash"></i> Code
+</a>
 
 </header>
 
+<section id="abstract" class="level2">
+<h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
+<p>Mutual information quantifies the dependence between two random variables and remains invariant under diffeomorphisms. In this paper, we explore the pointwise mutual information profile, an extension of mutual information that maintains this invariance. We analytically describe the profiles of multivariate normal distributions and introduce the family of fine distributions, for which the profile can be accurately approximated using Monte Carlo methods. We then show how fine distributions can be used to study the limitations of existing mutual information estimators, investigate the behavior of neural critics used in variational estimators, and understand the effect of experimental outliers on mutual information estimation. Finally, we show how fine distributions can be used to obtain model-based Bayesian estimates of mutual information, suitable for problems with available domain expertise in which uncertainty quantification is necessary.</p>
+</section>
+<section id="links" class="level2">
+<h2 class="anchored" data-anchor-id="links">Links</h2>
+<ul>
+<li>This is a direct follow-up to the <a href="../publications/beyond-normal.html">Beyond normal</a> manuscript.</li>
+</ul>
+</section>
 <section id="citation" class="level2">
 <h2 class="anchored" data-anchor-id="citation">Citation</h2>
 <pre><code>@misc{pmi-profiles,
@@ -148,9 +161,9 @@ ul.task-list li input[type="checkbox"] {
       primaryClass={stat.ML}
 }</code></pre>
 </section>
-<section id="abstract" class="level2">
-<h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
-<p>Mutual information quantifies the dependence between two random variables and remains invariant under diffeomorphisms. In this paper, we explore the pointwise mutual information profile, an extension of mutual information that maintains this invariance. We analytically describe the profiles of multivariate normal distributions and introduce the family of fine distributions, for which the profile can be accurately approximated using Monte Carlo methods. We then show how fine distributions can be used to study the limitations of existing mutual information estimators, investigate the behavior of neural critics used in variational estimators, and understand the effect of experimental outliers on mutual information estimation. Finally, we show how fine distributions can be used to obtain model-based Bayesian estimates of mutual information, suitable for problems with available domain expertise in which uncertainty quantification is necessary.</p>
+<section id="behind-the-scenes" class="level2">
+<h2 class="anchored" data-anchor-id="behind-the-scenes">Behind the scenes</h2>
+<p>This story has been described on the <a href="../posts/on-beyond-normal.html">blog</a>.</p>
 
 
 </section>

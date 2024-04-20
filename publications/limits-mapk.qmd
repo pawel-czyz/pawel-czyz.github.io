@@ -3,15 +3,26 @@ title: "Limits to the rate of information transmission through the MAPK pathway"
 type: "article"
 author: "F. Grabowski, P. Czyż, M. Kochańczyk, T. Lipniacki"
 year: "2019"
-publication: "J. R. Soc. Interface"
-preprint: "https://www.biorxiv.org/content/10.1101/402750v1"
-doi: "https://doi.org/10.1098/rsif.2018.0792"
-materials: "https://github.com/pawel-czyz/channel-capacity-estimator"
-toc: false
-categories:
-  - mutual information
-  - systems biology
+venue: "J. R. Soc. Interface"
+# preprint: "https://www.biorxiv.org/content/10.1101/402750v1"
+publication: "https://doi.org/10.1098/rsif.2018.0792"
+code: "https://github.com/pawel-czyz/channel-capacity-estimator"
+toc: true
 ---
+
+## Premise
+
+Do cells communicate in bits?
+
+## Abstract
+
+Two important signalling pathways of NF-κB and ERK transmit merely 1 bit of information about the level of extracellular stimulation.
+It is thus unclear how such systems can coordinate complex cell responses to external cues.
+We analyse information transmission in the MAPK/ERK pathway that converts both constant and pulsatile EGF stimulation into pulses of ERK activity. Based on an experimentally verified computational model, we demonstrate that, when input consists of sequences of EGF pulses, transmitted information increases nearly linearly with time.
+Thus, pulse-interval transcoding allows more information to be relayed than the amplitude–amplitude transcoding considered previously for the ERK and NF-κB pathways.
+Moreover, the information channel capacity $C$, or simply bitrate, is not limited by the bandwidth $B = 1/\tau$, where $\tau\approx 1\, h$ is the relaxation time.
+Specifically, when the input is provided in the form of sequences of short binary EGF pulses separated by intervals that are multiples of $\tau/n$ (but not shorter than $\tau$), then for $n = 2$, $C \approx 1.39$ bit/h; and for $n = 4$, $C \approx 1.86$ bit/h.
+The capability to respond to random sequences of EGF pulses enables cells to propagate spontaneous ERK activity waves across tissue.
 
 ## Citation
 ```
@@ -29,12 +40,11 @@ eprint = {https://royalsocietypublishing.org/doi/pdf/10.1098/rsif.2018.0792}
 }
 ```
 
-## Abstract
+## Acknowledgments
 
-Two important signalling pathways of NF-κB and ERK transmit merely 1 bit of information about the level of extracellular stimulation.
-It is thus unclear how such systems can coordinate complex cell responses to external cues.
-We analyse information transmission in the MAPK/ERK pathway that converts both constant and pulsatile EGF stimulation into pulses of ERK activity. Based on an experimentally verified computational model, we demonstrate that, when input consists of sequences of EGF pulses, transmitted information increases nearly linearly with time.
-Thus, pulse-interval transcoding allows more information to be relayed than the amplitude–amplitude transcoding considered previously for the ERK and NF-κB pathways.
-Moreover, the information channel capacity $C$, or simply bitrate, is not limited by the bandwidth $B = 1/\tau$, where $\tau\approx 1\, h$ is the relaxation time.
-Specifically, when the input is provided in the form of sequences of short binary EGF pulses separated by intervals that are multiples of $\tau/n$ (but not shorter than $\tau$), then for $n = 2$, $C \approx 1.39$ bit/h; and for $n = 4$, $C \approx 1.86$ bit/h.
-The capability to respond to random sequences of EGF pulses enables cells to propagate spontaneous ERK activity waves across tissue.
+Many, many thanks to Tomek Lipniacki, Marek Kochańczyk, Karolina Tudelska and, of course, Frederic Grabowski! I think this project was very important for my future development: I learned how much effort it takes to publish a paper, that biology is a wonderful subject to work on, and what mutual information is.
+
+
+## Behind the scenes
+
+This project is partially described in a [blog post](../posts/on-beyond-normal.qmd).

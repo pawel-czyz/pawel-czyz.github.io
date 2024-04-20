@@ -5,7 +5,7 @@ listing:
   - id: articles
     contents: "publications/*.qmd"
     template: ./ejs/publications.ejs
-    categories: true
+    categories: false
     sort:
       - "year desc"
       - "title"

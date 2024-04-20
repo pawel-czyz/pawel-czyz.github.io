@@ -3,31 +3,26 @@ title: "Bayesian quantification with black-box estimators"
 type: "article"
 author: "A. Ziegler, P. Czyż"
 year: "2023"
-publication: "Preprint, submitted"
+venue: "Preprint, submitted"
 preprint: "https://arxiv.org/abs/2302.09159"
-materials: "https://github.com/pawel-czyz/labelshift"
-toc: false
-categories:
-  - Bayesian statistics
-  - distribution shift
+code: "https://github.com/pawel-czyz/labelshift"
+toc: true
 ---
+
+## Premise
+
+We have an unlabeled data set and an imperfect classifier. Can we provide Bayesian estimates of the class prevalence vector?
 
 ## Abstract
 
 Understanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art.
 
 
-## Acknowledgments
-
-I had a lot of great time working on this! This is mostly due to Albert Ziegler and Ian Wright, who were wonderful mentors to work with. I am also grateful to Semmle/GitHub UK and the ETH AI Center for funding this work.
-
-
 ## Links
 
-- The Bayesian quantification manuscript is available [here](https://arxiv.org/abs/2302.09159). It evolved from [unsupervised recalibration](https://arxiv.org/abs/1908.09157), as we arrived to the quantification coming from the related problem of classifier recalibration under prior probability shifts.
-- The experiments are fully reproducible thanks to Snakemake workflows! Check out the [code](https://github.com/pawel-czyz/labelshift).
+- We have already discussed quantification in the post on [Gibbs sampling and EM algorithm](../posts/em-gibbs-quantification.qmd). It is also related to the [strict linear independence of measures](../posts/strict-linear-independence-measures.qmd).
+- Bayesian quantification originated in the form of [unsupervised recalibration](https://arxiv.org/abs/1908.09157). Albert described the background story (and related problems) at [the Humans of AI podcast](https://humansofai.transistor.fm/episodes/19-the-evolution-of-ai-in-software-development-with-albert-ziegler) (18:15–25:45).
 - Bayesian quantification is available in the [QuaPy package](https://github.com/HLT-ISTI/QuaPy)! Many thanks to [Alejandro Moreo Fernández](https://scholar.google.es/citations?user=4RIy5E4AAAAJ) for his kindness and contributions in pull requests [28](https://github.com/HLT-ISTI/QuaPy/pull/28) and [29](https://github.com/HLT-ISTI/QuaPy/pull/29).
-- We discussed quantification in the post on [Gibbs sampling and EM algorithm](../posts/em-gibbs-quantification.qmd).
 
 
 ## Citation
@@ -43,3 +38,12 @@ I had a lot of great time working on this! This is mostly due to Albert Ziegler 
 }
 ```
 
+## Acknowledgments
+
+I had a lot of great time working on this! This is mostly due to Albert Ziegler and Ian Wright, who were wonderful mentors to work with. I am also grateful to Semmle/GitHub UK and the ETH AI Center for funding this work.
+
+
+## Behind the scenes
+
+- I'm grateful for this experience, especially as this was my entry point to probabilistic machine learning and statistical inference. There were quite a few versions of this paper and it may be tricky to see how the project has changed, but it started with asymptotic consistency guarantees in large-data limit, then we moved to a version of a maximum likelihood approach (and then to a penalised maximum likelihood, to regularise the predictions), and finally we formalised the problem in terms of probabilistic graphical models and employed Bayesian inference.
+- The project started in July 2018, what (as of April 2024) makes it my personal record for the time needed to publish a project. When I don't want to feel to bad about this, I tell to myself that (a) I needed to learn many new things to be able to reach the final version of the paper; (b) for most of this time it was a side project, and (c) hey, as the great [Leslie Lamport](https://en.wikipedia.org/wiki/Leslie_Lamport) [explains on his website](https://lamport.azurewebsites.net/pubs/pubs.html#lamport-paxos), he submitted the paper introducing [Paxos algorithm](https://en.wikipedia.org/wiki/Paxos_(computer_science)) for the first time in 1990 and finally published it in 1998. Of course, Paxos is in an entirely different league than our paper, but it's good to know for an early-career researcher that even the greatest scientists with the best ideas also sometimes have to spend years trying to publish.  
