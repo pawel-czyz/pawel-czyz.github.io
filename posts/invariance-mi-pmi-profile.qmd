@@ -1,0 +1,193 @@
+---
+title: "Invariance of the mutual information and the profile"
+description: "We revisit the proof of mutual information invariance and generalize it to the pointwise mutual information profile."
+author: "Paweł Czyż"
+date: "5/13/2024"
+bibliography: references.bib
+---
+
+In our [recent manuscript](../publications/pmi-profiles.qmd) we study the *pointwise mutual information profile*, which generalizes the notion of mutual information between two random variables to higher moments.
+In this paper we assume that all the spaces and functions involved have sufficient regularity conditions (e.g., smoothness is our typical assumption) and prove that the pointwise mutual information profile doesn't change when either variable is reparameterized by a diffeomorphism.
+
+These assumptions are convenient, allowing for very short proofs for many interesting distributions, but are also too strong.
+In this post we'll pay the price of doing some measure theory to make the results more general and show what is *really* the point there.   
+
+## KL divergence
+
+Let $P$ and $Q$ be two probability distributions on a standard Borel space $\mathcal X$.
+In fact, the most interesting case for us is when $P=P_{XY}$ is a joint probability distribution of random variables $X$ and $Y$, and $Q=P_X\otimes P_Y$ is the product of marginal distributions, but some extra generality won't harm us.
+
+We will assume that $P\ll Q$, so that we have a well-defined [Radon–Nikodym derivative](https://en.wikipedia.org/wiki/Radon%E2%80%93Nikodym_theorem) $f = \mathrm{d}P/\mathrm{d}Q \colon \mathcal X\to [0, \infty)$, which is a measurable function.
+Note that it is defined only up to a $Q$-null set (and, as $P\ll Q$, every $Q$-null set is also a $P$-null set).
+By appropriately extending the logarithm function, one can define a measurable function $\log f\colon \mathcal{S}\to [-\infty, \infty) = \mathbb R \cup \{-\infty\}$, which appears in the well-known definition of the Kullback–Leibler divergence:
+$$
+\mathrm{KL}(P\parallel Q) = \int f\, \log f\, \mathrm{d}Q = \int \log f\, \mathrm{d}P.
+$$
+
+It is easy to show that this definition does not depend on the version of $f$ used. 
+
+## PMI profile
+
+However, we will be more interested in the "histogram of $\log f$ values".
+By the *pointwise mutual information profile* (perhaps we should call it *pointwise log-density ratio profile*, but let's use the former name) we will understand the [pushforward distribution](https://en.wikipedia.org/wiki/Pushforward_measure)
+$$
+  \mathrm{Prof}_{P\parallel Q} := (\log f)_\sharp P,
+$$
+which (a) seems to be defined on $[-\infty, \infty) = \mathbb R \cup \{-\infty\}$ and (b) doesn't have to actually exist, as $\log f$ is defined only up to a $Q$-null set!
+
+In fact neither of these issues is serious.
+To show that, let's write $\mathrm{Prof}$ for the profile and note that 
+$$
+\begin{align*}
+\mathrm{Prof}(-\{\infty\}) &= P( \{s\in \mathcal S\mid \log f(s) = -\infty\}) \\
+&= P(\{s\in \mathcal S\mid f(s) = 0\}) = 0,
+\end{align*}
+$$
+because we can write $P(E) = \int_E f\, \mathrm{d}Q$.
+
+The proof that the profile doesn't really depend on which version of $f$ we use is also easy: if $g = f$ up to a $Q$-null set, we have for any Borel subset $B\in [-\infty, \infty)$ the equality $\mathbf{1}_B(\log g) = \mathbf{1}_B(\log f)$ up to a $P$-null set (remember, we have $P \ll Q$) and the measure assigned to it, $\mathrm{Prof}(B) = \int \mathbf{1}_B( \log f ) \, \mathrm{d}P$, is the same.
+
+### Invariance of the profile
+
+Let's now prove the invariance of the profile: we want to show that under reasonable assumptions on $i\colon \mathcal X\to \mathcal X'$ there exists a profile of the push-forward distributions $\mathrm{Prof}_{i_\sharp P\parallel i_\sharp Q}$ and that, in fact, it is the same as the original profile $\mathrm{Prof}_{P\parallel Q}$.
+
+::: {.callout-note icon=false appearance="simple"}
+
+## Lemma
+
+Let $i\colon \mathcal X\to \mathcal X'$ be a measurable mapping between standard Borel spaces such that there exists a measurable left inverse $a\colon \mathcal X' \to \mathcal X$.
+If $P$ and $Q$ are two probability distributions on $\mathcal X$ such that $P \ll Q$ and $f = \mathrm{d}P/\mathrm{d}Q$ is the Radon–Nikodym derivative, then $i_\sharp P \ll i_\sharp Q$ and the Radon–Nikodym derivative is given by $\mathrm{d} i_\sharp P / \mathrm{d}i_\sharp Q = f\circ  a$.
+
+::: {.callout-note icon=false appearance="minimal" collapse=true}
+
+## Proof
+
+<!-- Consider any Borel subset $B\subseteq \mathcal X'$ such that $i_\sharp Q(B) = Q( i^{-1}(B) ) = 0$.
+Using $P\ll Q$ we note that $0 = P(i^{-1}(B))= i_\sharp P(B) = 0$, so that $i_\sharp P\ll i_\sharp Q$. -->
+
+To prove that $f\circ a\colon \mathcal X'\to [0, \infty)$ is the Radon–Nikodym derivative we need to prove that
+$$
+  i_\sharp P(B) = \int_B f\circ a \, \mathrm{d}i_\sharp Q
+$$
+for every Borel subset $B\subseteq \mathcal X'$.
+This is an easy corollary of [the change of variables formula](https://en.wikipedia.org/wiki/Pushforward_measure#Main_property:_change-of-variables_formula):
+
+$$
+\begin{align*}
+  \int_B f\circ a \, \mathrm{d}i_\sharp Q &= \int_{i^{-1}(B)} f\circ a\circ i\, \mathrm{d}Q \\
+  &= \int_{i^{-1}(B)} f\, \mathrm{d}Q \\
+  &= \int_{i^{-1}(B)} \mathrm{d}P \\
+  &= P(i^{-1}(B)) = i_\sharp P(B).
+\end{align*}
+$$
+
+There's also another [proof at MathStackExchange](https://math.stackexchange.com/a/4413000/551592), which looks interesting (I'm not however sure why approximation by simple functions is needed).
+
+:::
+
+:::
+
+Great!
+Now we know that the profile $\mathrm{Prof}_{i_\sharp P \parallel i_\sharp Q }$ is indeed well-defined.
+The proof of the invariance is then very simple:
+
+
+::: {.callout-note icon=false appearance="simple"}
+
+## Theorem
+
+Let $i\colon \mathcal X\to \mathcal X'$ be a measurable mapping between standard Borel spaces with a measurable left inverse.
+If $P$ and $Q$ are two probability distributions on $\mathcal X$ such that $P \ll Q$, then $\mathrm{Prof}_{i_\sharp P \parallel i_\sharp Q } = \mathrm{Prof}_{P \parallel  Q }$. 
+
+
+::: {.callout-note icon=false appearance="minimal" collapse=true}
+
+## Proof
+
+From the lemma above we know that $i_\sharp P \ll i_\sharp Q$, so that the profile is well-defined:
+$$
+  \left(\log\frac{\mathrm{d} i_\sharp P }{\mathrm{d} i_\sharp Q}\right)_\sharp (i_\sharp P). 
+$$
+
+Now let's take any measurable left inverse $a$ of $i$ and write
+$$
+  \log\frac{\mathrm{d} i_\sharp P }{\mathrm{d} i_\sharp Q} = \log f\circ a,
+$$
+where $f=\mathrm{d}P/\mathrm{d}Q$. 
+
+We now have
+
+$$
+  (\log f \circ a)_\sharp \, i_\sharp P = (\log f\circ a\circ i)_\sharp P = (\log f)_\sharp P.
+$$
+
+:::
+
+:::
+
+
+### How often do measurable left inverses exist?
+
+Above we assumed the existence of a measurable left inverse, while it's common to see an assumption of using a continuous injective mapping (which is a very convenient criterion as it's easy to verify).
+Fortunately, as we work with standard Borel spaces, we can use the following result:
+
+::: {#nte-lemma-left-inverse-exists  .callout-note icon=false appearance="simple"}
+
+## Lemma
+
+Let $i\colon \mathcal S\to \mathcal S'$ be a continuous injective mapping between two standard Borel spaces. Then, $i$ admits a measurable left inverse.
+
+::: {.callout-note icon=false appearance="minimal" collapse=true}
+
+## Proof
+
+Let's choose an arbitrary point $x_0\in \mathcal X$ and define a function $a\colon \mathcal X'\to \mathcal X$ in the following manner:
+$$
+a(y) = \begin{cases}
+  x_0 &\text{ if } y\notin i(\mathcal X)\\ 
+  x   &\text{ if } x \text{ is the (unique) point such that } i(x) = y
+\end{cases}
+$$
+
+This function is well-defined due to the fact that $i$ is injective and it is a left inverse: $a(i(x)) = x$ for all $x\in \mathcal X$.
+Now we need to prove that it is, indeed, measurable.
+Take any Borel set $B\subseteq \mathcal X$ and consider its preimage $a^{-1}(B) = \{y \in \mathcal X' \mid a(y) \in B \}$.
+If $x_0\notin B$, we have $a^{-1}(B) = i(B)$, which is Borel by Lusin–Suslin theorem.
+If $x_0\in B$, we can write
+$$
+\begin{align*}
+a^{-1}(B) &=  a^{-1}( B\setminus \{x_0\} ) \cup a^{-1}(\{x_0\}) \\
+          &= i(B\setminus \{x_0\}) \cup \{ i(x_0) \} \cup ( \mathcal X' \setminus i(\mathcal X)),
+\end{align*}
+$$
+
+which is Borel as a finite union of Borel sets.
+
+:::
+
+::: {.callout-note icon=false appearance="minimal" collapse=true}
+
+## Historical note
+
+This result allows one to prove that mutual information is invariant under continuous injective mappings using the data processing inequality (see Theorems 2.15 and 3.2d in @Polyanskiy-Wu-Information-Theory).
+
+We prove it in the [*Beyond normal*](../publications/beyond-normal.qmd) paper in rather a complicated manner, employing the interpretation of mutual information as a supremum over mutual information induced by finite partitions (see e.g., Sec. 4.2 and 4.5–4.6 of @Polyanskiy-Wu-Information-Theory or Chapters 1 and 2 of @Pinsker-1964-Information).
+As [Reviewer FjRx](https://openreview.net/forum?id=25vRtG56YH&noteId=NJfXa1AhOL) had a very good intuition that the data processing inequality is a key result to be applied here, I wish I had known this lemma back then! 
+:::
+
+:::
+
+## What are the profiles good for?
+
+In [our manuscript](../publications/pmi-profiles.qmd) we studied the PMI profiles for the following reasons:
+
+1. As they are invariant to continuous injective mappings, it turns out that our [*Beyond normal* paper](../publications/beyond-normal.qmd) had only a few "really different" distributions.
+2. The PMI profiles seem to be related to the estimation of mutual information using variational losses.
+3. When we were trying to [understand the mutual information in the Student distribution](https://github.com/cbg-ethz/bmi/commit/7cc52ac0c23a86be605db8aaacec35fd416794c3), we decided to use a Monte Carlo estimator of mutual information, essentially constructing the PMI profiles as a byproduct. This idea then turned out to be an interesting one for building distributions for which analytical expressions for ground-truth MI are not available, but can be obtained via Monte Carlo approximations. 
+4. We felt that if the variance of the PMI profile is large, the mutual information (being the mean) may be hard to estimate, on the basis of the Monte Carlo standard error. However, I don't have a good intuition whether it is true or not. 
+
+Overall, are they a useful concept? I'm not so sure: let's give it some time and see what the community decides!
+I would like to see the PMI profiles appearing in more contexts, but perhaps looking at just the first moment (the mutual information) is enough for all the purposes.
+
+I also think that it may be possible to generalize the PMI profiles to the [$f$-divergence setting](https://en.wikipedia.org/wiki/F-divergence).
+There exist variational lower bounds, which are related to [$f$-GANs](https://proceedings.neurips.cc/paper_files/paper/2016/hash/cedebb6e872f539bef8c3f919874e9d7-Abstract.html), but I can't say yet whether introducing an "$f$-divergence" profile would yield any practical benefits. (Or even how to define it: in the end, many pushforwards could be defined, but it does not necessarily mean that they have to be good objects to study!)

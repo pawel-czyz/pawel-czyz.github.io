@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Paweł Czyż">
+<meta name="dcterms.date" content="2024-05-13">
+<meta name="description" content="We revisit the proof of mutual information invariance and generalize it to the pointwise mutual information profile.">
+
+<title>Paweł Czyż - Invariance of the mutual information and the profile</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Paweł Czyż</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../blog.html" rel="" target="">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../publications.html" rel="" target="">
+ <span class="menu-text">Publications</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#kl-divergence" id="toc-kl-divergence" class="nav-link active" data-scroll-target="#kl-divergence">KL divergence</a></li>
+  <li><a href="#pmi-profile" id="toc-pmi-profile" class="nav-link" data-scroll-target="#pmi-profile">PMI profile</a>
+  <ul class="collapse">
+  <li><a href="#invariance-of-the-profile" id="toc-invariance-of-the-profile" class="nav-link" data-scroll-target="#invariance-of-the-profile">Invariance of the profile</a></li>
+  <li><a href="#how-often-do-measurable-left-inverses-exist" id="toc-how-often-do-measurable-left-inverses-exist" class="nav-link" data-scroll-target="#how-often-do-measurable-left-inverses-exist">How often do measurable left inverses exist?</a></li>
+  </ul></li>
+  <li><a href="#what-are-the-profiles-good-for" id="toc-what-are-the-profiles-good-for" class="nav-link" data-scroll-target="#what-are-the-profiles-good-for">What are the profiles good for?</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Invariance of the mutual information and the profile</h1>
+</div>
+
+<div>
+  <div class="description">
+    We revisit the proof of mutual information invariance and generalize it to the pointwise mutual information profile.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Paweł Czyż </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 13, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<p>In our <a href="../publications/pmi-profiles.html">recent manuscript</a> we study the <em>pointwise mutual information profile</em>, which generalizes the notion of mutual information between two random variables to higher moments. In this paper we assume that all the spaces and functions involved have sufficient regularity conditions (e.g., smoothness is our typical assumption) and prove that the pointwise mutual information profile doesn’t change when either variable is reparameterized by a diffeomorphism.</p>
+<p>These assumptions are convenient, allowing for very short proofs for many interesting distributions, but are also too strong. In this post we’ll pay the price of doing some measure theory to make the results more general and show what is <em>really</em> the point there.</p>
+<section id="kl-divergence" class="level2">
+<h2 class="anchored" data-anchor-id="kl-divergence">KL divergence</h2>
+<p>Let <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> be two probability distributions on a standard Borel space <span class="math inline">\(\mathcal X\)</span>. In fact, the most interesting case for us is when <span class="math inline">\(P=P_{XY}\)</span> is a joint probability distribution of random variables <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, and <span class="math inline">\(Q=P_X\otimes P_Y\)</span> is the product of marginal distributions, but some extra generality won’t harm us.</p>
+<p>We will assume that <span class="math inline">\(P\ll Q\)</span>, so that we have a well-defined <a href="https://en.wikipedia.org/wiki/Radon%E2%80%93Nikodym_theorem">Radon–Nikodym derivative</a> <span class="math inline">\(f = \mathrm{d}P/\mathrm{d}Q \colon \mathcal X\to [0, \infty)\)</span>, which is a measurable function. Note that it is defined only up to a <span class="math inline">\(Q\)</span>-null set (and, as <span class="math inline">\(P\ll Q\)</span>, every <span class="math inline">\(Q\)</span>-null set is also a <span class="math inline">\(P\)</span>-null set). By appropriately extending the logarithm function, one can define a measurable function <span class="math inline">\(\log f\colon \mathcal{S}\to [-\infty, \infty) = \mathbb R \cup \{-\infty\}\)</span>, which appears in the well-known definition of the Kullback–Leibler divergence: <span class="math display">\[
+\mathrm{KL}(P\parallel Q) = \int f\, \log f\, \mathrm{d}Q = \int \log f\, \mathrm{d}P.
+\]</span></p>
+<p>It is easy to show that this definition does not depend on the version of <span class="math inline">\(f\)</span> used.</p>
+</section>
+<section id="pmi-profile" class="level2">
+<h2 class="anchored" data-anchor-id="pmi-profile">PMI profile</h2>
+<p>However, we will be more interested in the “histogram of <span class="math inline">\(\log f\)</span> values”. By the <em>pointwise mutual information profile</em> (perhaps we should call it <em>pointwise log-density ratio profile</em>, but let’s use the former name) we will understand the <a href="https://en.wikipedia.org/wiki/Pushforward_measure">pushforward distribution</a> <span class="math display">\[
+  \mathrm{Prof}_{P\parallel Q} := (\log f)_\sharp P,
+\]</span> which (a) seems to be defined on <span class="math inline">\([-\infty, \infty) = \mathbb R \cup \{-\infty\}\)</span> and (b) doesn’t have to actually exist, as <span class="math inline">\(\log f\)</span> is defined only up to a <span class="math inline">\(Q\)</span>-null set!</p>
+<p>In fact neither of these issues is serious. To show that, let’s write <span class="math inline">\(\mathrm{Prof}\)</span> for the profile and note that <span class="math display">\[
+\begin{align*}
+\mathrm{Prof}(-\{\infty\}) &amp;= P( \{s\in \mathcal S\mid \log f(s) = -\infty\}) \\
+&amp;= P(\{s\in \mathcal S\mid f(s) = 0\}) = 0,
+\end{align*}
+\]</span> because we can write <span class="math inline">\(P(E) = \int_E f\, \mathrm{d}Q\)</span>.</p>
+<p>The proof that the profile doesn’t really depend on which version of <span class="math inline">\(f\)</span> we use is also easy: if <span class="math inline">\(g = f\)</span> up to a <span class="math inline">\(Q\)</span>-null set, we have for any Borel subset <span class="math inline">\(B\in [-\infty, \infty)\)</span> the equality <span class="math inline">\(\mathbf{1}_B(\log g) = \mathbf{1}_B(\log f)\)</span> up to a <span class="math inline">\(P\)</span>-null set (remember, we have <span class="math inline">\(P \ll Q\)</span>) and the measure assigned to it, <span class="math inline">\(\mathrm{Prof}(B) = \int \mathbf{1}_B( \log f ) \, \mathrm{d}P\)</span>, is the same.</p>
+<section id="invariance-of-the-profile" class="level3">
+<h3 class="anchored" data-anchor-id="invariance-of-the-profile">Invariance of the profile</h3>
+<p>Let’s now prove the invariance of the profile: we want to show that under reasonable assumptions on <span class="math inline">\(i\colon \mathcal X\to \mathcal X'\)</span> there exists a profile of the push-forward distributions <span class="math inline">\(\mathrm{Prof}_{i_\sharp P\parallel i_\sharp Q}\)</span> and that, in fact, it is the same as the original profile <span class="math inline">\(\mathrm{Prof}_{P\parallel Q}\)</span>.</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Lemma
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Let <span class="math inline">\(i\colon \mathcal X\to \mathcal X'\)</span> be a measurable mapping between standard Borel spaces such that there exists a measurable left inverse <span class="math inline">\(a\colon \mathcal X' \to \mathcal X\)</span>. If <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> are two probability distributions on <span class="math inline">\(\mathcal X\)</span> such that <span class="math inline">\(P \ll Q\)</span> and <span class="math inline">\(f = \mathrm{d}P/\mathrm{d}Q\)</span> is the Radon–Nikodym derivative, then <span class="math inline">\(i_\sharp P \ll i_\sharp Q\)</span> and the Radon–Nikodym derivative is given by <span class="math inline">\(\mathrm{d} i_\sharp P / \mathrm{d}i_\sharp Q = f\circ a\)</span>.</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Proof
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<!-- Consider any Borel subset $B\subseteq \mathcal X'$ such that $i_\sharp Q(B) = Q( i^{-1}(B) ) = 0$.
+Using $P\ll Q$ we note that $0 = P(i^{-1}(B))= i_\sharp P(B) = 0$, so that $i_\sharp P\ll i_\sharp Q$. -->
+<p>To prove that <span class="math inline">\(f\circ a\colon \mathcal X'\to [0, \infty)\)</span> is the Radon–Nikodym derivative we need to prove that <span class="math display">\[
+  i_\sharp P(B) = \int_B f\circ a \, \mathrm{d}i_\sharp Q
+\]</span> for every Borel subset <span class="math inline">\(B\subseteq \mathcal X'\)</span>. This is an easy corollary of <a href="https://en.wikipedia.org/wiki/Pushforward_measure#Main_property:_change-of-variables_formula">the change of variables formula</a>:</p>
+<p><span class="math display">\[
+\begin{align*}
+  \int_B f\circ a \, \mathrm{d}i_\sharp Q &amp;= \int_{i^{-1}(B)} f\circ a\circ i\, \mathrm{d}Q \\
+  &amp;= \int_{i^{-1}(B)} f\, \mathrm{d}Q \\
+  &amp;= \int_{i^{-1}(B)} \mathrm{d}P \\
+  &amp;= P(i^{-1}(B)) = i_\sharp P(B).
+\end{align*}
+\]</span></p>
+<p>There’s also another <a href="https://math.stackexchange.com/a/4413000/551592">proof at MathStackExchange</a>, which looks interesting (I’m not however sure why approximation by simple functions is needed).</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Great! Now we know that the profile <span class="math inline">\(\mathrm{Prof}_{i_\sharp P \parallel i_\sharp Q }\)</span> is indeed well-defined. The proof of the invariance is then very simple:</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Theorem
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Let <span class="math inline">\(i\colon \mathcal X\to \mathcal X'\)</span> be a measurable mapping between standard Borel spaces with a measurable left inverse. If <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> are two probability distributions on <span class="math inline">\(\mathcal X\)</span> such that <span class="math inline">\(P \ll Q\)</span>, then <span class="math inline">\(\mathrm{Prof}_{i_\sharp P \parallel i_\sharp Q } = \mathrm{Prof}_{P \parallel Q }\)</span>.</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Proof
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>From the lemma above we know that <span class="math inline">\(i_\sharp P \ll i_\sharp Q\)</span>, so that the profile is well-defined: <span class="math display">\[
+  \left(\log\frac{\mathrm{d} i_\sharp P }{\mathrm{d} i_\sharp Q}\right)_\sharp (i_\sharp P).
+\]</span></p>
+<p>Now let’s take any measurable left inverse <span class="math inline">\(a\)</span> of <span class="math inline">\(i\)</span> and write <span class="math display">\[
+  \log\frac{\mathrm{d} i_\sharp P }{\mathrm{d} i_\sharp Q} = \log f\circ a,
+\]</span> where <span class="math inline">\(f=\mathrm{d}P/\mathrm{d}Q\)</span>.</p>
+<p>We now have</p>
+<p><span class="math display">\[
+  (\log f \circ a)_\sharp \, i_\sharp P = (\log f\circ a\circ i)_\sharp P = (\log f)_\sharp P.
+\]</span></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="how-often-do-measurable-left-inverses-exist" class="level3">
+<h3 class="anchored" data-anchor-id="how-often-do-measurable-left-inverses-exist">How often do measurable left inverses exist?</h3>
+<p>Above we assumed the existence of a measurable left inverse, while it’s common to see an assumption of using a continuous injective mapping (which is a very convenient criterion as it’s easy to verify). Fortunately, as we work with standard Borel spaces, we can use the following result:</p>
+<div id="nte-lemma-left-inverse-exists" class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Lemma
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Let <span class="math inline">\(i\colon \mathcal S\to \mathcal S'\)</span> be a continuous injective mapping between two standard Borel spaces. Then, <span class="math inline">\(i\)</span> admits a measurable left inverse.</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Proof
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Let’s choose an arbitrary point <span class="math inline">\(x_0\in \mathcal X\)</span> and define a function <span class="math inline">\(a\colon \mathcal X'\to \mathcal X\)</span> in the following manner: <span class="math display">\[
+a(y) = \begin{cases}
+  x_0 &amp;\text{ if } y\notin i(\mathcal X)\\
+  x   &amp;\text{ if } x \text{ is the (unique) point such that } i(x) = y
+\end{cases}
+\]</span></p>
+<p>This function is well-defined due to the fact that <span class="math inline">\(i\)</span> is injective and it is a left inverse: <span class="math inline">\(a(i(x)) = x\)</span> for all <span class="math inline">\(x\in \mathcal X\)</span>. Now we need to prove that it is, indeed, measurable. Take any Borel set <span class="math inline">\(B\subseteq \mathcal X\)</span> and consider its preimage <span class="math inline">\(a^{-1}(B) = \{y \in \mathcal X' \mid a(y) \in B \}\)</span>. If <span class="math inline">\(x_0\notin B\)</span>, we have <span class="math inline">\(a^{-1}(B) = i(B)\)</span>, which is Borel by Lusin–Suslin theorem. If <span class="math inline">\(x_0\in B\)</span>, we can write <span class="math display">\[
+\begin{align*}
+a^{-1}(B) &amp;=  a^{-1}( B\setminus \{x_0\} ) \cup a^{-1}(\{x_0\}) \\
+          &amp;= i(B\setminus \{x_0\}) \cup \{ i(x_0) \} \cup ( \mathcal X' \setminus i(\mathcal X)),
+\end{align*}
+\]</span></p>
+<p>which is Borel as a finite union of Borel sets.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Historical note
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>This result allows one to prove that mutual information is invariant under continuous injective mappings using the data processing inequality (see Theorems 2.15 and 3.2d in <span class="citation" data-cites="Polyanskiy-Wu-Information-Theory">Polyanskiy and Wu (<a href="#ref-Polyanskiy-Wu-Information-Theory" role="doc-biblioref">2022</a>)</span>).</p>
+<p>We prove it in the <a href="../publications/beyond-normal.html"><em>Beyond normal</em></a> paper in rather a complicated manner, employing the interpretation of mutual information as a supremum over mutual information induced by finite partitions (see e.g., Sec. 4.2 and 4.5–4.6 of <span class="citation" data-cites="Polyanskiy-Wu-Information-Theory">Polyanskiy and Wu (<a href="#ref-Polyanskiy-Wu-Information-Theory" role="doc-biblioref">2022</a>)</span> or Chapters 1 and 2 of <span class="citation" data-cites="Pinsker-1964-Information">Pinsker and Feinstein (<a href="#ref-Pinsker-1964-Information" role="doc-biblioref">1964</a>)</span>). As <a href="https://openreview.net/forum?id=25vRtG56YH&amp;noteId=NJfXa1AhOL">Reviewer FjRx</a> had a very good intuition that the data processing inequality is a key result to be applied here, I wish I had known this lemma back then!</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="what-are-the-profiles-good-for" class="level2">
+<h2 class="anchored" data-anchor-id="what-are-the-profiles-good-for">What are the profiles good for?</h2>
+<p>In <a href="../publications/pmi-profiles.html">our manuscript</a> we studied the PMI profiles for the following reasons:</p>
+<ol type="1">
+<li>As they are invariant to continuous injective mappings, it turns out that our <a href="../publications/beyond-normal.html"><em>Beyond normal</em> paper</a> had only a few “really different” distributions.</li>
+<li>The PMI profiles seem to be related to the estimation of mutual information using variational losses.</li>
+<li>When we were trying to <a href="https://github.com/cbg-ethz/bmi/commit/7cc52ac0c23a86be605db8aaacec35fd416794c3">understand the mutual information in the Student distribution</a>, we decided to use a Monte Carlo estimator of mutual information, essentially constructing the PMI profiles as a byproduct. This idea then turned out to be an interesting one for building distributions for which analytical expressions for ground-truth MI are not available, but can be obtained via Monte Carlo approximations.</li>
+<li>We felt that if the variance of the PMI profile is large, the mutual information (being the mean) may be hard to estimate, on the basis of the Monte Carlo standard error. However, I don’t have a good intuition whether it is true or not.</li>
+</ol>
+<p>Overall, are they a useful concept? I’m not so sure: let’s give it some time and see what the community decides! I would like to see the PMI profiles appearing in more contexts, but perhaps looking at just the first moment (the mutual information) is enough for all the purposes.</p>
+<p>I also think that it may be possible to generalize the PMI profiles to the <a href="https://en.wikipedia.org/wiki/F-divergence"><span class="math inline">\(f\)</span>-divergence setting</a>. There exist variational lower bounds, which are related to <a href="https://proceedings.neurips.cc/paper_files/paper/2016/hash/cedebb6e872f539bef8c3f919874e9d7-Abstract.html"><span class="math inline">\(f\)</span>-GANs</a>, but I can’t say yet whether introducing an “<span class="math inline">\(f\)</span>-divergence” profile would yield any practical benefits. (Or even how to define it: in the end, many pushforwards could be defined, but it does not necessarily mean that they have to be good objects to study!)</p>
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-Pinsker-1964-Information" class="csl-entry" role="listitem">
+Pinsker, M. S., and A. Feinstein. 1964. <em>Information and Information Stability of Random Variables and Processes</em>. Holden-Day Series in Time Series Analysis. Holden-Day.
+</div>
+<div id="ref-Polyanskiy-Wu-Information-Theory" class="csl-entry" role="listitem">
+Polyanskiy, Y., and Y. Wu. 2022. <em>Information Theory: From Coding to Learning</em>. Cambridge University Press.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

@@ -11,6 +11,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/invariance-mi-pmi-profile.html",
       "/posts/mixtures-and-admixtures.html",
       "/posts/irrational-pi-and-e.html",
       "/posts/clustering-exponential-family-softmax.html",
