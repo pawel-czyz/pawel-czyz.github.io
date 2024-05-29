@@ -13,7 +13,7 @@ Where and when should we start this story? Probably a good origin will be in the
 Informally speaking, we tried to model the [MAPK pathway](https://en.wikipedia.org/wiki/MAPK/ERK_pathway) as a communication channel. Imagine that the cell is given some input $x\in \mathcal X$ and we measure the response $y\in \mathcal Y$. Once we vary $x$ and we record different values $y$ we may start observing some patterns – perhaps changes with $y$ is somehow associated with changes in $x$. To make this more formal, consider a random variable $X$ representing the given inputs and another random variable $Y$ representing the outputs. The [mutual information](https://en.wikipedia.org/wiki/Mutual_information) $I(X; Y)$ measures how dependent these variables are: $I(X; Y) = 0$ if and only if $X$ and $Y$ are independent.
 Contrary to correlation, mutual information works for any kind of variables (continuous, discrete, of arbitrary dimension...) and can capture nonlinear dependencies.
 
-I enjoyed my time in the project and the provided mentorship very much! We wrote [a paper](https://royalsocietypublishing.org/doi/10.1098/rsif.2018.0792), and – perhaps more importantly – I learned that information theory and biology are great fields to study!
+I enjoyed my time in the project and the provided mentorship very much! We wrote [a paper](../publications/limits-mapk.qmd), and – perhaps more importantly – I learned that information theory and biology are great fields to study!
 
 Many years have passed and I thought that perhaps it's the time to become a mentor on my own.
 Fortunately, the very first Master's student I supervised, [Anej](https://anejsvete.github.io/), was so bright and motivated that he wrote a great Master's thesis despite having such an unexperienced supervisor as me!
@@ -34,7 +34,7 @@ We started thinking:
 The 1st and 2nd question are related. But so are 2nd and 3rd! Suppose that we can easily sample points $(x_1, y_1), \dotsc, (x_n, y_n)$ from the joint distribution $P_{XY}$. If $f\colon \mathcal X\to \mathcal X$ and $g\colon \mathcal Y\to \mathcal Y$ are diffeomorphisms, we can apply them to obtain a sample $(f(x_1), g(y_1)), \dotsc, (f(x_n), g(y_n))$ from $P_{f(X)g(Y)}$, which is a joint distribution between variables $f(X)$ and $g(Y)$.
 As we apply a diffeomorphism[^1], the mutual information does not change: $I(X; Y) = I(f(X); g(Y))$. 
 
-[^1]: More precisely, if all the spaces involved are standard Borel, then $f\colon \mathcal X\to \mathcal X'$ and $g\colon \mathcal Y\to \mathcal Y'$ can be continuous injective mappings and e.g., increase the dimensionality of the space. See [Theorem 2.1 here](https://openreview.net/forum?id=25vRtG56YH), which is a well-known fact, but it still took us quite some time to prove it. M.S. Pinsker's [Information and information stability of random variables and processes](https://books.google.pl/books/about/Information_and_Information_Stability_of.html?id=seEyAAAAMAAJ) proved to be an invaluable resource.
+[^1]: More precisely, if all the spaces involved are standard Borel, then $f\colon \mathcal X\to \mathcal X'$ and $g\colon \mathcal Y\to \mathcal Y'$ can be continuous injective mappings and e.g., increase the dimensionality of the space. See [Theorem 2.1 here](https://openreview.net/forum?id=25vRtG56YH), which is a well-known fact, but it still took us quite some time to prove it. M.S. Pinsker's [*Information and information stability of random variables and processes*](https://books.google.pl/books/about/Information_and_Information_Stability_of.html?id=seEyAAAAMAAJ) proved to be an invaluable resource.
 
 Frederic and I started programming[^2] different distributions and transformations, in the meantime learning 
 , and after five months we had a ready manuscript titled *Are mutual information estimators homeomorphism-invariant?*, which shows that the 3rd question was the most important one for ~~a lapsed differential geometer who is currently trying to be an imposter in the machine learning world~~ me.
@@ -42,7 +42,7 @@ Frederic and I started programming[^2] different distributions and transformatio
 [^2]: As a byproduct we learned [Snakemake](https://snakemake.readthedocs.io/), which transformed my approach to data science entirely. But this is a different story.
 
 Well, I was wrong: after the manuscript got rejected from ICML, we realized that the most important aspect of our work was actually using the transformed distributions to study the strengths and limitations of existing estimators[^3].
-We improved the experiments in the paper and changed the story to [_Beyond normal: on the evaluation of the mutual information estimators_](https://openreview.net/forum?id=25vRtG56YH)[^4], which was accepted to NeurIPS.
+We improved the experiments in the paper and changed the story to [_Beyond normal: on the evaluation of the mutual information estimators_](../publications/beyond-normal.qmd)[^4], which was accepted to NeurIPS.
 
 [^3]: Also, Frederic figured out that the 3rd question (whether the estimators which are invariant to diffeomorphisms) has a trivial answer. If $\mathcal M$ is a connected smooth manifold of dimension at least 2, then for any two sets of distinct points $\{a_1, \dotsc, a_n\}$ and $\{b_1, \dotsc, b_n\}$ there exists a diffeomorphism $u\colon \mathcal M\to \mathcal M$ such that $b_i = u(a_i)$ (the proof of this fact can be e.g., found in P.W. Michor's and Cornelia Vizman's _$n$-transitivity of certain diffeomorphisms groups_). Hence, if $\mathcal X$ and $\mathcal Y$ fulfil the assumptions above, we can move a finite data set as we wish and the only invariant estimator has to return the same answer for *any* set of input data points.
 
@@ -76,7 +76,7 @@ From this it is easy to observe that the distribution of the random variable $i_
 
 [^6]: It's tempting to say that pointwise mutual information [transforms as a scalar](https://en.wikipedia.org/wiki/Tensor#Tensor_densities) under the transformations from the group $\mathrm{Diff}(\mathcal X)\times \mathrm{Diff}(\mathcal Y)$.
 
-Hence, diffeomorphisms leave invariant not only the mutual information: they leave invariant also the whole pointwise mutual information profile, what limits how expressive the distributions can be.
+Hence, diffeomorphisms leave invariant not only the mutual information: they leave invariant also the whole pointwise mutual information profile, what limits how expressive the distributions can be; see also [this post](invariance-mi-pmi-profile.qmd) for more general invariance results.
 We did not have yet a counterexample, but a strong feeling that it should exist: we just needed to find distributions with different profiles, but the same mutual information.
 
 #### Model-based mutual information estimation
@@ -93,7 +93,7 @@ However, as discussed above, generally we cannot expect that a normalizing flow 
 There's no real data without real noise and we wanted to have distributions which can be used in practice. One source of noise are _outliers_, which sometimes can be attributed to errors in data collection or recording (e.g., the equipment was apparently switched off or some piece of experimental setup broke), and are well-known suspects when an estimator behaves badly. 
 In *Beyond normal* we investigated heavy-tailed distributions (either by applying some transformations to multivariate normal distributions to make the tails heavier, or by using multivariate Student distributions), but we felt that it was not enough.  
 
-## The mixtures and the critics
+## The mixtures (and the critics)
 
 The outliers here were the most concerning and I had the feeling that if $P_{XY}$ is the distribution from which we want to sample and $P_{\tilde X \tilde Y}$ is the "noise distribution" with $I(\tilde X; \tilde Y) = 0$, then we could perhaps calculate the information contained in the mixture distribution:
 $$P_{X'Y'} = (1-\alpha)\, P_{XY} + \alpha \, P_{\tilde X \tilde Y},$$
@@ -113,11 +113,9 @@ This works for multivariate normal distributions and Student distributions, so w
 
 Hence, although we do not have an _exact_ formula for $I(X; Y)$ where $P_{XY}$ is a mixture of multivariate normal or Student distributions, we have its Monte Carlo approximation. Now we can apply diffeomorphisms to this distribution obtaining more expressive distribution, having e.g., a normalizing flow applied to a Gaussian mixture or a mixture of normalizing flow, or mix all of these again...
 
-Implementation of a prototype in TensorFlow Probability took one day[^7] and after a month we had [The mixtures and the neural critics](https://arxiv.org/abs/2310.10240)[^8] ready.
+Implementation of a prototype in TensorFlow Probability took one day[^7] and after a month we had a [manuscript](../publications/pmi-profiles.qmd) ready.
 
 [^7]: Actually, it took three weeks of me complaining that we couldn't use multivariate Student distributions in TensorFlow Probability on JAX. Since [I had learned that I was wrong](https://github.com/tensorflow/probability/issues/1733), a few hours passed before [we had the prototype](https://github.com/cbg-ethz/bmi/pull/110) and a couple of more days before it was refactored into a stable solution.  
-
-[^8]: Yes, this is named after J.R.R. Tolkien's [The monsters and the critics](https://en.wikipedia.org/wiki/Beowulf:_The_Monsters_and_the_Critics). I'm very stubborn, so it's great that Frederic and Alex are so patient!
 
 I very much like this concept because:
 
@@ -125,4 +123,4 @@ I very much like this concept because:
   - We can construct a mixture distribution with a different pointwise mutual information profile than the multivariate normal distribution. Due to the fact that Gaussian mixtures are _very_ expressive, we can build a whole new family of distributions! 
   - We also do not have to model $P_{XY}$ as a multivariate normal distribution transformed by diffeomorphism $f\times g$ – we can use Gaussian (or Student) mixtures! We quickly built a prototype of model-based mutual information estimation with mixtures, which can provide uncertainty quantification on mutual information in the usual Bayesian manner.
 
-Let's finish this post at the place where we started: in *Beyond normal* we could apply diffeomorphisms to transform continuous $X$ and $Y$ variables. The Monte Carlo estimator from *The mixtures and the critics* applies in exactly the same manner also to the case when $X$ is discrete variable and $Y$ is continuous, which is exactly the case we investigated many years ago! 
+Let's finish this post at the place where we started: in *Beyond normal* we could apply diffeomorphisms to transform continuous $X$ and $Y$ variables. The Monte Carlo estimator from the [follow-up manuscript](../publications/pmi-profiles.qmd) applies in exactly the same manner also to the case when $X$ is discrete variable and $Y$ is continuous, which is exactly the case we investigated many years ago! 

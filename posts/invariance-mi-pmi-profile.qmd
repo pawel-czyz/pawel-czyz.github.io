@@ -58,6 +58,8 @@ Let's now prove the invariance of the profile: we want to show that under reason
 Let $i\colon \mathcal X\to \mathcal X'$ be a measurable mapping between standard Borel spaces such that there exists a measurable left inverse $a\colon \mathcal X' \to \mathcal X$.
 If $P$ and $Q$ are two probability distributions on $\mathcal X$ such that $P \ll Q$ and $f = \mathrm{d}P/\mathrm{d}Q$ is the Radon–Nikodym derivative, then $i_\sharp P \ll i_\sharp Q$ and the Radon–Nikodym derivative is given by $\mathrm{d} i_\sharp P / \mathrm{d}i_\sharp Q = f\circ  a$.
 
+:::
+
 ::: {.callout-note icon=false appearance="minimal" collapse=true}
 
 ## Proof
@@ -85,7 +87,6 @@ There's also another [proof at MathStackExchange](https://math.stackexchange.com
 
 :::
 
-:::
 
 Great!
 Now we know that the profile $\mathrm{Prof}_{i_\sharp P \parallel i_\sharp Q }$ is indeed well-defined.
@@ -99,6 +100,7 @@ The proof of the invariance is then very simple:
 Let $i\colon \mathcal X\to \mathcal X'$ be a measurable mapping between standard Borel spaces with a measurable left inverse.
 If $P$ and $Q$ are two probability distributions on $\mathcal X$ such that $P \ll Q$, then $\mathrm{Prof}_{i_\sharp P \parallel i_\sharp Q } = \mathrm{Prof}_{P \parallel  Q }$. 
 
+:::
 
 ::: {.callout-note icon=false appearance="minimal" collapse=true}
 
@@ -123,8 +125,6 @@ $$
 
 :::
 
-:::
-
 
 ### How often do measurable left inverses exist?
 
@@ -136,6 +136,8 @@ Fortunately, as we work with standard Borel spaces, we can use the following res
 ## Lemma
 
 Let $i\colon \mathcal S\to \mathcal S'$ be a continuous injective mapping between two standard Borel spaces. Then, $i$ admits a measurable left inverse.
+
+:::
 
 ::: {.callout-note icon=false appearance="minimal" collapse=true}
 
@@ -173,8 +175,6 @@ This result allows one to prove that mutual information is invariant under conti
 
 We prove it in the [*Beyond normal*](../publications/beyond-normal.qmd) paper in rather a complicated manner, employing the interpretation of mutual information as a supremum over mutual information induced by finite partitions (see e.g., Sec. 4.2 and 4.5–4.6 of @Polyanskiy-Wu-Information-Theory or Chapters 1 and 2 of @Pinsker-1964-Information).
 As [Reviewer FjRx](https://openreview.net/forum?id=25vRtG56YH&noteId=NJfXa1AhOL) had a very good intuition that the data processing inequality is a key result to be applied here, I wish I had known this lemma back then! 
-:::
-
 :::
 
 ## What are the profiles good for?
