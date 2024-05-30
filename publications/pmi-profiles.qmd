@@ -38,4 +38,5 @@ Finally, we show how Bend and Mix Models can be used to obtain model-based Bayes
 ## Behind the scenes
 
 - The full story has been described on the [blog](../posts/on-beyond-normal.qmd).
-- The first version of this manuscript was title *The mixtures and the critics: on the pointwise mutual information profiles of fine distributions*. This is, of course, named after J.R.R. Tolkien's [*The monsters and the critics*](https://en.wikipedia.org/wiki/Beowulf:_The_Monsters_and_the_Critics). I was very stubborn, but after weeks of discussions I was eventually convinced that the new title could be more informative about the content.
+- The first version of this manuscript was titled *The mixtures and the critics: on the pointwise mutual information profiles of fine distributions*. This is, of course, named after J.R.R. Tolkien's [*The monsters and the critics*](https://en.wikipedia.org/wiki/Beowulf:_The_Monsters_and_the_Critics). I was very stubborn on keeping this, but after weeks of discussions I was eventually convinced that the new title is informative about the content.
+
