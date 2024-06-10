@@ -20,47 +20,110 @@ Consider now two group homomorphisms, $f\colon G\to H$ and $u\colon H\to G$.
 If we treat them as functors, $\mathbf{B}f$ and $\mathbf{B}u$, under which circumstances are they [adjoint](https://en.wikipedia.org/wiki/Adjoint_functors)?
 In other words, what are the properties of homomorphisms of $f$ and $u$, such that $\mathbf{B}f \dashv \mathbf{B}u$?
 
-For an adjunction we need a natural isomorphism $\psi_{\bullet_G\bullet_H}\colon \mathrm{Hom}_{\mathbf{B}H}( \mathbf{B}f(\bullet_G), \bullet_H) \to \mathrm{Hom}_{\mathbf{B}G}(\bullet_G, \mathbf{B}g(\bullet_H) )$.
-This is just a convoluted way of writing that we need a bijection $\psi\colon H\to G$ with additional naturality properties.
+For an adjunction we need a natural isomorphism $\psi_{\bullet_G\bullet_H}\colon \mathrm{Hom}_{\mathbf{B}H}( \mathbf{B}f(\bullet_G), \bullet_H) \to \mathrm{Hom}_{\mathbf{B}G}(\bullet_G, \mathbf{B}g(\bullet_H) )$.This is just a convoluted way of writing that we need a bijection $\psi\colon H\to G$ with additional properties, making it the *natural* isomorphism.
 
-If we write $\phi\colon G\to H$ for the inverse, $\phi = \psi^{-1}$, the properties of natural isomorphism are as follows: 
+What properties?
+Let's introduce some notation. For an arrow $h\in H$ we write $h^\flat = \psi(h)$.
+If $\phi\colon G\to H$ be the inverse, $\phi = \psi^{-1}$, and $g\in G$, we write $g^\sharp = \phi(g)$.
+Of course, we have $(h^\flat)^\sharp = h$ and $(g^\sharp)^\flat = g$ for all $h$ and $g$.
 
+The first property (naturality in $\mathbf{B}H$) reads that for every $h_1$ and $h_2$ in $H$, we have
 $$
-\phi(g_1)f(g_2) = \phi(g_1 g_2), \quad u(h_1) \psi(h_2) = \psi(h_1 h_2)
+    u(h_1) h_2^\flat = (h_1h_2)^\flat,
+$$
+or equivalently,
+$$
+  u(h_1) \psi(h_2) = \psi(h_1h_2).  
+$$
+
+The second property (naturality in $\mathbf{B}G$) reads that for every $g\in G$ and $h \in H$ it holds that
+$$
+    (h \circ f(g))^\flat = h^\flat g.
+$$
+
+This looks asymmetric, but we can fix it. As $G$ and $H$ have to be bijections, we can write $h = g_1^\sharp$. Rename $g$ to $g_2$. Then,
+$$
+    (g_1^\sharp f(g_2))^\flat = g_1 g_2,
+$$
+
+or equivalently
+$$
+    g_1^\sharp f(g_2) = (g_1 g_2)^\sharp,
+$$
+
+or equivalently
+$$
+    \phi(g_1) f(g_2) = \phi(g_1g_2).
+$$
+
+To summarise, we require
+$$
+    \phi(g_1)f(g_2) = \phi(g_1 g_2), \quad u(h_1) \psi(h_2) = \psi(h_1 h_2).
 $$
 
 for all $g_1, g_2\in G$ and $h_1, h_2 \in H$.
+Note that these conditions *differ from* the definition of a homomorphism, having $f(g_2)$ instead of $\phi(g_2)$ and $u(h_1)$ instead of $\psi(h_1)$.
+They are also slightly asymmetric, which is related to the fact that adjoint functors also have this asymmetry: we want $f$ to be the left adjoint and $g$ to be the right adjoint. 
 
----
 
-Niech $G$ i $H$ będą grupami oraz niech 
+These conditions are, actually, very restrictive: if we take $g_1 = 1_G$, the identity element, then we have
 $$
-    f\colon G \leftrightarrows H \colon u
-$$
-będą dwoma homomorfizmami grup. 
-
-Mówimy, że są \emph{sprzężone} jeśli istnieją bijekcje (niekoniecznie będące homomorfizmami)
-
-$$
-    \psi \colon G \leftrightarrows H \colon \phi = \psi^{-1}
+    \phi(1_G) f(g) = \phi(g)
 $$
 
-takie, że
+for all $g\in G$.
+We can therefore write $f$ as a composition of bijective functions, i.e., $f$ is also bijective.
+And as $f$ is a bijective group homomorphism, it has to be a group isomorphism.
 
+We can now conjecture the following:
+
+**Theorem:** Let $f\colon G \leftrightarrows H \colon u$ be two group homomorphisms. They form an adjoint pair if and only if they are group isomorphisms (not necessarily inverse to each other).
+
+*Proof:* Assume first that $f$ and $u$ are adjoint.
+Using the same notation as above, we see that $f$ is a group isomorphism.
+Analogously,
+$$
+    u(h) \psi(1_H) = \psi(h)
+$$
+
+for all $h\in H$, so that $u$ is an isomorphism.
+
+
+Conversely, assume that $f$ and $u$ are any group isomorphisms.
+Choose any $g'\in G$ and $h'\in H$ and define $\phi(g) = h' f(g)$ and $\psi(h) = u(h) g'$.
+
+We have
 $$
 \begin{align*}
-    \psi(g_1) f(g_2) &= \psi(g_1 g_2)\\
-    u(h_1)\phi(h_1) &= \phi(h_1 h_2)
+    \phi(g_1) f(g_2) &= h' f(g_1) f(g_2) &&= h' f(g_1g_2) &= \phi(g_1g_2)\\
+    u(h_1)\psi(h_2) &= u(h_1) u(h_2) g' &&= u(h_1h_2) g' &= \psi(h_1h_2).
 \end{align*}
 $$
 
-dla wszystkich $g_1, g_2\in G$ oraz $h_1, h_2\in H$.
+**todo: PROVE THAT PHI AND PSI ARE INVERSES UNDER SUITABLE ASSUMPTIONS**
+
+At this point we see that the only examples of adjoint group homomorphisms arise from group isomorphisms.
+
+## Where are the monads?
+
+As we have an adjunction $\mathbf{B}f\dashv \mathbf{B}u$ for any pair of group isomorphisms $f$ and $u$, we can take a look how monads work.
+Let's start by recalling the definitions of the unit and counit.
+
+The unit is a natural transformation $\eta\colon 1_{\mathbf{B}G}\Rightarrow \mathbf{B}uf$ given by $\eta_{\bullet_G} = (1_H)^\flat$.
+Abusing the notation to write $\eta$ instead of $\eta_{\bullet_G}$, we see that $\eta = \psi(1_H) = u(1_H)g' = 1_Gg' = g'$
+from the proof above.
+
+**TODO: WHY IS IT A NATURAL ISOMORPHISM?**
+
+What is the counit? Analogously, it is $\epsilon = (1_G)^\sharp = h'$ from the proof above.
+
+**TODO: TRIANGLE IDENTITIES**
+
+**TODO: 
+
+---
 
 Pytania:
 
-  - Czy istnieją jakiekolwiek przykłady sprzężonych homomorfizmów?
-  - Niech $f$ i $u$ będą sprzężone oraz niech $f$ będzie izomorfizmem. Czy $u$ musi być izomorfizmem?
-  - Czy da się znaleźć sprzężenie, w którym $\psi$ jest bijekcją, ale nie jest izomorfizmem grup?
   - Czy mając zadane sprzężenie $f$ i $u$ może być więcej niż jedna para bijekcji $\psi = \phi^{-1}$  spełniających aksjomaty?
-  - Czy da się znaleźć ,,prawe sprzężenie'' $u$ do funkcji stałej $f(g) = 1_H$? Czy da się znaleźć ,,lewe sprzężenie'' $f$ do funkcji stałej $u(h)=1_G$?
   - Czy mając zadane $f$, ,,prawe sprzężenie'' $u$ jest unikalne?
