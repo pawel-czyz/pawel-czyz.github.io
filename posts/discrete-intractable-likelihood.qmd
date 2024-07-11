@@ -1,0 +1,400 @@
+---
+title: "Learning models with discrete Fisher divergence"
+description: "High-dimensional discrete models suffer from the issue with intractable normalising constants. A recent manuscript introducing discrete Fisher divergence helps to resolve this issue."
+author: "Paweł Czyż"
+date: "7/11/2024"
+execute:
+  freeze: true
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+ISBA 2024 was a phenomenal experience, with a lot of great people, conversations, and presented projects.
+Summarising it would take a separate post. Or two. Or three.
+
+In this one, however, we'll take a look only at one topic, presented by [Takuo Matsubara](https://sites.google.com/view/takuomatsubara/home).
+I remember that during the talk I was sitting amazed for the whole time: not only was the talk great and engaging, but also the method was particularly elegant.
+In January, I have been thinking about using the [Fisher's noncentral hypergeometric distribution](https://en.wikipedia.org/wiki/Fisher%27s_noncentral_hypergeometric_distribution), but its normalising constant is computationally too expensive.
+I wish I had known Takuo's paper back then!
+
+The [paper](https://doi.org/10.1080/01621459.2023.2257891) (or the [preprint](https://arxiv.org/abs/2206.08420)) focuses on the following problem: we have a distribution defined on a discrete space $\mathcal Y = \{0, 1, \dotsc, K-1\}^G$ and its PMF is *everywhere positive* and *known up to the normalizing constant*.
+I.e., we have
+
+$$
+  p_\theta(y) = \frac{1}{\mathcal Z(\theta)} q_\theta(y),
+$$
+
+where $q_\theta(y) > 0$ everywhere and this function is easy to evaluate.
+However, evaluating $\mathcal Z(\theta)$ is prohibitively expensive, as it usually requires $O(K^G)$ evaluations of $q_\theta$.
+
+Takuo's framework helps to do inference in this model without the need to calculate $\mathcal Z(\theta)$ at all! In fact, it applies to more general spaces, although in this blog post we restrict our attention to the special case above.
+
+Before we discuss this method, let's quickly summarise how likelihood-based inference works.
+
+## Kullback–Leibler divergence
+
+As Takuo explained in his presentation, once we observe data points $y_1, \dotsc, y_N$, we can form the empirical distribution $p_\text{emp} = \frac{1}{N} \sum_{n=1}^N \delta_{y_n}$ and consider the Kullback–Leibler divergence
+$$
+\mathrm{KL}(p_\text{emp} \parallel p_\theta ) = -\frac{1}{N} \sum_{n=1}^N \log p_\theta(y_n) + \frac{1}{N} \sum_{n=1}^N \log p_\text{emp}(y_n) = -\frac{1}{N} \sum_{n=1}^N \log p_\theta(y_n) - H(p_\text{emp}).
+$$
+
+Hence, $N \cdot \mathrm{KL}(p_\text{emp} \parallel p_\theta)$ is the negative loglikelihood (up to an additive constant, which depends on the entropy of the empirical data distribution), which can be then optimised in maximum likelihood approaches.
+A nice property is that $\mathrm{KL}(p_1\parallel p_2) \ge 0$ and becomes $0$ if and only if $p_1 = p_2$.
+When we have $N$ large enough, so that $p_\text{emp}$ is close to the data distribution, using maximum likelihood should result in a distribution being "the closest" to the data distribution amongh the family $p_\theta$.
+In particular, under no misspecification we should rediscover the data distribution.
+
+As Takuo explained, also Bayesian inference also proceeds in this manner:
+$$
+  p( \theta \mid y_1, \dotsc, y_N ) \propto p(\theta) \cdot \exp(-N\cdot \mathrm{KL}(p_\text{emp} \parallel p_\theta) ),
+$$
+
+where the entropy of $p_\text{emp}$ is effectively hidden in the proportionality constant.
+
+Before Takuo's talk, I haven't thought about Bayesian inference in terms of the Kullback–Leibler divergence from the *empirical* data distribution $p_\text{emp}$ to the model $p_\theta$: on continuous spaces $p_\text{emp}$ is atomic, while $p_\theta$ is (usually) not and $\mathrm{KL}(p_\text{emp} \parallel  p_\theta) = +\infty$ for all parameters $\theta$.
+However, for a discrete space $\mathcal Y$ both measures are necessarily atomic and this works nicely.
+
+However, maximum likelihood, minimisation of the Kullback–Leibler divergence, and Bayesian inference all rely on having the access to $\log p_\theta(y) = \log q_\theta(y) - \log \mathcal Z(\theta)$, which is not tractable in our case.
+
+## Discrete Fisher divergence
+
+Define operators on $\mathcal Y$ incrementing and decrementing a specific position:
+$$
+  (\mathcal I_g y)_h = \begin{cases}
+    (y_g + 1) \mod K &\text{ if } g = h\\
+    y_h &\text{ otherwise}
+  \end{cases} 
+$$
+and
+$$
+  (\mathcal D_g y)_h = \begin{cases}
+    (y_g - 1) \mod K &\text{ if } g = h\\
+    y_h &\text{ otherwise}
+  \end{cases} 
+$$
+
+where the "mod $K$" means that we "increment" $K-1$ to $0$ (and, conversely, "decrement" $0$ to $K-1$).
+When the data are binary, $K=2$, we have $\mathcal I_g = \mathcal D_g$ and they reduce to flipping the $g$-th bit. 
+
+The *discrete Fisher divergence* is then given by
+$$
+  \mathrm{DFD}(p_1\parallel p_2) = \mathbb E_{y\sim p_2}\left[ \sum_{g=1}^G \left( \frac{ p_1( \mathcal D_gy ) }{ p_1(y) } \right)^2 -2 \frac{  p_1(y) }{ p_1(\mathcal I_g y) }  \right] + C(p_2),
+$$
+
+where $C(p_2)$ is a particular expression which does not depend on $p_1$.
+In the paper you can find the formula for it, as well as the proof that $\mathrm{DFD}(p_1\parallel p_2)\ge 0$ and is zero if and only if $p_1 = p_2$. Hence, a generalised posterior is proposed:
+$$
+  p^{\mathrm{DFD}} \propto p(\theta) \cdot \exp(-\tau N\cdot \mathrm{DFD}(p_\theta \parallel p_\text{emp} )),
+$$
+
+where $\tau$ is the temperature parameter, used in [generalised Bayesian inference](https://arxiv.org/abs/1306.6430) and as a [solution](https://arxiv.org/abs/1412.3730) to model [misspecification](https://arxiv.org/abs/1506.06101).
+
+Note that
+$$\begin{align*}
+ \mathrm{DFD}(p_\theta \parallel p_\text{emp}) &= \frac{1}{N} \sum_{n=1}^N\sum_{g=1}^G \left(\frac{ p_\theta(\mathcal D_g y_n) }{ p_\theta(y_n) }\right)^2 - 2 \frac{p_\theta(y_n)}{p_\theta(\mathcal{I}_{g}y_n)}  + C(p_\text{emp}) \\
+    &= \frac{1}{N} \sum_{n=1}^N\sum_{g=1}^G \left(\frac{ q_\theta(\mathcal D_g y_n) }{ q_\theta(y_n) }\right)^2 - 2 \frac{q_\theta(y_n)}{q_\theta(\mathcal{I}_{g}y_n)}  + C(p_\text{emp})
+\end{align*}
+$$
+
+meaning that it does not need the (intractable) normalising constant $\mathcal Z(\theta)$!
+This comes at the price of $O(NG)$ evaluations of $q_\theta$ (rather than $O(N)$ calls to $p_\theta$ as in the likelihood-based methods) and the fact that we are using now a generalised Bayesian approach, rather than the typical Bayesian one (the usual question is "what is the value of the temperature $\tau$ one should use?").
+
+Overall, I very much like this idea, with potentially large impact on applications: in computational biology we use many discrete models and likelihood based methods could not be used because of intractable normalising constants.
+
+## Experiments on binary data
+
+Let's consider $K=2$, so that $\mathcal X = \{0, 1\}^G$.
+If $\mathcal F_g := \mathcal I_g = \mathcal D_g$ is the bitflip operator, the discrete Fisher divergence takes the form 
+
+$$
+  \mathrm{DFD}(p_\theta \parallel p_\text{emp})
+    = \frac{1}{N} \sum_{n=1}^N\sum_{g=1}^G \left(\frac{ q_\theta(\mathcal F_g y_n) }{ q_\theta(y_n) }\right)^2 - 2 \frac{q_\theta(y_n)}{q_\theta(\mathcal{F}_{g}y_n)}  + C(p_\text{emp}).
+$$
+
+I will simulate the data by tossing $G$ independent coins, each with its own bias $\pi_g$.
+In this case the likelihood is tractable, as it is just
+$$
+  p_\pi( y ) = \prod_{g=1}^G \pi_g^{y_g} (1-\pi_g)^{1-y_g}.
+$$
+
+It is convenient to write this model in the exponential family form, by reparameterising it into log-odds, $\alpha_g = \log\frac{\pi_g}{1-\pi_g}$. Then, we have 
+$$
+  q_\alpha(y) = \exp\left( \sum_{g=1}^G \alpha_g y_g \right)
+$$
+
+```{python}
+from functools import partial
+from typing import Callable
+from jaxtyping import Float, Int, Array
+
+import numpy as np
+import jax
+import jax.numpy as jnp
+from jax.scipy import optimize
+
+rng = np.random.default_rng(42)
+
+n_samples: int = 100
+n_genes: int = 10
+
+def logit(p):
+  return np.log(p) - np.log1p(-p)
+
+def expit(x):
+  return 1.0 / (1 + np.exp(-x))
+
+true_bias = np.linspace(0.2, 0.7, n_genes)
+true_alpha = logit(true_bias)
+
+Y = rng.binomial(1, p=true_bias, size=(n_samples, n_genes))
+```
+
+The simplest option is to calculate the maximum likelihood solution.
+Let's do that:
+```{python}
+def print_estimate_summary(alphas, name: str | None = None) -> None:
+  if name is not None:
+    print(f"----- {name} -----")
+  print("Absolute error on the bias:")
+  found_bias = expit(alphas)
+  print(true_bias - found_bias)
+
+  print("True bias:")
+  print(true_bias)
+
+mle_bias = np.mean(Y, axis=0)
+mle_alpha = logit(mle_bias)
+
+print_estimate_summary(mle_alpha, name="maximum likelihood")
+```
+
+As we have the luxury of doing full Bayesian inference, let's try it. We will use a hierarchical model, in which the prior on $\alpha$ is a flexible normal distribution:
+
+```{python}
+import numpyro
+import numpyro.distributions as dist
+
+
+def independent_model(mutations):
+    n_samples, n_genes = mutations.shape
+    
+    mu = numpyro.sample("_mu", dist.Normal(0.0, 5.0))
+    sigma = numpyro.sample("_sigma", dist.HalfCauchy(scale=3.0))
+
+    z =  numpyro.sample('_z', dist.Normal(jnp.zeros(n_genes), 1))
+
+    alpha = numpyro.deterministic("alpha", mu + sigma * z)    
+
+    with numpyro.plate("samples", n_samples, dim=-2):
+        with numpyro.plate("genes", n_genes, dim=-1):
+            numpyro.sample("obs", dist.BernoulliLogits(alpha[None, :]), obs=mutations)
+
+key = jax.random.PRNGKey(0)
+
+key, subkey = jax.random.split(key)
+
+posterior = numpyro.infer.MCMC(
+  numpyro.infer.NUTS(independent_model),
+  num_chains=4,
+  num_samples=500,
+  num_warmup=500,
+)
+posterior.run(subkey, mutations=Y)
+
+posterior.print_summary()
+
+alpha_samples = posterior.get_samples()["alpha"]
+bias_samples = expit(alpha_samples)
+
+posterior_mean_alpha = alpha_samples.mean(axis=0)
+
+print_estimate_summary(posterior_mean_alpha, name="posterior mean")
+```
+
+This looks like both maximum likelihood and Bayesian inference do reasonable job in this problem.
+Let's implement now the discrete Fisher divergence: 
+
+```{python}
+DataPoint = Int[Array, " G"]
+
+
+def bitflip(g: int, y: DataPoint) -> DataPoint:
+  return y.at[g].set(1 - y[g])
+
+
+def dfd_onepoint(
+  log_q: Callable[[DataPoint], float],
+  y: DataPoint,
+) -> float:
+  log_qy: float = log_q(y)
+
+  def log_q_flip_fn(g: int):
+    return log_q(bitflip(g, y))
+
+  log_qflipped = jax.vmap(log_q_flip_fn)(jnp.arange(y.shape[0]))
+
+  log_ratio = log_qflipped - log_qy
+
+  return jnp.sum( jnp.exp(2 * log_ratio) - 2 * jnp.exp(-log_ratio))
+
+
+def dfd(log_q, ys) -> float:
+  f = partial(dfd_onepoint, log_q)
+
+  return jnp.mean(jax.vmap(f)(ys))
+
+
+def linear(alpha: Float[Array, " G"], y: DataPoint) -> float:
+  return jnp.sum(alpha * y)
+
+@jax.jit
+def loss(alpha):
+  return dfd(partial(linear, alpha), Y)
+
+result = optimize.minimize(loss, jnp.zeros(n_genes), method="BFGS")
+
+dfd_alpha = result.x
+
+print_estimate_summary(dfd_alpha, name="DFD")
+```
+
+Wow, this looks pretty good to me!
+Let's now visualise the performance of all methods:
+
+```{python}
+import matplotlib.pyplot as plt
+plt.style.use("dark_background")
+
+fig, axs = plt.subplots(1, 2, sharex=True, sharey=False, figsize=(4, 2), dpi=300)
+for ax in axs:
+  ax.spines[["top", "right"]].set_visible(False)
+
+colors = {
+  "true": "white",
+  "mle": "maroon",
+  "posterior_sample": "lightgrey",
+  "dfd": "gold",
+}
+
+ax = axs[0]
+x_axis = np.arange(1, n_genes + 1)
+ax.set_xticks(x_axis)
+ax.set_title("$\\alpha$")
+
+ax = axs[1]
+ax.set_xticks(x_axis)
+ax.set_title("$\\pi$")
+
+
+def plot(alpha_values, color, alpha=1.0, scatter: bool = True):
+  ax = axs[0]
+  ax.plot(x_axis, alpha_values, c=color, alpha=alpha)
+  if scatter:
+    ax.scatter(x_axis, alpha_values, c=color, alpha=alpha)
+
+  ax = axs[1]
+  bias_values = expit(alpha_values)
+  ax.plot(x_axis, bias_values, c=color, alpha=alpha)
+  if scatter:
+    ax.scatter(x_axis, bias_values, c=color, alpha=alpha)
+
+
+for sample in alpha_samples[::40]:
+  plot(sample, colors["posterior_sample"], alpha=0.1, scatter=False)
+
+plot(true_alpha, colors["true"])
+plot(mle_alpha, colors["mle"])
+plot(dfd_alpha, colors["dfd"])
+
+fig.tight_layout()
+
+```
+
+This looks pretty good to me! Let's do one more thing: sample from the DFD posterior:
+
+```{python}
+def dfd_model(mutations, temperature):
+    n_samples, n_genes = mutations.shape
+    
+    mu = numpyro.sample("_mu", dist.Normal(0.0, 5.0))
+    sigma = numpyro.sample("_sigma", dist.HalfCauchy(scale=3.0))
+
+    z = numpyro.sample('_z', dist.Normal(jnp.zeros(n_genes), 1))
+
+    alpha = numpyro.deterministic("alpha", mu + sigma * z)    
+
+    numpyro.factor("dfd", -temperature * n_samples * loss(alpha))
+
+
+dfd_samples = {}
+
+temperature_range = [0.01, 0.1, 0.5, 1.0, 2.0]
+
+for temperature in temperature_range:
+  key, subkey = jax.random.split(key)
+
+  posterior = numpyro.infer.MCMC(
+    numpyro.infer.NUTS(dfd_model),
+    num_chains=4,
+    num_samples=500,
+    num_warmup=500,
+  )
+  
+  posterior.run(
+    subkey,
+    mutations=Y,
+    temperature=temperature,
+  )
+  print(f"----- Temperature: {temperature:.2f} -----")
+  posterior.print_summary()
+
+  dfd_samples[temperature] = posterior.get_samples()["alpha"]
+```
+
+We can visualise the samples and compare them with the usual Bayesian approach:
+
+```{python}
+fig, axs = plt.subplots(n_genes, len(temperature_range) + 1)
+
+for i in range(n_genes):
+  for j in range(len(temperature_range) + 1):
+    samples = alpha_samples if j == len(temperature_range) else  dfd_samples[temperature_range[j]]
+
+    color = colors["posterior_sample"] if j == len(temperature_range) else colors["dfd"]
+    if j == len(temperature_range):
+      c_alpha = 1.0
+    else:
+      c_alpha = 0.3 + 0.7 * j / len(temperature_range)
+
+    bias_samples = expit(samples)
+
+    ax = axs[i, j]
+    ax.hist(bias_samples[:, i], bins=np.linspace(0, 1, 20), density=True, alpha=c_alpha, color=color)
+
+    ax.set_yticks([]) 
+    ax.set_xticks([])
+    ax.spines[["top", "right"]].set_visible(False)
+
+    ax.axvline(true_bias[i], color=colors["true"], linestyle="--"  )
+
+for i, ax in enumerate(axs[:, 0]):
+  ax.set_ylabel(f"{i}")
+
+for j, ax in enumerate(axs[0, :]):
+  name = "Bayes" if j == len(temperature_range) else  f"$T$={temperature_range[j]:.2f}"
+  ax.set_title(name)
+
+for ax in axs[-1, :]:
+  ax.set_xticks([0, 0.5, 1])
+
+
+```
+
+If the temperature is too low, the prior seems to have too large influence. In this case $T = 0.1$ seems to be the most reasonable, yielding reasonable uncertainty quantification.
+
+## Summary
+
+Overall, I have to say that I very much like the discrete Fisher divergence idea and I congratulate the authors on this article!
+
+In the manuscript there are some experiments with the [Ising model](https://en.wikipedia.org/wiki/Ising_model) – I will need to try this method on the related high-dimensional problems, as (on the toy problem above) it showed some very promising performance. This method is also easy to implement and fast to run.
