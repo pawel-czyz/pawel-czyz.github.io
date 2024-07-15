@@ -1,0 +1,138 @@
+---
+title: "How many distinct Ising models are over there?"
+description: "Essentially one. But some care is needed to count them properly."
+author: "Paweł Czyż"
+date: "07/15/2024"
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+Recall "the" [Ising model](https://en.wikipedia.org/wiki/Ising_model).
+We have a graph with $G$ nodes and each node takes a value $s_g \in \{-1, 1\}$.
+It is parameterised by a symmetric $G\times G$ matrix $\Omega = (\Omega_{gg'})$, representing interactions between different nodes, and an additional vector $\mathbf{\alpha} = (\alpha_g)$.
+In physics, $s_g$ may be the magnetic moments of different sites in a lattice of magnets: $\Omega$ describes interactions between different sites (e.g., due to the spatial structure of the lattice it can be constrained) and $\mathbf{\alpha}$ describes the interactions with an external magnetic field, providing asymmetry between the states $-1$ and $+1$.  
+
+Given the configuration vector $\mathbf{s} = (s_g)$, the energy of the system is given as
+$$
+    E(\mathbf{s}) = \mathbf{s}^T \Omega \mathbf{s} + \mathbf{\mathbf{\alpha}}^T \mathbf{s} = \sum_{g} \alpha_g s_g + \sum_{g}\sum_{g'}  \Omega_{gg'}s_g s_{g'}.
+$$
+
+Given the energy, we will be interested in the probability distribution
+$$
+  P(\mathbf{s}) = \mathcal Z^{-1} \exp(-E(\mathbf{s})),
+$$
+where $\mathcal Z$ is the normalising constant and can depend on the parameters $\mathbf{\alpha}$ and $\Omega$.
+
+This is an interesting system: it can be specified by $G(G+1)/2 + G = O(G^2)$ parameters, but it *can* attribute distinct energies to each of the possible $2^G$ states.
+It does not have to be the case for every set of parameters, though: for example, if we restrict the parameters, e.g., set $\mathbf{\alpha} = \mathbf{0}$, then the states $\mathbf{s}$ and $\mathbf{-s}$ have the same energy and, at most, $2^{G-1}$ distinct energy levels can be represented.
+Moreover, even if this model attributes $2^G$ distinct energies, it does not need to be a good model for an arbitrary probability distribution over the set $\{-1, 1\}^G$, which can require even $2^G$ parameters to specify.
+
+If we decided to count different energy functions $E$ as different models, the answer "how many of different Ising models do we have" would be $+\infty$. However, this is not a very compelling answer and as all of them have the same structure, we will think of them as of one model.
+
+However, not all the parameters are really necessary.
+Because for every $s_g \in \{0, 1\}$ we have $s_g^2 = 1$, for every state $\mathbf{s}$ we have a summand $\mathbf{s}^T \mathrm{diag}(\Omega) \mathbf{s} = \sum_g \Omega_{gg}$.
+This offset does not change energy differences and makes the statistical model unidentifiable. We can therefore drop the diagonal terms (by setting $\Omega_{gg} = 0$) and think of the Ising model as of one having $G(G-1) / 2 + G = G(G+1)/2$ parameters.
+Note that this is *not* the same as dropping the $\mathbf{\alpha}$ terms, which are needed to introduce asymmetry between $\mathbf{s}$ and $-\mathbf{s}$ states.
+
+## A "different" Ising model
+
+Now consider a physical model of interacting magnets, but a statistical model representing mutations.
+This idea dates back to the [2013 paper of Lingzhou Xue, Hui Zou and Tianxi Cai](https://arxiv.org/abs/1208.3555) and the [2001 paper of Jacek Majewski, Hao Li and Jurg Ott](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1226070/), in which they use Ising models described above to model mutations.
+
+However, for me assigning numbers from the set $\{-1, 1\}$ to mutation data is not natural: I think of a binary genotype in terms of a vector $\mathbf{y}\in \{0, 1\}^G$ representing the presence or the absence of a mutation at a particular locus.
+
+The energy for that model would be
+$$
+  \tilde E(\mathbf{y}) = \sum_g \pi_g y_g + \sum_{g'\neq g} \Theta_{gg'} y_gy_g',
+$$
+
+where $\pi_g$ is then related to the probability of gene mutation in the model where all mutations arise independently (i.e., $\Theta_{gg'} = 0$ for all $g\neq g'$. See the model we discussed [in this blog post](discrete-intractable-likelihood.qmd)) and $\Theta_{gg'}=\Theta_{g'g}$ are used to model some (anti-)correlations between genes $g$ and $g'$.
+Note that as $y_g = y_g^2$ for $y_g \in \{0, 1\}$ we can write $\Theta_{gg} = \pi_g$ and use a single matrix $\Theta$:
+$$
+  \tilde E(\mathbf{y}) = \mathbf{y}^T \Theta \mathbf{y} = \sum_{g}\sum_{g'} \Theta_{gg'} y_g y_{g'}.
+$$
+
+This model can also result in $2^G$ different energy levels.
+We can hope that both models are essentially equivalent, i.e., if we relabel $\mathbf{s}$ to $\mathbf{y}$, we can find the parameters $\Theta$ such that energy in the new model, $\tilde E(\mathbf{y})$ will "agree" with the old energy $E(\mathbf{s})$. (And, that for every state $\mathbf{y}$ relabelled to $\mathbf{s}$, we can find parameters $\mathbf{\alpha}$ and $\Omega$ such that the energies agree).
+
+We shouldn't hope for the *exact* equality of energies (after all recall that (a) zero point energy is not well defined in the first model, as we can always change the diagonal terms of $\Omega$ shifting all energy levels simultaneously by the same number, (b) only the energy differences matter, as in this model we can observe only frequencies of different states and shifting the energy levels doesn't change the probability distribution), but the equality of the differences $\tilde E(\mathbf{y}) - \tilde E(\mathbf{y}')$ and $E(\mathbf s) - E(\mathbf s')$ whenever we respectively relabel $\mathbf s$ and $\mathbf s'$ to $\mathbf y$ and $\mathbf y'$. (And that relabelling from $\mathbf y$ to $\mathbf s$ also "works", in the sense explained above).
+
+We can consider two relabelling procedures:
+
+$$
+  s_g = -1 \leftrightarrow y_g= 0,\quad s_g =1 \leftrightarrow y_g = 1
+$$
+and
+$$
+  s_g = -1 \leftrightarrow y_g = 1, \quad s_g = 1 \leftrightarrow y_g = 0.
+$$
+
+I focus on the first one as it feels more natural to me.
+Mathematically, we can write it as $y_g = 0.5(s_g + 1)$ or $s_g = 1 - 2y_g$.
+The other relabelling can also be introduced by using an "internal" relabelling in either model (see the digression below).  
+
+::: {.callout-caution collapse="true"}
+## Digression: internal relabelling 
+
+Note that for the $\{-1, 1\}$ model, the mapping $\mathbf{s}\mapsto -\mathbf{s}$ for all states does not change the energy differences, once $\mathbf{\alpha}$ is changed to $-\mathbf{\alpha}$.
+The interaction terms, represented by the $\Omega$ matrix, do not need to be changed.
+
+In the $\{0, 1\}$ model, we can check what happens if we apply $y_g \mapsto 1-y_g$ symmetry and change $\Theta$ to $\tilde\Theta$.
+We have
+$$\begin{align*}
+\tilde E(\mathbf{1} -\mathbf{y}) &= \sum_{g}\sum_{g'}  \tilde \Theta_{gg'}(1-y_g)(1-y_{g'}) \\
+&= \sum_{g}\sum_{g'} \tilde \Theta_{gg'} y_{g}y_{g'} + \sum_{g}\sum_{g'} \tilde \Theta_{gg'} - 2\sum_{g}\left(\sum_{g'} \Theta_{g'g}  \right) y_g,
+\end{align*}
+$$
+
+which looks a bit different than
+$$
+\tilde E(\mathbf{y}) = \sum_{g}\sum_{g'} \Theta_{gg'}y_gy_{g'}.
+$$
+
+However, note that:
+
+1. The first term, i.e., interactions, does not need to be changed. We can take $\tilde \Theta_{gg'} = \Theta_{gg'}$ for all $g\neq g'$.
+2. The second term does not depend on $\mathbf{y}$. It does not affect the energy *differences*, so that it does not change the probabilities. We can simply ignore it.
+3. The last term can be incorporated in the diagonal entries of $\Theta$, similarly as we did it with the $\mathbf{\pi}$ vector before.
+
+Hence, both models show similar symmetry. 
+Parameterisation in terms of $\Theta$ may be more natural for biological applications, but it changes less intuitively under the relabelling symmetry (which in physics is a more natural operation than in biology).
+
+:::
+
+The energy is given by
+$$\begin{align*}
+  \tilde E(\mathbf{y}) &= \sum_{g}\sum_{g'} \Theta_{gg'} y_g y_g' \\
+  &= \frac{1}{4}\sum_{g}\sum_{g'} \Theta_{gg'} (1 + s_g)(1 + s_{g'}) \\
+  &= \mathrm{const.} + \sum_{g}\sum_{g'} \frac{\Theta_{gg'}}{4} s_g s_{g'} + \sum_{g} \left(\sum_{g'}\frac{\Theta_{gg'}}{2}\right) s_g,
+\end{align*}
+$$
+
+where $\mathrm{const.}$ does not depend on $\mathbf{y}$ (or, more appropriate in this context, on $\mathbf{s}$), so that it does not change the energy differences. and we can ignore it.
+From this we can read the expressions for $\Omega$ and $\mathbf{\alpha}$ vectors resulting in the same distribution.
+I think it is important to notice that, in many cases, $\mathbf{\alpha}\neq 0$.
+In other words, to model mutational dependencies one has to use the Ising model including interactions with the external field, to introduce possible asymmetry.
+
+Let's do this exercise now in the other direction.
+We have $s_g = 1 - 2y_g$, so
+$$\begin{align*}
+  E(\mathbf{s}) &= \sum_g \alpha_g s_g + \sum_g \sum_{g'} \Omega_{gg'} s_g s_{g'} \\
+  &= \left(\sum_g \alpha_g - 2 \sum_{g} \alpha_g y_g \right) + \sum_{g}\sum_{g'} 4 \Omega_{gg'} y_g y_{g'} - \sum_g \left(\sum_{g'} 4\Omega_{gg'} \right)y_g.
+\end{align*}
+$$
+
+We can happily ignore the constant term $\sum_{g}\alpha_g$ and define appropriate matrix $\Theta$ corresponding to this model.
+Overall, the interaction terms, i.e., $\Omega_{gg'}$ and $\Theta_{gg'}$ are equivalent up to scaling.
+
+The diagonal terms seem to be more delicate, though. Let's see what happens when $\mathbf{\alpha} = 0$.
+In this case, the energy is proportional (I dropped the factor of 4) to
+$$
+  \sum_{g\neq g'} \Omega_{gg'} y_gy_g' + \sum_{g}\left( \Omega_{gg} - \sum_{g'} \Omega_{gg'} \right)y_g
+$$
+
+This is a bit weird: the diagonal terms $\Omega_{gg}$ seem to affect the energy in this model, even though they did not control it in the other parameterisation.
+
+Somewhat here has to be wrong...
