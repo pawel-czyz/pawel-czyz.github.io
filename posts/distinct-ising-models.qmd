@@ -55,6 +55,9 @@ $$
 $$
 
 This model can also result in $2^G$ different energy levels.
+
+## Aren't these the same model?
+
 We can hope that both models are essentially equivalent, i.e., if we relabel $\mathbf{s}$ to $\mathbf{y}$, we can find the parameters $\Theta$ such that energy in the new model, $\tilde E(\mathbf{y})$ will "agree" with the old energy $E(\mathbf{s})$. (And, that for every state $\mathbf{y}$ relabelled to $\mathbf{s}$, we can find parameters $\mathbf{\alpha}$ and $\Omega$ such that the energies agree).
 
 We shouldn't hope for the *exact* equality of energies (after all recall that (a) zero point energy is not well defined in the first model, as we can always change the diagonal terms of $\Omega$ shifting all energy levels simultaneously by the same number, (b) only the energy differences matter, as in this model we can observe only frequencies of different states and shifting the energy levels doesn't change the probability distribution), but the equality of the differences $\tilde E(\mathbf{y}) - \tilde E(\mathbf{y}')$ and $E(\mathbf s) - E(\mathbf s')$ whenever we respectively relabel $\mathbf s$ and $\mathbf s'$ to $\mathbf y$ and $\mathbf y'$. (And that relabelling from $\mathbf y$ to $\mathbf s$ also "works", in the sense explained above).
@@ -130,9 +133,20 @@ Overall, the interaction terms, i.e., $\Omega_{gg'}$ and $\Theta_{gg'}$ are equi
 The diagonal terms seem to be more delicate, though. Let's see what happens when $\mathbf{\alpha} = 0$.
 In this case, the energy is proportional (I dropped the factor of 4) to
 $$
-  \sum_{g\neq g'} \Omega_{gg'} y_gy_g' + \sum_{g}\left( \Omega_{gg} - \sum_{g'} \Omega_{gg'} \right)y_g
+  \sum_{g\neq g'} \Omega_{gg'} y_gy_g' + \sum_{g}\left( \Omega_{gg} - \sum_{g'} \Omega_{gg'} \right)y_g = 
+  \sum_{g\neq g'} \Omega_{gg'} y_gy_g' - \sum_{g}\left(\sum_{g'\neq g} \Omega_{gg'} \right)y_g.
 $$
 
-This is a bit weird: the diagonal terms $\Omega_{gg}$ seem to affect the energy in this model, even though they did not control it in the other parameterisation.
+Note that the left hand side of the equation looks a bit wrong: it explicitly mentions the diagonal terms $\Omega_{gg}$, even though they should not affect the energy differences! On the right hand side we see that this dependency is a mirage: the terms $\Omega_{gg}$ cancel out.
+In particular, this model has a strong constraint: the baseline occurence probabilities, $\Theta_{gg}$, depend on the offdiagonal terms!
 
-Somewhat here has to be wrong...
+I don't find this constraint natural and I think it's important to remember about mentioning it as an explicit assumption, when one is fitting a model with $\mathbf{\alpha} = \mathbf{0}$.
+In this nice paper from 2013, the analysis seemed to be performed with this constraint in mind.
+I wonder what would have happened if the authors had decided to model mutations without it. In particular:
+
+1. Would there be some interaction terms looking different? (These are high-dimensional problems with no known ground-truth, so perhaps a simulation study would be more informative). 
+2. Would the more flexible model fit the data better?
+3. Can (penalised) pseudolikelihood still provide reliable estimates in this case? As an alternative method of training these models, one could use discrete Fisher divergence, which already [appeared on this blog](discrete-intractable-likelihood.qmd).
+4. How does sparsity interact with this constraint? I recall that many sparsity-inducing priors for learning graphical models (which is a very hard tassk) may incur some bias, but I don't understand it as well as I want. 
+
+Perhaps I should try implementing this and see what happens!
