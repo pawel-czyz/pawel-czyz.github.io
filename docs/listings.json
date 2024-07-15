@@ -11,6 +11,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/distinct-ising-models.html",
       "/posts/discrete-intractable-likelihood.html",
       "/posts/adjoint-group-homomorphisms.html",
       "/posts/invariance-mi-pmi-profile.html",
