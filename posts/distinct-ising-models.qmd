@@ -141,12 +141,14 @@ Note that the left hand side of the equation looks a bit wrong: it explicitly me
 In particular, this model has a strong constraint: the baseline occurence probabilities, $\Theta_{gg}$, depend on the offdiagonal terms!
 
 I don't find this constraint natural and I think it's important to remember about mentioning it as an explicit assumption, when one is fitting a model with $\mathbf{\alpha} = \mathbf{0}$.
-In this nice paper from 2013, the analysis seemed to be performed with this constraint in mind.
-I wonder what would have happened if the authors had decided to model mutations without it. In particular:
+In this nice paper from 2013, the analysis seems to have been performed with this constraint in mind.
+I wonder what would have happened if the authors had decided to model mutations without this assumption (I think that the 2001 paper allows for the additional $\mathbf{\alpha}$ term). 
+In particular:
 
 1. Would there be some interaction terms looking different? (These are high-dimensional problems with no known ground-truth, so perhaps a simulation study would be more informative). 
 2. Would the more flexible model fit the data better?
 3. Can (penalised) pseudolikelihood still provide reliable estimates in this case? As an alternative method of training these models, one could use discrete Fisher divergence, which already [appeared on this blog](discrete-intractable-likelihood.qmd).
 4. How does sparsity interact with this constraint? I recall that many sparsity-inducing priors for learning graphical models (which is a very hard tassk) may incur some bias, but I don't understand it as well as I want. 
 
-Perhaps I should try implementing this and see what happens!
+These Ising models look very interesting.
+I should try implementing some of them!

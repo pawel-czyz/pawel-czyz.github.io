@@ -238,13 +238,14 @@ Digression: internal relabelling
   \sum_{g\neq g'} \Omega_{gg'} y_gy_g' - \sum_{g}\left(\sum_{g'\neq g} \Omega_{gg'} \right)y_g.
 \]</span></p>
 <p>Note that the left hand side of the equation looks a bit wrong: it explicitly mentions the diagonal terms <span class="math inline">\(\Omega_{gg}\)</span>, even though they should not affect the energy differences! On the right hand side we see that this dependency is a mirage: the terms <span class="math inline">\(\Omega_{gg}\)</span> cancel out. In particular, this model has a strong constraint: the baseline occurence probabilities, <span class="math inline">\(\Theta_{gg}\)</span>, depend on the offdiagonal terms!</p>
-<p>I don’t find this constraint very natural and I think it’s important to remember about it. I think I’d like to understand the effect of this better: in this nice paper from 2013, the analysis seems to be performed with this constraint. I wonder what happens when it is removed. In particular:</p>
+<p>I don’t find this constraint natural and I think it’s important to remember about mentioning it as an explicit assumption, when one is fitting a model with <span class="math inline">\(\mathbf{\alpha} = \mathbf{0}\)</span>. In this nice paper from 2013, the analysis seems to have been performed with this constraint in mind. I wonder what would have happened if the authors had decided to model mutations without this assumption (I think that the 2001 paper allows for the additional <span class="math inline">\(\mathbf{\alpha}\)</span> term). In particular:</p>
 <ol type="1">
-<li>Are there are some interaction terms which look different?</li>
-<li>Does the more flexible model fit the data better?</li>
+<li>Would there be some interaction terms looking different? (These are high-dimensional problems with no known ground-truth, so perhaps a simulation study would be more informative).</li>
+<li>Would the more flexible model fit the data better?</li>
 <li>Can (penalised) pseudolikelihood still provide reliable estimates in this case? As an alternative method of training these models, one could use discrete Fisher divergence, which already <a href="../posts/discrete-intractable-likelihood.html">appeared on this blog</a>.</li>
+<li>How does sparsity interact with this constraint? I recall that many sparsity-inducing priors for learning graphical models (which is a very hard tassk) may incur some bias, but I don’t understand it as well as I want.</li>
 </ol>
-<p>Perhaps I should try implementing this!</p>
+<p>These Ising models look very interesting. I should try implementing some of them!</p>
 
 
 </section>
