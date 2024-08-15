@@ -1,0 +1,386 @@
+---
+title: "Estimating the mean vector"
+description: "Let's estimate the mean vector from multivariate normal data."
+author: "Paweł Czyż"
+date: "8/16/2024"
+execute:
+  freeze: true
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+I recently ended up building another Gibbs sampler[^1]. I had $N$ vectors $(Y_n)$ such that each vector $Y_n = (Y_{n1}, \dotsc, Y_{nG})$ was assumed to come from the multivariate normal distribution:
+
+$$
+Y_n\mid \mu \sim \mathcal N(\mu, \Sigma),
+$$
+
+where $\Sigma$ is a known $G\times G$ covariance matrix and $\mu \sim \mathcal N(0, B)$ is the unknown population mean, given a multivariate normal prior.
+In this case, it is important that we know $\Sigma$ and that $B$ is a fixed matrix, which was not necessarily build using $\Sigma$: the [Wikipedia derivation](https://en.wikipedia.org/wiki/Bayesian_multivariate_linear_regression#Conjugate_prior_distribution) for Bayesian multivariate linear regression (which is a more general case) uses a different prior.
+I searched the internet for some time and I found a nice project, [The Book of Statistical Proofs](https://statproofbook.github.io/P/mblr-prior), but I still could not find the derivation adressing the simple case above.
+
+[^1]: Yes, probably I [shouldn't have](https://elevanth.org/blog/2017/11/28/build-a-better-markov-chain/), but I had to use a sparse prior over the space of positive definite matrices and I don't know how to run Hamiltonian Monte Carlo with these choices...
+
+Let's quickly derive it. Define $\nu(x) = \exp(-x/2)$, which has two key properties. First, $\nu(x)\cdot \nu(y) = \nu(x + y)$.
+Second, 
+$$\begin{align*}
+  \mathcal N(x\mid m, V) &\propto \nu\big( (x-m)^T V^{-1}(x-m) \big)\\
+  &\propto \nu( x^TV^{-1}x - 2m^TV^{-1}x),
+\end{align*}
+$$
+
+which shows us how to recognise the mean and the covariance matrix of a multivariate normal distribution.
+
+Let's define $\bar Y = N^{-1}\sum_{n=1}^N Y_n$ to be the mean vector and $V = (B^{-1} + N\Sigma^{-1})^{-1}$ to be an auxiliary matrix. (We see that $V^{-1}$ looks like sum of precision matrices, so may turn out to be some precision matrix!).
+The posterior on $\mu$ is given by
+$$\begin{align*}
+  p\big(\mu \mid (Y_n), \Sigma, B\big) &\propto  \mathcal N( \mu\mid 0, B) \cdot \prod_{n=1}^N \mathcal N(Y_n\mid \mu, \Sigma) \\
+  &\propto \nu( \mu^T B^{-1}\mu )\cdot \nu\left( \sum_{n=1}^N (Y_n - \mu)^T \Sigma^{-1} (Y_n - \mu)  \right) \\
+  &\propto \nu\left( 
+    \mu^T \left(B^{-1} + N \Sigma^{-1}\right)\mu - 2 N \bar Y^T \Sigma^{-1} \mu
+    \right) \\
+  & \propto \nu\left(
+    \mu^T V^{-1} \mu - 2 N \bar Y^T \Sigma^{-1} (V V^{-1}) \mu
+  \right) \\
+  & \propto \nu\left(
+    \mu^T V^{-1} \mu - 2\left(N \bar Y^T \Sigma^{-1} V\right) V^{-1} \mu
+  \right).
+\end{align*}
+$$
+
+Let's define $m^T = N\bar Y^T \Sigma^{-1} V$, so that $m = N \cdot V \Sigma^{-1} \bar Y$.
+In turn, we have 
+$p\big(\mu \mid (Y_n), \Sigma, B\big) = \mathcal N(\mu \mid m, V)$.
+
+It looks a bit surprising that we have $m$ being proportional to $N$: we would expect that for $N\gg 1$ we would have $m\approx \bar Y$. However, this is fine as for $N\gg 1$ we have $V \approx N^{-1}\Sigma$ and $m\approx \bar Y$.
+For a small sample size, however, the prior regularises the estimate.
+
+Let's implement these equations in JAX:
+
+```{python}
+from typing import Callable
+
+import jax
+import jax.numpy as jnp
+import jax.random as jrandom
+
+import blackjax
+from jaxtyping import Float, Array
+
+
+def normal_logp(
+  x: Float[Array, " G"],
+  mean: Float[Array, " G"],
+  precision: Float[Array, "G G"],
+) -> Float[Array, ""]:
+  y = x - mean
+  return -0.5 * jnp.einsum("g,gh,h->", y, precision, y)
+
+
+def logposterior_fn(
+  data: Float[Array, "N G"],
+  precision_prior: Float[Array, "G G"],
+  precision_likelihood: Float[Array, "G G"],
+) -> Callable[[Float[Array, " G"]], Float[Array, ""]]:
+  def fn(mu: Float[Array, " G"]) -> Float[Array, ""]:
+    logprior = normal_logp(
+      x=mu,
+      mean=jnp.zeros_like(mu),
+      precision=precision_prior,
+    )
+    loglike = jnp.sum(
+      jax.vmap(
+        normal_logp,
+        in_axes=(0, None, None),)(
+          data,
+          mu,
+          precision_likelihood,
+        )
+    )
+    return logprior + loglike
+  
+  return fn
+
+
+def get_y_bar(data: Float[Array, "N G"]) -> Float[Array, " G"]:
+  return jnp.mean(data, axis=0)
+
+
+def posterior_precision(
+  data: Float[Array, "N G"],
+  precision_prior: Float[Array, "G G"],
+  precision_likelihood: Float[Array, "G G"],
+):
+  N = data.shape[0]
+  return precision_prior + N * precision_likelihood
+
+
+def posterior_mean(
+  data: Float[Array, "N G"],
+  precision_prior: Float[Array, "G G"],
+  precision_likelihood: Float[Array, "G G"],
+):
+  N = data.shape[0]
+  posterior_cov = jnp.linalg.inv(
+    posterior_precision(
+      data=data,
+      precision_prior=precision_prior,
+      precision_likelihood=precision_likelihood,
+    )
+  )
+  return (N * posterior_cov) @ precision_likelihood  @  get_y_bar(data)
+
+
+def posterior_sample(
+  key,
+  data: Float[Array, "N G"],
+  precision_prior: Float[Array, "G G"],
+  precision_likelihood: Float[Array, "G G"],
+  size: int = 1_000,
+):
+  N = data.shape[0]
+
+  m = posterior_mean(
+    data=data,
+    precision_prior=precision_prior,
+    precision_likelihood=precision_likelihood,
+  )
+  V = jnp.linalg.inv(posterior_precision(
+    data=data,
+    precision_prior=precision_prior,
+    precision_likelihood=precision_likelihood,
+  ))
+
+  return jrandom.multivariate_normal(
+    key, mean=m, cov=V, shape=(size,)
+  )
+```
+
+We start by generating some data points:
+
+```{python}
+n_samples = 4_000
+data_size: int = 3
+
+corr = 0.95
+Sigma = jnp.asarray([
+  [1.0, 2 * corr],
+  [2 * corr, 2.0**2 * 1.0],
+])
+
+B = 1.0**2 * jnp.eye(2)
+
+mu = jnp.asarray([0.0, 1.5])
+
+key = jrandom.PRNGKey(42)
+key, subkey = jrandom.split(key)
+
+data = jrandom.multivariate_normal(key, mu, Sigma, shape=(data_size,))
+
+```
+
+Now let's do inference in three different ways:
+
+1. Sample directly from multivariate normal using the formula derived above.
+2. Use the NUTS sampler from the [BlackJAX package](https://github.com/blackjax-devs/blackjax).
+3. Assume a somewhat wrong $\Sigma$ matrix, ignoring the offdiagonal terms and retaining only the diagonal ones.
+
+Additionally, we will plot a sample from the prior.
+On top of that we plot three points: the ground-truth vector $\mu^*$, data mean $\bar Y$, and the plotted (prior or an appropriate posterior) distribution mean.
+
+```{python}
+
+# Prior
+key, subkey = jrandom.split(key)
+prior = jrandom.multivariate_normal(
+  subkey,
+  mean=jnp.zeros(2),
+  cov=B,
+  shape=(n_samples,)
+)
+
+# Sample using analytic formula
+key, subkey = jrandom.split(key)
+posterior = posterior_sample(
+  subkey,
+  data=data,
+  precision_prior=jnp.linalg.inv(B),
+  precision_likelihood=jnp.linalg.inv(Sigma),
+  size=n_samples,
+)
+
+
+logdensity_fn = logposterior_fn(
+  data=data,
+  precision_prior=jnp.linalg.inv(B),
+  precision_likelihood=jnp.linalg.inv(Sigma),
+)
+
+nuts = blackjax.nuts(
+  logdensity_fn,
+  1e-2,
+  jnp.ones(2),
+)
+
+n_warmup = 2_000
+
+state = nuts.init(jnp.zeros_like(mu))
+step_fn = jax.jit(nuts.step)
+
+key, subkey = jrandom.split(key)
+for i in range(n_warmup):
+    nuts_key = jrandom.fold_in(subkey, i)
+    state, _ = step_fn(nuts_key, state)
+
+posterior_blackjax = []
+key, subkey = jrandom.split(key)
+for i in range(n_samples):
+    nuts_key = jrandom.fold_in(subkey, i)
+    state, _ = step_fn(nuts_key, state)
+    posterior_blackjax.append(state.position)
+
+posterior_blackjax = jnp.asarray(posterior_blackjax)
+
+# Assume that errors are uncorrelated
+key, subkey = jrandom.split(key)
+posterior_ind = posterior_sample(
+  subkey,
+  data=data,
+  precision_prior=jnp.linalg.inv(B),
+  precision_likelihood=jnp.diag(1.0 / jnp.diagonal(Sigma)),
+  size=5_000,
+)
+
+import matplotlib.pyplot as plt
+plt.style.use("dark_background")
+
+def _annotate(ax, x, y, marker, color, label=None):
+  ax.scatter([x], [y], s=6**2, c=color, marker=marker, label=label)
+
+def annotate_axis(ax):
+  _annotate(ax, mu[0], mu[1], marker="x", color="r", label="$\\mu^*$")
+  _annotate(ax, data.mean(axis=0)[0], data.mean(axis=0)[1], marker="+", color="yellow", label="$\\bar Y$")
+
+
+fig, axs = plt.subplots(2, 2, sharex=True, sharey=True, dpi=200)
+
+ax = axs[0, 0]
+ax.set_title("Prior")
+ax.scatter(prior[:, 0], prior[:, 1], s=1, c="lightblue", alpha=0.3)
+_annotate(ax, mu[0], mu[1], marker="x", color="r")
+_annotate(ax, 0.0, 0.0, marker="*", color="salmon")
+
+ax = axs[0, 1]
+ax.set_title("Posterior (uncorrelated $\\Sigma$)")
+ax.scatter(posterior_ind[:, 0], posterior_ind[:, 1], s=1, c="blue", alpha=0.3)
+ax.scatter([mu[0]], [mu[1]], s=10, c="red", marker="x")
+annotate_axis(ax)
+_annotate(ax, posterior_ind[:, 0].mean(), posterior_ind[:, 1].mean(), marker="*", color="salmon")
+
+
+ax = axs[1, 0]
+ax.set_title("Posterior (analytic)")
+ax.scatter(posterior[:, 0], posterior[:, 1], s=1, c="blue", alpha=0.3)
+ax.scatter([mu[0]], [mu[1]], s=10, c="red", marker="x")
+annotate_axis(ax)
+_annotate(ax, posterior[:, 0].mean(), posterior[:, 1].mean(), marker="*", color="salmon")
+
+ax = axs[1, 1]
+ax.set_title("Posterior (BlackJAX)")
+ax.scatter(posterior_blackjax[:, 0], posterior_blackjax[:, 1], s=1, c="blue", alpha=0.3)
+ax.scatter([mu[0]], [mu[1]], s=10, c="red", marker="x")
+annotate_axis(ax)
+_annotate(ax, posterior_blackjax[:, 0].mean(), posterior_blackjax[:, 1].mean(), marker="*", color="salmon", label="Mean")
+ax.legend(frameon=False)
+
+
+for ax in axs.ravel():
+  ax.set_xlabel("$\\mu_1$")
+  ax.set_ylabel("$\\mu_2$")
+  ax.spines[["top", "right"]].set_visible(False)
+
+fig.tight_layout()
+```
+
+Using a proper $\Sigma$ should help us estimate the mean vector better.
+Moreover, using the prior should regularise the inference.
+Let's do several repetitions of this experiment and evaluate the distance:
+
+```{python}
+
+def distance(x1, x2):
+  return jnp.sqrt(jnp.sum(jnp.square(x1 - x2)))
+
+
+def make_repetition(key, data_size: int):
+  key1, key2 = jrandom.split(key, 2)
+  mu_true = jrandom.multivariate_normal(key1, jnp.zeros(2), B)
+
+  data = jrandom.multivariate_normal(
+    key2, mu_true, Sigma, shape=(data_size,)
+  )
+
+  y_bar = get_y_bar(data)
+  
+  mu_expected = posterior_mean(
+    data=data,
+    precision_prior=jnp.linalg.inv(B),
+    precision_likelihood=jnp.linalg.inv(Sigma),
+  )
+  return {
+    "prior": distance(jnp.zeros(2), mu_true),
+    "posterior": distance(mu_expected, mu_true),
+    "data": distance(y_bar, mu_true),
+  }
+
+n_reps = 2_000
+
+key, subkey1, subkey2 = jrandom.split(key, 3)
+reps_small = [make_repetition(k, data_size=2) for k in jrandom.split(subkey1, n_reps)]
+
+reps_large = [make_repetition(k, data_size=10) for k in jrandom.split(subkey2, n_reps)]
+
+fig, axs = plt.subplots(3, 2, sharex=True, sharey=True)
+
+bins = jnp.linspace(0, 5, 15)
+
+ax = axs[0, 0]
+ax.set_title("$N=2$")
+ax.set_xlabel("Prior mean")
+ax.hist([r["prior"] for r in reps_small], color="white", density=True, bins=bins)
+
+ax = axs[1, 0]
+ax.hist([r["posterior"] for r in reps_small], color="bisque", density=True, bins=bins)
+ax.set_xlabel("Posterior mean")
+
+ax = axs[2, 0]
+ax.hist([r["data"] for r in reps_small], color="darkorange", density=True, bins=bins)
+ax.set_xlabel("Data mean")
+
+
+ax = axs[0, 1]
+ax.set_title("$N=20$")
+ax.set_xlabel("Prior mean")
+ax.hist([r["prior"] for r in reps_large], color="white", density=True, bins=bins)
+
+ax = axs[1, 1]
+ax.hist([r["posterior"] for r in reps_large], color="bisque", density=True, bins=bins)
+ax.set_xlabel("Posterior mean")
+
+ax = axs[2, 1]
+ax.hist([r["data"] for r in reps_large], color="darkorange", density=True, bins=bins)
+ax.set_xlabel("Data mean")
+
+
+for ax in axs.ravel():
+  ax.spines[["top", "right", "left"]].set_visible(False)
+
+fig.suptitle("Error")
+fig.tight_layout()
+
+```
+
+We see what expected: for small sample sizes, using plain data results in too large errors (due to large variance).
+A reasonable prior can regularise the posterior mean, so that the error is smaller.

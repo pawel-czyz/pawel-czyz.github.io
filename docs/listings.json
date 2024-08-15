@@ -11,6 +11,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/estimating-mean-vector.html",
       "/posts/distinct-ising-models.html",
       "/posts/discrete-intractable-likelihood.html",
       "/posts/adjoint-group-homomorphisms.html",
