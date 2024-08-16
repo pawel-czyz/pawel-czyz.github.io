@@ -21,7 +21,7 @@ where $\Sigma$ is a known $G\times G$ covariance matrix and $\mu \sim \mathcal N
 In this case, it is important that we know $\Sigma$ and that $B$ is a fixed matrix, which was not necessarily build using $\Sigma$: the [Wikipedia derivation](https://en.wikipedia.org/wiki/Bayesian_multivariate_linear_regression#Conjugate_prior_distribution) for Bayesian multivariate linear regression (which is a more general case) uses a different prior.
 I searched the internet for some time and I found a nice project, [The Book of Statistical Proofs](https://statproofbook.github.io/P/mblr-prior), but I still could not find the derivation adressing the simple case above.
 
-[^1]: Yes, probably I [shouldn't have](https://elevanth.org/blog/2017/11/28/build-a-better-markov-chain/), but I had to use a sparse prior over the space of positive definite matrices and I don't know how to run Hamiltonian Monte Carlo with these choices...
+[^1]: Probably I [shouldn't have](https://elevanth.org/blog/2017/11/28/build-a-better-markov-chain/), but I had to use a sparse prior over the space of positive definite matrices and I don't know how to run Hamiltonian Monte Carlo with these choices...
 
 Let's quickly derive it. Define $\nu(x) = \exp(-x/2)$, which has two key properties. First, $\nu(x)\cdot \nu(y) = \nu(x + y)$.
 Second, 
@@ -188,11 +188,14 @@ Now let's do inference in three different ways:
 3. Assume a somewhat wrong $\Sigma$ matrix, ignoring the offdiagonal terms and retaining only the diagonal ones.
 
 Additionally, we will plot a sample from the prior.
-On top of that we plot three points: the ground-truth vector $\mu^*$, data mean $\bar Y$, and the plotted (prior or an appropriate posterior) distribution mean.
+On top of that we plot three points: the ground-truth vector $\mu^*$, data mean $\bar Y$, and the plotted (prior or an appropriate posterior) distribution mean[^2].
 
 ```{python}
+import matplotlib.pyplot as plt
+plt.style.use("dark_background")
 
-# Prior
+
+# Sample from the prior
 key, subkey = jrandom.split(key)
 prior = jrandom.multivariate_normal(
   subkey,
@@ -201,7 +204,7 @@ prior = jrandom.multivariate_normal(
   shape=(n_samples,)
 )
 
-# Sample using analytic formula
+# Sample from the posterior using analytic formula
 key, subkey = jrandom.split(key)
 posterior = posterior_sample(
   subkey,
@@ -212,6 +215,7 @@ posterior = posterior_sample(
 )
 
 
+# Sample from the posterior using BlackJAX
 logdensity_fn = logposterior_fn(
   data=data,
   precision_prior=jnp.linalg.inv(B),
@@ -243,7 +247,7 @@ for i in range(n_samples):
 
 posterior_blackjax = jnp.asarray(posterior_blackjax)
 
-# Assume that errors are uncorrelated
+# Assume that errors are uncorrelated and use analytic formula
 key, subkey = jrandom.split(key)
 posterior_ind = posterior_sample(
   subkey,
@@ -253,8 +257,6 @@ posterior_ind = posterior_sample(
   size=5_000,
 )
 
-import matplotlib.pyplot as plt
-plt.style.use("dark_background")
 
 def _annotate(ax, x, y, marker, color, label=None):
   ax.scatter([x], [y], s=6**2, c=color, marker=marker, label=label)
@@ -304,9 +306,10 @@ for ax in axs.ravel():
 fig.tight_layout()
 ```
 
-Using a proper $\Sigma$ should help us estimate the mean vector better.
-Moreover, using the prior should regularise the inference.
-Let's do several repetitions of this experiment and evaluate the distance:
+Looks like BlackJAX and analytic formula give the same posterior, so perhaps there is no mistake in the algebra.
+We also see that using a proper $\Sigma$ should help us estimate the mean vector better and that using the prior should regularise the inference.
+
+Let's do several repetitions of this experiment and evaluate the distance from the point estimate to the ground-truth value:
 
 ```{python}
 
@@ -329,58 +332,170 @@ def make_repetition(key, data_size: int):
     precision_prior=jnp.linalg.inv(B),
     precision_likelihood=jnp.linalg.inv(Sigma),
   )
+
+  mu_diagonal = posterior_mean(
+    data=data,
+    precision_prior=jnp.linalg.inv(B),
+    precision_likelihood=jnp.diag(1.0 / jnp.diagonal(Sigma)),
+  )
+
   return {
     "prior": distance(jnp.zeros(2), mu_true),
     "posterior": distance(mu_expected, mu_true),
     "data": distance(y_bar, mu_true),
+    "diagonal": distance(mu_diagonal, mu_true),
   }
 
 n_reps = 2_000
 
-key, subkey1, subkey2 = jrandom.split(key, 3)
-reps_small = [make_repetition(k, data_size=2) for k in jrandom.split(subkey1, n_reps)]
+def make_plots(key, axs, data_size: int):
+  reps = [make_repetition(k, data_size=data_size) for k in jrandom.split(key, n_reps)]
 
-reps_large = [make_repetition(k, data_size=10) for k in jrandom.split(subkey2, n_reps)]
+  bins = jnp.linspace(0, 4, 20)
 
-fig, axs = plt.subplots(3, 2, sharex=True, sharey=True)
+  def plot(ax, name, color):
+    ax.hist(
+      [r[name] for r in reps],
+      color=color,
+      density=True,
+      bins=bins,
+    )
 
-bins = jnp.linspace(0, 5, 15)
+  ax = axs[0]
+  ax.set_title(f"$N={data_size}$")
+  ax.set_xlabel("Prior mean")
+  plot(ax, "prior", "white")
 
-ax = axs[0, 0]
-ax.set_title("$N=2$")
-ax.set_xlabel("Prior mean")
-ax.hist([r["prior"] for r in reps_small], color="white", density=True, bins=bins)
+  ax = axs[1]
+  ax.set_xlabel("Posterior mean")
+  plot(ax, "posterior", "bisque")
 
-ax = axs[1, 0]
-ax.hist([r["posterior"] for r in reps_small], color="bisque", density=True, bins=bins)
-ax.set_xlabel("Posterior mean")
+  ax = axs[2]
+  ax.set_xlabel("Data mean")
+  plot(ax, "data", "darkorange")
 
-ax = axs[2, 0]
-ax.hist([r["data"] for r in reps_small], color="darkorange", density=True, bins=bins)
-ax.set_xlabel("Data mean")
+  ax = axs[3]
+  ax.set_xlabel("Diagonal model")
+  plot(ax, "diagonal", "purple")
 
 
-ax = axs[0, 1]
-ax.set_title("$N=20$")
-ax.set_xlabel("Prior mean")
-ax.hist([r["prior"] for r in reps_large], color="white", density=True, bins=bins)
+fig, axs = plt.subplots(4, 4, sharex=True, sharey="row")
 
-ax = axs[1, 1]
-ax.hist([r["posterior"] for r in reps_large], color="bisque", density=True, bins=bins)
-ax.set_xlabel("Posterior mean")
-
-ax = axs[2, 1]
-ax.hist([r["data"] for r in reps_large], color="darkorange", density=True, bins=bins)
-ax.set_xlabel("Data mean")
-
+for i, size in enumerate([2, 10, 50, 250]):
+  key, subkey = jrandom.split(key)
+  make_plots(
+    subkey,
+    axs=axs[:, i],
+    data_size=size,
+  )
 
 for ax in axs.ravel():
   ax.spines[["top", "right", "left"]].set_visible(False)
+  ax.set_yticks([])
 
 fig.suptitle("Error")
 fig.tight_layout()
-
 ```
 
-We see what expected: for small sample sizes, using plain data results in too large errors (due to large variance).
-A reasonable prior can regularise the posterior mean, so that the error is smaller.
+We see what should expected:
+
+1. Every method that uses data (i.e., everything apart from the prior) has improved performance when $N$ increases.
+2. For small sample sizes, using plain data can result in larger errors and a reasonable prior can regularise the posterior mean, so that the error is smaller.
+3. Given enough data, the performance of posterior mean and using the data mean looks quite similar.
+
+Additionally, we see that a model assuming diagonal $\Sigma$ (i.e., ignoring the correlations) also has performance quite similar to the true one.
+
+This "performance looks similar" can actually be somewhat misleading: each of this distributions has quite large variance, so minor differences can be unobserved.
+
+Let's now repeat this experiment, but this time plotting the *difference* between distances, so that we can see any difference better. Namely, for the method $M$ and and the $s$-th simulation, write $d^{(M)}_s$ for the obtained distance.
+Now, instead of plotting the data sets $\{ d^{(M_1)}_{1}, \dotsc, d^{(M_1)}_S\}$ and $\{ d^{(M_2)}_{1}, \dotsc, d^{(M_2)}_S\}$, we can plot the differences $\{ d^{(M_2)}_{1} - d^{(M_1)}_{1}, \dotsc, d^{(M_2)}_{S} - d^{(M_1)}_{S} \}$.
+
+Let's use the posterior mean in the right model (potentially the best solution) as the baseline and compare it with three other models.
+In each of the plots, the samples on the right of zero, represent positive difference, i.e., the case when the baseline method (in our case the posterior in the right model) was better than the considered alternative.
+Apart from raw samples, let's plot the mean of such distribution (and, intuitively, we should expect it to be larger than zero) and report the percentage of samples on the right from zero.
+
+```{python}
+n_reps = 3_000
+
+def compare_with_diagonal(key, data_size: int):
+  key1, key2 = jrandom.split(key, 2)
+  mu_true = jrandom.multivariate_normal(key1, jnp.zeros(2), B)
+
+  data = jrandom.multivariate_normal(
+    key2, mu_true, Sigma, shape=(data_size,)
+  )
+
+  y_bar = get_y_bar(data)
+  
+  mu_posterior = posterior_mean(
+    data=data,
+    precision_prior=jnp.linalg.inv(B),
+    precision_likelihood=jnp.linalg.inv(Sigma),
+  )
+  mu_diagonal = posterior_mean(
+    data=data,
+    precision_prior=jnp.linalg.inv(B),
+    precision_likelihood=jnp.diag(1.0 / jnp.diagonal(Sigma)),
+  )
+
+  baseline = distance(mu_posterior, mu_true)
+
+  return {
+    "delta_prior": distance(jnp.zeros(2), mu_true) - baseline,
+    "delta_diagonal": distance(mu_diagonal, mu_true) - baseline,
+    "delta_data": distance(y_bar, mu_true) - baseline,
+  }
+
+
+def make_plots(key, axs, data_size: int):
+  reps = [compare_with_diagonal(k, data_size=data_size) for k in jrandom.split(key, n_reps)]
+
+  bins = jnp.linspace(-2, 2, 20)
+
+  def plot(ax, name, color):
+    samples = jnp.array([r[name] for r in reps])
+    ax.hist(
+      samples,
+      color=color,
+      density=True,
+      bins=bins,
+    )
+    p_worse = float(100 * jnp.mean(samples > 0))
+    ax.axvline(jnp.mean(samples), linestyle=":", color="salmon")
+    ax.axvline(0.0, linestyle=":", color="white")
+    ax.annotate(f"{p_worse:.0f}%", xy=(0.05, 0.5), xycoords='axes fraction')
+
+  ax = axs[0]
+  ax.set_title(f"$N={data_size}$")
+  ax.set_xlabel("Prior mean")
+  plot(ax, "delta_prior", "white")
+
+  ax = axs[1]
+  ax.set_xlabel("Data mean")
+  plot(ax, "delta_data", "darkorange")
+
+  ax = axs[2]
+  ax.set_xlabel("Diagonal model")
+  plot(ax, "delta_diagonal", "purple")
+
+
+fig, axs = plt.subplots(3, 4, sharex=True, sharey="row")
+
+for i, size in enumerate([2, 10, 50, 250]):
+  key, subkey = jrandom.split(key)
+  make_plots(
+    subkey,
+    axs=axs[:, i],
+    data_size=size,
+  )
+
+for ax in axs.ravel():
+  ax.spines[["top", "right", "left"]].set_visible(False)
+  ax.set_yticks([])
+
+fig.suptitle("Extra error over the baseline")
+fig.tight_layout()
+```
+
+As expected, a well-specified Bayesian model performs the best. However, having "enough" data points one can use the data mean as well (or the misspecified model without off-diagonal terms in the covariance).
+An interesting question would be to check how this "enough" depends on the dimensionality of the problem.
