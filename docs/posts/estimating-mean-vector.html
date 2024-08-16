@@ -341,126 +341,130 @@ Y_n\mid \mu \sim \mathcal N(\mu, \Sigma),
 <li>Use the NUTS sampler from the <a href="https://github.com/blackjax-devs/blackjax">BlackJAX package</a>.</li>
 <li>Assume a somewhat wrong <span class="math inline">\(\Sigma\)</span> matrix, ignoring the offdiagonal terms and retaining only the diagonal ones.</li>
 </ol>
-<p>Additionally, we will plot a sample from the prior. On top of that we plot three points: the ground-truth vector <span class="math inline">\(\mu^*\)</span>, data mean <span class="math inline">\(\bar Y\)</span>, and the plotted (prior or an appropriate posterior) distribution mean.</p>
+<p>Additionally, we will plot a sample from the prior. On top of that we plot three points: the ground-truth vector <span class="math inline">\(\mu^*\)</span>, data mean <span class="math inline">\(\bar Y\)</span>, and the plotted (prior or an appropriate posterior) distribution mean[^2].</p>
 <div class="cell" data-execution_count="3">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prior</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>key, subkey <span class="op">=</span> jrandom.split(key)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>prior <span class="op">=</span> jrandom.multivariate_normal(</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  subkey,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  mean<span class="op">=</span>jnp.zeros(<span class="dv">2</span>),</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  cov<span class="op">=</span>B,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  shape<span class="op">=</span>(n_samples,)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample using analytic formula</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>key, subkey <span class="op">=</span> jrandom.split(key)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>posterior <span class="op">=</span> posterior_sample(</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  subkey,</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  data<span class="op">=</span>data,</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  precision_prior<span class="op">=</span>jnp.linalg.inv(B),</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  precision_likelihood<span class="op">=</span>jnp.linalg.inv(Sigma),</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  size<span class="op">=</span>n_samples,</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>logdensity_fn <span class="op">=</span> logposterior_fn(</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  data<span class="op">=</span>data,</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  precision_prior<span class="op">=</span>jnp.linalg.inv(B),</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  precision_likelihood<span class="op">=</span>jnp.linalg.inv(Sigma),</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>nuts <span class="op">=</span> blackjax.nuts(</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  logdensity_fn,</span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="fl">1e-2</span>,</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  jnp.ones(<span class="dv">2</span>),</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>n_warmup <span class="op">=</span> <span class="dv">2_000</span></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>state <span class="op">=</span> nuts.init(jnp.zeros_like(mu))</span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>step_fn <span class="op">=</span> jax.jit(nuts.step)</span>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"dark_background"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample from the prior</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>key, subkey <span class="op">=</span> jrandom.split(key)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>prior <span class="op">=</span> jrandom.multivariate_normal(</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  subkey,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  mean<span class="op">=</span>jnp.zeros(<span class="dv">2</span>),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  cov<span class="op">=</span>B,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  shape<span class="op">=</span>(n_samples,)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample from the posterior using analytic formula</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>key, subkey <span class="op">=</span> jrandom.split(key)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>posterior <span class="op">=</span> posterior_sample(</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  subkey,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  data<span class="op">=</span>data,</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  precision_prior<span class="op">=</span>jnp.linalg.inv(B),</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  precision_likelihood<span class="op">=</span>jnp.linalg.inv(Sigma),</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  size<span class="op">=</span>n_samples,</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample from the posterior using BlackJAX</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>logdensity_fn <span class="op">=</span> logposterior_fn(</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  data<span class="op">=</span>data,</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  precision_prior<span class="op">=</span>jnp.linalg.inv(B),</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  precision_likelihood<span class="op">=</span>jnp.linalg.inv(Sigma),</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>nuts <span class="op">=</span> blackjax.nuts(</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  logdensity_fn,</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  <span class="fl">1e-2</span>,</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  jnp.ones(<span class="dv">2</span>),</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>key, subkey <span class="op">=</span> jrandom.split(key)</span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_warmup):</span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    nuts_key <span class="op">=</span> jrandom.fold_in(subkey, i)</span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    state, _ <span class="op">=</span> step_fn(nuts_key, state)</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>n_warmup <span class="op">=</span> <span class="dv">2_000</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>state <span class="op">=</span> nuts.init(jnp.zeros_like(mu))</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>step_fn <span class="op">=</span> jax.jit(nuts.step)</span>
 <span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>posterior_blackjax <span class="op">=</span> []</span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>key, subkey <span class="op">=</span> jrandom.split(key)</span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_samples):</span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    nuts_key <span class="op">=</span> jrandom.fold_in(subkey, i)</span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    state, _ <span class="op">=</span> step_fn(nuts_key, state)</span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    posterior_blackjax.append(state.position)</span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>posterior_blackjax <span class="op">=</span> jnp.asarray(posterior_blackjax)</span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Assume that errors are uncorrelated</span></span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>key, subkey <span class="op">=</span> jrandom.split(key)</span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>posterior_ind <span class="op">=</span> posterior_sample(</span>
-<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>  subkey,</span>
-<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>  data<span class="op">=</span>data,</span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>  precision_prior<span class="op">=</span>jnp.linalg.inv(B),</span>
-<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>  precision_likelihood<span class="op">=</span>jnp.diag(<span class="fl">1.0</span> <span class="op">/</span> jnp.diagonal(Sigma)),</span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>  size<span class="op">=</span><span class="dv">5_000</span>,</span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"dark_background"</span>)</span>
-<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _annotate(ax, x, y, marker, color, label<span class="op">=</span><span class="va">None</span>):</span>
-<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>  ax.scatter([x], [y], s<span class="op">=</span><span class="dv">6</span><span class="op">**</span><span class="dv">2</span>, c<span class="op">=</span>color, marker<span class="op">=</span>marker, label<span class="op">=</span>label)</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>key, subkey <span class="op">=</span> jrandom.split(key)</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_warmup):</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    nuts_key <span class="op">=</span> jrandom.fold_in(subkey, i)</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    state, _ <span class="op">=</span> step_fn(nuts_key, state)</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>posterior_blackjax <span class="op">=</span> []</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>key, subkey <span class="op">=</span> jrandom.split(key)</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_samples):</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    nuts_key <span class="op">=</span> jrandom.fold_in(subkey, i)</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>    state, _ <span class="op">=</span> step_fn(nuts_key, state)</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>    posterior_blackjax.append(state.position)</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>posterior_blackjax <span class="op">=</span> jnp.asarray(posterior_blackjax)</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="co"># Assume that errors are uncorrelated and use analytic formula</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>key, subkey <span class="op">=</span> jrandom.split(key)</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>posterior_ind <span class="op">=</span> posterior_sample(</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>  subkey,</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>  data<span class="op">=</span>data,</span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>  precision_prior<span class="op">=</span>jnp.linalg.inv(B),</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>  precision_likelihood<span class="op">=</span>jnp.diag(<span class="fl">1.0</span> <span class="op">/</span> jnp.diagonal(Sigma)),</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>  size<span class="op">=</span><span class="dv">5_000</span>,</span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> annotate_axis(ax):</span>
-<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>  _annotate(ax, mu[<span class="dv">0</span>], mu[<span class="dv">1</span>], marker<span class="op">=</span><span class="st">"x"</span>, color<span class="op">=</span><span class="st">"r"</span>, label<span class="op">=</span><span class="st">"$</span><span class="ch">\\</span><span class="st">mu^*$"</span>)</span>
-<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>  _annotate(ax, data.mean(axis<span class="op">=</span><span class="dv">0</span>)[<span class="dv">0</span>], data.mean(axis<span class="op">=</span><span class="dv">0</span>)[<span class="dv">1</span>], marker<span class="op">=</span><span class="st">"+"</span>, color<span class="op">=</span><span class="st">"yellow"</span>, label<span class="op">=</span><span class="st">"$</span><span class="ch">\\</span><span class="st">bar Y$"</span>)</span>
-<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>, dpi<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _annotate(ax, x, y, marker, color, label<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>  ax.scatter([x], [y], s<span class="op">=</span><span class="dv">6</span><span class="op">**</span><span class="dv">2</span>, c<span class="op">=</span>color, marker<span class="op">=</span>marker, label<span class="op">=</span>label)</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> annotate_axis(ax):</span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>  _annotate(ax, mu[<span class="dv">0</span>], mu[<span class="dv">1</span>], marker<span class="op">=</span><span class="st">"x"</span>, color<span class="op">=</span><span class="st">"r"</span>, label<span class="op">=</span><span class="st">"$</span><span class="ch">\\</span><span class="st">mu^*$"</span>)</span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>  _annotate(ax, data.mean(axis<span class="op">=</span><span class="dv">0</span>)[<span class="dv">0</span>], data.mean(axis<span class="op">=</span><span class="dv">0</span>)[<span class="dv">1</span>], marker<span class="op">=</span><span class="st">"+"</span>, color<span class="op">=</span><span class="st">"yellow"</span>, label<span class="op">=</span><span class="st">"$</span><span class="ch">\\</span><span class="st">bar Y$"</span>)</span>
 <span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>, <span class="dv">0</span>]</span>
-<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Prior"</span>)</span>
-<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>ax.scatter(prior[:, <span class="dv">0</span>], prior[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">1</span>, c<span class="op">=</span><span class="st">"lightblue"</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>_annotate(ax, mu[<span class="dv">0</span>], mu[<span class="dv">1</span>], marker<span class="op">=</span><span class="st">"x"</span>, color<span class="op">=</span><span class="st">"r"</span>)</span>
-<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>_annotate(ax, <span class="fl">0.0</span>, <span class="fl">0.0</span>, marker<span class="op">=</span><span class="st">"*"</span>, color<span class="op">=</span><span class="st">"salmon"</span>)</span>
-<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>, <span class="dv">1</span>]</span>
-<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Posterior (uncorrelated $</span><span class="ch">\\</span><span class="st">Sigma$)"</span>)</span>
-<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>ax.scatter(posterior_ind[:, <span class="dv">0</span>], posterior_ind[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">1</span>, c<span class="op">=</span><span class="st">"blue"</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>ax.scatter([mu[<span class="dv">0</span>]], [mu[<span class="dv">1</span>]], s<span class="op">=</span><span class="dv">10</span>, c<span class="op">=</span><span class="st">"red"</span>, marker<span class="op">=</span><span class="st">"x"</span>)</span>
-<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>annotate_axis(ax)</span>
-<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>_annotate(ax, posterior_ind[:, <span class="dv">0</span>].mean(), posterior_ind[:, <span class="dv">1</span>].mean(), marker<span class="op">=</span><span class="st">"*"</span>, color<span class="op">=</span><span class="st">"salmon"</span>)</span>
-<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>, <span class="dv">0</span>]</span>
-<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Posterior (analytic)"</span>)</span>
-<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>ax.scatter(posterior[:, <span class="dv">0</span>], posterior[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">1</span>, c<span class="op">=</span><span class="st">"blue"</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>ax.scatter([mu[<span class="dv">0</span>]], [mu[<span class="dv">1</span>]], s<span class="op">=</span><span class="dv">10</span>, c<span class="op">=</span><span class="st">"red"</span>, marker<span class="op">=</span><span class="st">"x"</span>)</span>
-<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>annotate_axis(ax)</span>
-<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>_annotate(ax, posterior[:, <span class="dv">0</span>].mean(), posterior[:, <span class="dv">1</span>].mean(), marker<span class="op">=</span><span class="st">"*"</span>, color<span class="op">=</span><span class="st">"salmon"</span>)</span>
-<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>, <span class="dv">1</span>]</span>
-<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Posterior (BlackJAX)"</span>)</span>
-<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>ax.scatter(posterior_blackjax[:, <span class="dv">0</span>], posterior_blackjax[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">1</span>, c<span class="op">=</span><span class="st">"blue"</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>ax.scatter([mu[<span class="dv">0</span>]], [mu[<span class="dv">1</span>]], s<span class="op">=</span><span class="dv">10</span>, c<span class="op">=</span><span class="st">"red"</span>, marker<span class="op">=</span><span class="st">"x"</span>)</span>
-<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>annotate_axis(ax)</span>
-<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>_annotate(ax, posterior_blackjax[:, <span class="dv">0</span>].mean(), posterior_blackjax[:, <span class="dv">1</span>].mean(), marker<span class="op">=</span><span class="st">"*"</span>, color<span class="op">=</span><span class="st">"salmon"</span>, label<span class="op">=</span><span class="st">"Mean"</span>)</span>
-<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs.ravel():</span>
-<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>  ax.set_xlabel(<span class="st">"$</span><span class="ch">\\</span><span class="st">mu_1$"</span>)</span>
-<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>  ax.set_ylabel(<span class="st">"$</span><span class="ch">\\</span><span class="st">mu_2$"</span>)</span>
-<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">"top"</span>, <span class="st">"right"</span>]].set_visible(<span class="va">False</span>)</span>
-<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>, dpi<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>, <span class="dv">0</span>]</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Prior"</span>)</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>ax.scatter(prior[:, <span class="dv">0</span>], prior[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">1</span>, c<span class="op">=</span><span class="st">"lightblue"</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>_annotate(ax, mu[<span class="dv">0</span>], mu[<span class="dv">1</span>], marker<span class="op">=</span><span class="st">"x"</span>, color<span class="op">=</span><span class="st">"r"</span>)</span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>_annotate(ax, <span class="fl">0.0</span>, <span class="fl">0.0</span>, marker<span class="op">=</span><span class="st">"*"</span>, color<span class="op">=</span><span class="st">"salmon"</span>)</span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Posterior (uncorrelated $</span><span class="ch">\\</span><span class="st">Sigma$)"</span>)</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>ax.scatter(posterior_ind[:, <span class="dv">0</span>], posterior_ind[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">1</span>, c<span class="op">=</span><span class="st">"blue"</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>ax.scatter([mu[<span class="dv">0</span>]], [mu[<span class="dv">1</span>]], s<span class="op">=</span><span class="dv">10</span>, c<span class="op">=</span><span class="st">"red"</span>, marker<span class="op">=</span><span class="st">"x"</span>)</span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>annotate_axis(ax)</span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>_annotate(ax, posterior_ind[:, <span class="dv">0</span>].mean(), posterior_ind[:, <span class="dv">1</span>].mean(), marker<span class="op">=</span><span class="st">"*"</span>, color<span class="op">=</span><span class="st">"salmon"</span>)</span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>, <span class="dv">0</span>]</span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Posterior (analytic)"</span>)</span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>ax.scatter(posterior[:, <span class="dv">0</span>], posterior[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">1</span>, c<span class="op">=</span><span class="st">"blue"</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>ax.scatter([mu[<span class="dv">0</span>]], [mu[<span class="dv">1</span>]], s<span class="op">=</span><span class="dv">10</span>, c<span class="op">=</span><span class="st">"red"</span>, marker<span class="op">=</span><span class="st">"x"</span>)</span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>annotate_axis(ax)</span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>_annotate(ax, posterior[:, <span class="dv">0</span>].mean(), posterior[:, <span class="dv">1</span>].mean(), marker<span class="op">=</span><span class="st">"*"</span>, color<span class="op">=</span><span class="st">"salmon"</span>)</span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>, <span class="dv">1</span>]</span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Posterior (BlackJAX)"</span>)</span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>ax.scatter(posterior_blackjax[:, <span class="dv">0</span>], posterior_blackjax[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">1</span>, c<span class="op">=</span><span class="st">"blue"</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>ax.scatter([mu[<span class="dv">0</span>]], [mu[<span class="dv">1</span>]], s<span class="op">=</span><span class="dv">10</span>, c<span class="op">=</span><span class="st">"red"</span>, marker<span class="op">=</span><span class="st">"x"</span>)</span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>annotate_axis(ax)</span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>_annotate(ax, posterior_blackjax[:, <span class="dv">0</span>].mean(), posterior_blackjax[:, <span class="dv">1</span>].mean(), marker<span class="op">=</span><span class="st">"*"</span>, color<span class="op">=</span><span class="st">"salmon"</span>, label<span class="op">=</span><span class="st">"Mean"</span>)</span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs.ravel():</span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>  ax.set_xlabel(<span class="st">"$</span><span class="ch">\\</span><span class="st">mu_1$"</span>)</span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>  ax.set_ylabel(<span class="st">"$</span><span class="ch">\\</span><span class="st">mu_2$"</span>)</span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">"top"</span>, <span class="st">"right"</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <p><img src="estimating-mean-vector_files/figure-html/cell-4-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<p>Using a proper <span class="math inline">\(\Sigma\)</span> should help us estimate the mean vector better. Moreover, using the prior should regularise the inference. Let’s do several repetitions of this experiment and evaluate the distance:</p>
+<p>Looks like BlackJAX and analytic formula give the same posterior, so perhaps there is no mistake in the algebra. We also see that using a proper <span class="math inline">\(\Sigma\)</span> should help us estimate the mean vector better and that using the prior should regularise the inference.</p>
+<p>Let’s do several repetitions of this experiment and evaluate the distance from the point estimate to the ground-truth value:</p>
 <div class="cell" data-execution_count="4">
 <details>
 <summary>Code</summary>
@@ -483,62 +487,173 @@ Y_n\mid \mu \sim \mathcal N(\mu, \Sigma),
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    precision_prior<span class="op">=</span>jnp.linalg.inv(B),</span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    precision_likelihood<span class="op">=</span>jnp.linalg.inv(Sigma),</span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"prior"</span>: distance(jnp.zeros(<span class="dv">2</span>), mu_true),</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"posterior"</span>: distance(mu_expected, mu_true),</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data"</span>: distance(y_bar, mu_true),</span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>n_reps <span class="op">=</span> <span class="dv">2_000</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>key, subkey1, subkey2 <span class="op">=</span> jrandom.split(key, <span class="dv">3</span>)</span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>reps_small <span class="op">=</span> [make_repetition(k, data_size<span class="op">=</span><span class="dv">2</span>) <span class="cf">for</span> k <span class="kw">in</span> jrandom.split(subkey1, n_reps)]</span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>reps_large <span class="op">=</span> [make_repetition(k, data_size<span class="op">=</span><span class="dv">10</span>) <span class="cf">for</span> k <span class="kw">in</span> jrandom.split(subkey2, n_reps)]</span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">2</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>bins <span class="op">=</span> jnp.linspace(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">15</span>)</span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>, <span class="dv">0</span>]</span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"$N=2$"</span>)</span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Prior mean"</span>)</span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>ax.hist([r[<span class="st">"prior"</span>] <span class="cf">for</span> r <span class="kw">in</span> reps_small], color<span class="op">=</span><span class="st">"white"</span>, density<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span>bins)</span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>, <span class="dv">0</span>]</span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>ax.hist([r[<span class="st">"posterior"</span>] <span class="cf">for</span> r <span class="kw">in</span> reps_small], color<span class="op">=</span><span class="st">"bisque"</span>, density<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span>bins)</span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Posterior mean"</span>)</span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">2</span>, <span class="dv">0</span>]</span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>ax.hist([r[<span class="st">"data"</span>] <span class="cf">for</span> r <span class="kw">in</span> reps_small], color<span class="op">=</span><span class="st">"darkorange"</span>, density<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span>bins)</span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Data mean"</span>)</span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">0</span>, <span class="dv">1</span>]</span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"$N=20$"</span>)</span>
-<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Prior mean"</span>)</span>
-<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>ax.hist([r[<span class="st">"prior"</span>] <span class="cf">for</span> r <span class="kw">in</span> reps_large], color<span class="op">=</span><span class="st">"white"</span>, density<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span>bins)</span>
-<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">1</span>, <span class="dv">1</span>]</span>
-<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>ax.hist([r[<span class="st">"posterior"</span>] <span class="cf">for</span> r <span class="kw">in</span> reps_large], color<span class="op">=</span><span class="st">"bisque"</span>, density<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span>bins)</span>
-<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Posterior mean"</span>)</span>
-<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axs[<span class="dv">2</span>, <span class="dv">1</span>]</span>
-<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>ax.hist([r[<span class="st">"data"</span>] <span class="cf">for</span> r <span class="kw">in</span> reps_large], color<span class="op">=</span><span class="st">"darkorange"</span>, density<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span>bins)</span>
-<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Data mean"</span>)</span>
-<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs.ravel():</span>
-<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">"top"</span>, <span class="st">"right"</span>, <span class="st">"left"</span>]].set_visible(<span class="va">False</span>)</span>
-<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Error"</span>)</span>
-<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  mu_diagonal <span class="op">=</span> posterior_mean(</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>data,</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    precision_prior<span class="op">=</span>jnp.linalg.inv(B),</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    precision_likelihood<span class="op">=</span>jnp.diag(<span class="fl">1.0</span> <span class="op">/</span> jnp.diagonal(Sigma)),</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">"prior"</span>: distance(jnp.zeros(<span class="dv">2</span>), mu_true),</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">"posterior"</span>: distance(mu_expected, mu_true),</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data"</span>: distance(y_bar, mu_true),</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">"diagonal"</span>: distance(mu_diagonal, mu_true),</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>n_reps <span class="op">=</span> <span class="dv">2_000</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_plots(key, axs, data_size: <span class="bu">int</span>):</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>  reps <span class="op">=</span> [make_repetition(k, data_size<span class="op">=</span>data_size) <span class="cf">for</span> k <span class="kw">in</span> jrandom.split(key, n_reps)]</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>  bins <span class="op">=</span> jnp.linspace(<span class="dv">0</span>, <span class="dv">4</span>, <span class="dv">20</span>)</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> plot(ax, name, color):</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    ax.hist(</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>      [r[name] <span class="cf">for</span> r <span class="kw">in</span> reps],</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>      color<span class="op">=</span>color,</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>      density<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>      bins<span class="op">=</span>bins,</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>  ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>  ax.set_title(<span class="ss">f"$N=</span><span class="sc">{</span>data_size<span class="sc">}</span><span class="ss">$"</span>)</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>  ax.set_xlabel(<span class="st">"Prior mean"</span>)</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>  plot(ax, <span class="st">"prior"</span>, <span class="st">"white"</span>)</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>  ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>  ax.set_xlabel(<span class="st">"Posterior mean"</span>)</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>  plot(ax, <span class="st">"posterior"</span>, <span class="st">"bisque"</span>)</span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>  ax <span class="op">=</span> axs[<span class="dv">2</span>]</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>  ax.set_xlabel(<span class="st">"Data mean"</span>)</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>  plot(ax, <span class="st">"data"</span>, <span class="st">"darkorange"</span>)</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>  ax <span class="op">=</span> axs[<span class="dv">3</span>]</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>  ax.set_xlabel(<span class="st">"Diagonal model"</span>)</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>  plot(ax, <span class="st">"diagonal"</span>, <span class="st">"purple"</span>)</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">4</span>, <span class="dv">4</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="st">"row"</span>)</span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, size <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="dv">2</span>, <span class="dv">10</span>, <span class="dv">50</span>, <span class="dv">250</span>]):</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>  key, subkey <span class="op">=</span> jrandom.split(key)</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>  make_plots(</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>    subkey,</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>    axs<span class="op">=</span>axs[:, i],</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>    data_size<span class="op">=</span>size,</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs.ravel():</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">"top"</span>, <span class="st">"right"</span>, <span class="st">"left"</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>  ax.set_yticks([])</span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Error"</span>)</span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="estimating-mean-vector_files/figure-html/cell-5-output-1.png" width="662" height="475"></p>
+<p><img src="estimating-mean-vector_files/figure-html/cell-5-output-1.png" width="657" height="475"></p>
 </div>
 </div>
-<p>We see what expected: for small sample sizes, using plain data results in too large errors (due to large variance). A reasonable prior can regularise the posterior mean, so that the error is smaller.</p>
+<p>We see what should expected:</p>
+<ol type="1">
+<li>Every method that uses data (i.e., everything apart from the prior) has improved performance when <span class="math inline">\(N\)</span> increases.</li>
+<li>For small sample sizes, using plain data can result in larger errors and a reasonable prior can regularise the posterior mean, so that the error is smaller.</li>
+<li>Given enough data, the performance of posterior mean and using the data mean looks quite similar.</li>
+</ol>
+<p>Additionally, we see that a model assuming diagonal <span class="math inline">\(\Sigma\)</span> (i.e., ignoring the correlations) also has performance quite similar to the true one.</p>
+<p>This “performance looks similar” can actually be somewhat misleading: each of this distributions has quite large variance, so minor differences can be unobserved.</p>
+<p>Let’s now repeat this experiment, but this time plotting the <em>difference</em> between distances, so that we can see any difference better. Namely, for the method <span class="math inline">\(M\)</span> and and the <span class="math inline">\(s\)</span>-th simulation, write <span class="math inline">\(d^{(M)}_s\)</span> for the obtained distance. Now, instead of plotting the data sets <span class="math inline">\(\{ d^{(M_1)}_{1}, \dotsc, d^{(M_1)}_S\}\)</span> and <span class="math inline">\(\{ d^{(M_2)}_{1}, \dotsc, d^{(M_2)}_S\}\)</span>, we can plot the differences <span class="math inline">\(\{ d^{(M_2)}_{1} - d^{(M_1)}_{1}, \dotsc, d^{(M_2)}_{S} - d^{(M_1)}_{S} \}\)</span>.</p>
+<p>Let’s use the posterior mean in the right model (potentially the best solution) as the baseline and compare it with three other models. In each of the plots, the samples on the right of zero, represent positive difference, i.e., the case when the baseline method (in our case the posterior in the right model) was better than the considered alternative. Apart from raw samples, let’s plot the mean of such distribution (and, intuitively, we should expect it to be larger than zero) and report the percentage of samples on the right from zero.</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>n_reps <span class="op">=</span> <span class="dv">3_000</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compare_with_diagonal(key, data_size: <span class="bu">int</span>):</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  key1, key2 <span class="op">=</span> jrandom.split(key, <span class="dv">2</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  mu_true <span class="op">=</span> jrandom.multivariate_normal(key1, jnp.zeros(<span class="dv">2</span>), B)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  data <span class="op">=</span> jrandom.multivariate_normal(</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    key2, mu_true, Sigma, shape<span class="op">=</span>(data_size,)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  y_bar <span class="op">=</span> get_y_bar(data)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  mu_posterior <span class="op">=</span> posterior_mean(</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>data,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    precision_prior<span class="op">=</span>jnp.linalg.inv(B),</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    precision_likelihood<span class="op">=</span>jnp.linalg.inv(Sigma),</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  mu_diagonal <span class="op">=</span> posterior_mean(</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>data,</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    precision_prior<span class="op">=</span>jnp.linalg.inv(B),</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    precision_likelihood<span class="op">=</span>jnp.diag(<span class="fl">1.0</span> <span class="op">/</span> jnp.diagonal(Sigma)),</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  baseline <span class="op">=</span> distance(mu_posterior, mu_true)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"delta_prior"</span>: distance(jnp.zeros(<span class="dv">2</span>), mu_true) <span class="op">-</span> baseline,</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">"delta_diagonal"</span>: distance(mu_diagonal, mu_true) <span class="op">-</span> baseline,</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">"delta_data"</span>: distance(y_bar, mu_true) <span class="op">-</span> baseline,</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_plots(key, axs, data_size: <span class="bu">int</span>):</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>  reps <span class="op">=</span> [compare_with_diagonal(k, data_size<span class="op">=</span>data_size) <span class="cf">for</span> k <span class="kw">in</span> jrandom.split(key, n_reps)]</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  bins <span class="op">=</span> jnp.linspace(<span class="op">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">20</span>)</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> plot(ax, name, color):</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    samples <span class="op">=</span> jnp.array([r[name] <span class="cf">for</span> r <span class="kw">in</span> reps])</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    ax.hist(</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>      samples,</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>      color<span class="op">=</span>color,</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>      density<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>      bins<span class="op">=</span>bins,</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    p_worse <span class="op">=</span> <span class="bu">float</span>(<span class="dv">100</span> <span class="op">*</span> jnp.mean(samples <span class="op">&gt;</span> <span class="dv">0</span>))</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    ax.axvline(jnp.mean(samples), linestyle<span class="op">=</span><span class="st">":"</span>, color<span class="op">=</span><span class="st">"salmon"</span>)</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    ax.axvline(<span class="fl">0.0</span>, linestyle<span class="op">=</span><span class="st">":"</span>, color<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    ax.annotate(<span class="ss">f"</span><span class="sc">{</span>p_worse<span class="sc">:.0f}</span><span class="ss">%"</span>, xy<span class="op">=</span>(<span class="fl">0.05</span>, <span class="fl">0.5</span>), xycoords<span class="op">=</span><span class="st">'axes fraction'</span>)</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>  ax <span class="op">=</span> axs[<span class="dv">0</span>]</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>  ax.set_title(<span class="ss">f"$N=</span><span class="sc">{</span>data_size<span class="sc">}</span><span class="ss">$"</span>)</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>  ax.set_xlabel(<span class="st">"Prior mean"</span>)</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>  plot(ax, <span class="st">"delta_prior"</span>, <span class="st">"white"</span>)</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>  ax <span class="op">=</span> axs[<span class="dv">1</span>]</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>  ax.set_xlabel(<span class="st">"Data mean"</span>)</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>  plot(ax, <span class="st">"delta_data"</span>, <span class="st">"darkorange"</span>)</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>  ax <span class="op">=</span> axs[<span class="dv">2</span>]</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>  ax.set_xlabel(<span class="st">"Diagonal model"</span>)</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>  plot(ax, <span class="st">"delta_diagonal"</span>, <span class="st">"purple"</span>)</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">4</span>, sharex<span class="op">=</span><span class="va">True</span>, sharey<span class="op">=</span><span class="st">"row"</span>)</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, size <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="dv">2</span>, <span class="dv">10</span>, <span class="dv">50</span>, <span class="dv">250</span>]):</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>  key, subkey <span class="op">=</span> jrandom.split(key)</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>  make_plots(</span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>    subkey,</span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>    axs<span class="op">=</span>axs[:, i],</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>    data_size<span class="op">=</span>size,</span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axs.ravel():</span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>  ax.spines[[<span class="st">"top"</span>, <span class="st">"right"</span>, <span class="st">"left"</span>]].set_visible(<span class="va">False</span>)</span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>  ax.set_yticks([])</span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>fig.suptitle(<span class="st">"Extra error over the baseline"</span>)</span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>fig.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="estimating-mean-vector_files/figure-html/cell-6-output-1.png" width="661" height="475"></p>
+</div>
+</div>
+<p>As expected, a well-specified Bayesian model performs the best. However, having “enough” data points one can use the data mean as well (or the misspecified model without off-diagonal terms in the covariance). An interesting question would be to check how this “enough” depends on the dimensionality of the problem.</p>
 
 
 
@@ -546,7 +661,7 @@ Y_n\mid \mu \sim \mathcal N(\mu, \Sigma),
 <div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>Yes, probably I <a href="https://elevanth.org/blog/2017/11/28/build-a-better-markov-chain/">shouldn’t have</a>, but I had to use a sparse prior over the space of positive definite matrices and I don’t know how to run Hamiltonian Monte Carlo with these choices…<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>Probably I <a href="https://elevanth.org/blog/2017/11/28/build-a-better-markov-chain/">shouldn’t have</a>, but I had to use a sparse prior over the space of positive definite matrices and I don’t know how to run Hamiltonian Monte Carlo with these choices…<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
