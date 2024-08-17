@@ -1,15 +1,22 @@
 ---
 title: Blog
 listing:
+  id: post-listing
   contents: posts
+  type: table
+  fields: [date, title, description]
   sort: "date desc"
-  type: default
-  categories: true
+  categories: false
+  filter-ui: [title, date, description]
+  page-size: 10
 ---
 
 These posts have evolved from my digital garden[^1] into a bit longer form.
 Their main role is [to educate myself](https://rgiordan.github.io/meta/2019/07/26/why.html) and they may be incomplete, written from a very subjective point of view, or contain errors.
 I'd be grateful for feedback on how to improve them!
+
+::: {#post-listing}
+:::
 
 [^1]: See [this link](https://joelhooks.com/digital-garden/) for a difference. I maintain my digital garden in [Obsidian](https://obsidian.md/). Please, let me know if you know a good way of integrating Obsidian with [Quarto](https://quarto.org/)!
 
