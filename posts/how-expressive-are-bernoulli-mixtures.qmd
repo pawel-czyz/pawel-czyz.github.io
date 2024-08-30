@@ -1,0 +1,27 @@
+---
+title: "How expressive are Bernoulli mixture models?"
+description: ""
+author: "Paweł Czyż"
+date: "8/19/2024"
+execute:
+  freeze: true
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+\newcommand\nGenes
+
+We have [already discussed](beta-bernoulli.qmd) that all the distributions with only two outcomes are Bernoulli distributions.
+Similarly, a distribution on a finite set has to be a categorical distribution (so, if it has the full support, it has to be in an [exponential family](https://en.wikipedia.org/wiki/Exponential_family)).
+
+Let's now think about the probability distributions on the space of binary vectors, $\mathcal Y = \{0, 1\}^G$. The most general case is the categorical distribution mentioned above, which requires specifying a probability table with $2^G$ entries (with $2^G-1$ free parameters).
+On the other hand, we can consider a distribution with $G$ parameters, which corresponds to $G$ independent (but not necessarily identically distributed) Bernoulli trials:
+
+\newcommand\G{{\mathcal{y}}}
+
+$$
+P(y\mid )
+$$
+
