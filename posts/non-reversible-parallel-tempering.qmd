@@ -2,7 +2,7 @@
 title: "Non-reversible parallel tempering"
 description: "Let's create a basic JAX implementation of a wonderful Markov chain Monte Carlo method."
 author: "Paweł Czyż"
-date: "9/12/2024"
+date: "8/31/2024"
 # execute:
 #   freeze: true
 format: 
@@ -219,9 +219,21 @@ $$
   r = \frac{ \mathbf{p}(\mathbf x')}{ \mathbf{p}(\mathbf x)} = \frac{ p_i(x_j) p_j(x_i)}{ p_i(x_i) p_j(x_j)}.
 $$ 
 
-Typically, adjacent indices are swapped, as for $i$ very distant from $j$ we expect that $r$ is close to zero. 
+Typically, only adjacent indices are swapped, as for $i$ very distant from $j$ we expect that $r$ would close to zero.
+It is also informative to write this ratio in terms of the target and the reference distributions.
+As $\log p_n(x) = \beta_n \log p(x) + (1-\beta_n) \log p_0(x) - \log \mathcal Z(\beta_n)$, we have
+$$\begin{align*}
+\log r &= \beta_i (\log p(x_j) - \log p(x_i)) + (1-\beta_i) (\log p_0(x_j) - \log p_0(x_i)) \\
+&+ \beta_j( \log p(x_i) - \log p(x_j) ) + (1-\beta_j)( \log p_0(x_i) - \log p_0(x_j) ) \\
+&= -(\beta_i - \beta_j) \left( \log \frac{p(x_i)}{p_0(x_i)} - \log \frac{p(x_j)}{p_0(x_j)} \right)  
+\end{align*}
+$$
 
-Let's implement this in JAX!
+This is a very convenient formula if $p_0$ corresponds to the prior distribution and $p$ is the posterior distribution, as their ratio is then simply the likelihood[^2].
+
+[^2]: It is tempting to use priors $p_0$ which are easy to sample from, but for which $\log p_0(x)$ can be intractable. However, that one has to evaluate $\log p_0(x)$ to construct the Markov kernels targeting intermediate distributions $p_n$ for $0 < n < N$. Only for swapping the chains we can rely just on the likelihood.
+
+This is enough theory for now – let's implement parallel tempering in JAX.
 
 ### JAX implementation
 
@@ -473,6 +485,503 @@ for ax in axs.ravel():
 
 This looks much better! However, to obtain these results I needed to tweak the parameters quite a bit. The most important points seem to be the following:
 
-1. The reference distribution should cover a large enough area, so that the modes are covered. Using a reference distribution with a very small standard deviation resulted in non-mixing chain.  
-2. Ensuring that local exploration is somewhat efficient is very important. If I used $\sigma$ to sample from $p_0$ (rather than using random walk with an appropriate scale), I could not get a good mixing of the chain.
-3. Sometimes the base in the exponential annealing schedule could qualitatively change the results.
+1. The reference distribution should cover a large enough area, so that the modes are covered. Using a reference distribution with a very small standard deviation resulted in non-mixing chain. Using a too "wide" reference distribution resulted in worse mixing, but the problems were less severe than when I used too narrow reference distribution. 
+2. Ensuring that local exploration is somewhat efficient is very important. When I used $\sigma$ to sample from $p_0$ (rather than using random walk with an appropriate scale), I could not get a good mixing of the chain.
+3. Schedule does matter: sometimes changing the base in the exponential annealing schedule qualitatively changed the results. It however did not seem to be as crucial as using a wide-enough reference which can be explored properly.
+
+### How can we do better?
+It would be nice to have a good default for the annealing schedule. Also, if one has multiple machines, it would also be interesting to parallelise the computation: for example, applying the  kernels $N$ kernels to the components $x_n$ can be parallelised and we could also think about parallelising the swap moves. 
+
+## Non-reversible parallel tempering
+
+In [*Non-reversible parallel tempering: a scalable highly parallel MCMC scheme
+*](https://arxiv.org/abs/1905.02939), Saifuddin Syed, Alexandre Bouchard-Côté, George Deligiannidis and Arnaud Doucet propose an interesting alternative to the sampling scheme described above.
+
+Consider a *distributed* swapping scheme, distributed across many machines (even though, we will stay with JAX parallelism).
+To make it distributed, one may not want to sequentially attempt swapping $i \leftrightarrow i+1$ for all $i=0, \dotsc, N-1$, but rather employ *either* an:
+
+1. *Even move*: swap the states $2k \leftrightarrow 2k+1$, which can be done simultaneously for all $k$.
+2. *Odd move*: swap the states $2k-1 \leftrightarrow 2k$, which also can be done simultaneously for all $k$.
+
+Note that both moves are different from what we did above: each full sweep swapped the states consequtively.
+In particular, there was a chance (very small, though) to travel from $p_0$ to $p$ in one full sweep (incurring $N-1$ swaps).
+Currently $x_0$ can either be swapped with $x_1$ (even move is accepted) or be left in place in one step (odd move or rejected even move).
+
+The authors consider alternating between these moves basing on the following:
+
+1. Stochastic even-odd swap (SEO): the even move is proposed with chance $p$ and the odd move is proposed with chance $1-p$ (in the paper $p=0.5$, providing equal chance).
+2. Deterministic even-odd swap (DEO): even time steps result in even moves and odd time steps result in odd moves.
+
+### JAX implementation
+
+Let's quickly implement DEO in JAX:
+
+```{python}
+
+def controlled_swapping(X, M):
+  """Swaps particular entries of `X`, as described by binary mask `M`.
+
+  Args:
+    X: array of shape (n_chains, dim)
+    M: binary mask of shape (n_chains - 1,) controlling which chains should be swapped. We have `M[i] = 1` if `X[i]` and `X[i+1]` should be swapped.
+    
+  Note:
+    Consecutive values 1 in `M` are not allowed.
+    Namely, it cannot hold that `M[i] = M[i+1] = 1`.
+  """
+  def f(Y, i):
+    # If M[i] = 1, we swap X[i] with X[i+1]
+    # Otherwise we leave it as it was
+    
+    # Y[i]
+    value = jax.lax.select(M[i], X[i + 1], X[i])
+    # Y[i + 1]
+    value_next = jax.lax.select(M[i], X[i], X[i + 1])
+        
+    Y = Y.at[i].set(value)
+    Y = Y.at[i + 1].set(value_next)
+        
+    return Y, None
+
+  # Run the scan over the range of M
+  Y, _ = jax.lax.scan(f, X, jnp.arange(M.shape[0]))
+  return Y
+
+
+def deo_extended_kernel(
+  log_prob,
+  log_ref,
+  annealing_schedule,
+):
+  def log_p(y, beta):
+    return beta * log_prob(y) + (1.0 - beta) * log_ref(y)
+
+  log_p_vmap = jax.vmap(log_p, in_axes=(0, 0))
+
+  def extended_kernel(
+    key,
+    state,
+    timestep: int,
+  ) -> tuple:
+    """Extended deterministic even-odd swap kernel, which
+    for even timesteps makes even swaps (2i <-> 2i+1)
+    and for odd timesteps makes odd swaps (2i-1 <-> 2i)
+
+    Args:
+      key: random key
+      state: state
+      timestep: timestep number, used to decide whether to make even or odd move
+
+    Returns:
+      new_state, the same shape as `state`
+      rejection_rates, shape (n_chains-1,)
+    """
+    n_chains = state.shape[0]
+
+    idx1 = jnp.arange(n_chains-1)
+    idx2 = idx_i + 1
+
+    xs1 = state[idx1]
+    xs2 = state[idx2]
+
+    betas1 = annealing_schedule[idx1]
+    betas2 = annealing_schedule[idx2]
+
+    log_numerators = log_p_vmap(xs1, betas2) + log_p_vmap(xs2, betas1) 
+    log_denominators = log_p_vmap(xs1, betas1) + log_p_vmap(xs2, betas2)
+    log_accept = log_numerator - log_denominator
+    accept_prob = jnp.minimum(jnp.exp(log_r), 1.0)
+    rejection_rates = 1.0 - accept_prob
+
+    # Where the swaps would be accepted through M-H
+    accept_mask = jrandom.bernoulli(key, p=accept_prob)
+    # Where the swaps can be accepted due to even-odd moves
+    even_odd_mask = jnp.mod(idx1, 2) == jnp.mod(timestep, 2)
+    total_mask = accept_mask & even_odd_mask
+
+    # Now the tricky part: we need to execute the swaps
+    new_state = controlled_swapping(state, total_mask)
+    return new_state, rejection_rates
+
+  return extended_kernel
+
+
+def deo_sampling_loop(
+  key,
+  x0,
+  kernel_local,
+  kernel_deo,
+  n_samples: int,
+):
+  def f(x, timestep: int):
+    subkey = jrandom.fold_in(key, timestep)
+
+    key_local, key_deo = jrandom.split(subkey)
+
+    # Apply local exploration kernel
+    x = kernel_local(key_local, x)
+
+    # Apply the DEO swap
+    x, rejection_rates = kernel_deo(
+      key_deo,
+      x,
+      timestep,
+    )
+
+    return x, (x, rejection_rates)
+  
+  _, (samples, rejection_rates) = jax.lax.scan(f, x0, jrandom.split(key, n_samples))
+  
+  return samples, rejection_rates
+```
+
+```{python}
+
+xs_pt_all = np.empty((len(SIGMAS), len(DISTRIBUTIONS), N_SAMPLES))
+
+_REFERENCE_SCALE = 30
+
+def log_ref(x):
+  return dist.Normal(0, _REFERENCE_SCALE).log_prob(x)
+
+n_chains = 10
+betas = annealing_exponential(n_chains, 1.1)
+
+
+for d, (_, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+  def log_prob(x):
+    distribution = dist_factory()
+    return distribution.log_prob(x)
+  
+  for s, sigma in enumerate(SIGMAS):
+    sigmas = sigma * jnp.ones_like(betas)
+    sigmas = sigmas.at[0].set(_REFERENCE_SCALE)  # We know how to sample from the reference distribution 
+
+    K_ind = generate_independent_annealed_kernel(
+      log_prob=log_prob,
+      log_ref=log_ref,
+      annealing_schedule=betas,
+      kernel_generator=generate_kernel,
+      params=sigmas,
+    )
+
+    K_swap = generate_full_sweep_swap_kernel(
+      log_prob=log_prob,
+      log_ref=log_ref,
+      annealing_schedule=betas,
+    )
+    K_pt = compose_kernels([K_ind, K_swap])
+
+    key, subkey = jrandom.split(key)
+    x0 = 0.5 * jnp.ones(n_chains)
+    xs_pt = sampling_loop(key=subkey, x0=x0, kernel=K_pt, n_samples=N_SAMPLES * 2)[N_SAMPLES:]
+
+    xs_pt_all[s, d, :] = xs_pt[:, -1]
+```
+
+```{python}
+fig, axs = plt.subplots(
+  len(SIGMAS),
+  len(DISTRIBUTIONS),
+  sharex="col",
+  dpi=350,
+)
+
+for i, sigma in enumerate(SIGMAS):
+  if sigma < 1:
+    axs[i, 0].set_ylabel(f"$\\sigma={sigma:.2f}$")
+  else:
+    axs[i, 0].set_ylabel(f"$\\sigma={int(sigma)}$")
+
+  for j, (dist_name, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+    ax = axs[i, j]
+
+    if i == 0:
+      ax.set_title(dist_name)
+
+    bins = 30
+
+    ax.hist(xs_true_all[j], density=True, bins=bins, histtype="step", color="white")
+
+    ax.hist(xs_pt_all[i, j], density=True, bins=bins, histtype="stepfilled", color="C3", alpha=0.4)
+
+for ax in axs.ravel():
+  ax.spines[["top", "left", "right"]].set_visible(False)
+  ax.set_yticks([])
+```
+
+```{python}
+fig, axs = plt.subplots(
+  len(SIGMAS),
+  len(DISTRIBUTIONS),
+  sharex="col",
+  sharey="col",
+  dpi=350,
+)
+
+for i, sigma in enumerate(SIGMAS):
+  if sigma < 1:
+    axs[i, 0].set_ylabel(f"$\\sigma={sigma:.2f}$")
+  else:
+    axs[i, 0].set_ylabel(f"$\\sigma={int(sigma)}$")
+
+  for j, (dist_name, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+    ax = axs[i, j]
+
+    if i == 0:
+      ax.set_title(dist_name)
+
+    ax.plot(xs_pt_all[i, j], color="C3")
+
+for ax in axs.ravel():
+  ax.spines[["top", "right"]].set_visible(False)
+```
+
+
+
+### Why non-reversible parallel tempering?
+
+Interestingly, DEO has better performance than SEO, which are termed, respectively, non-reversible and reversible parallel tempering schemes.
+The discussion whether to use non-reversible or reversible kernels has a long history and I still find it mysterious.
+Probably it is worth to write a separate blog post on the topic, but:
+
+  - This wonderful 2000 paper from [Persi Diaconis, Susan Holmes and Radford Neal](https://doi.org/10.1214/aoap/1019487508) shows examples where non-reversible methods are more efficient than reversible ones. 
+  - In a [great 2016 paper from Gareth Roberts and Jeffrey Rosenthal](https://doi.org/10.5539/ijsp.v5n1p51) there are examples where "systematic scan" Gibbs samplers (which often are non-reversible, although not always: recall kernels of the form $K_1 K_2 K_1$) can outperform "random scan" (always reversible) Gibbs samplers. Examples with the other behaviour are also provided.
+  - In a 2016 [C. Andrieu's paper](https://www.jstor.org/stable/26363466) there is a theorem showing that for two kernels fulfilling some technical assumptions, systematic scans are more efficient than random ones. I think this may perhaps offer an interesting perspective on why DEO may be more efficient than SEO.  
+
+This discussion whether reversible or non-reversible scheme could be used is one way of looking at the problem. Another is through the perspective of reducing a diffusive random walk behaviour by introducing a momentum variable.
+Momentum is a common theme in computational statistics and machine learning, with examples such as [MALA](https://en.wikipedia.org/wiki/Metropolis-adjusted_Langevin_algorithm) and [Hamiltonian Monte Carlo](https://en.wikipedia.org/wiki/Hamiltonian_Monte_Carlo) in Markov chain Monte Carlo world or [stochastic gradient descent with momentum](https://en.wikipedia.org/wiki/Stochastic_gradient_descent#Momentum) in optimisation.
+
+I think studying the behaviour of the DEO scheme is an important contribution of this paper, but there several more: 
+
+1. By introducing and studying the index process, the authors devise the DEO sampling scheme together with a method for *choosing the annealing schedule* basing on preliminary runs.
+2. The proposed sampling scheme is highly parallelisable and can be used in distributed computing environments. [Pigeons.jl](https://pigeons.run/) serves as a proof that this solution is very practical.
+
+
+I think I'll skip the precise description of the index process, replacing it with a picture I based on the figures from the paper. We will simulate the path of the chain under the sequential scheme we studied before, SEO and DEO:
+
+```{python}
+def _find_trajectory(states, tracked: int = None):
+  n_chains = states.shape[1]
+
+  if tracked is None:
+    tracked = n_chains // 2
+
+  return jnp.einsum("ng,g->n", states == tracked, jnp.arange(n_chains))
+
+def generate_figure_momentum(p: float = 0.85, n_chains: int = 5, n_timesteps: int = 30):
+  rng = np.random.default_rng(42)
+
+  fig, axs = plt.subplots(3, 1, sharex=True, sharey=True)
+
+  x_axis = np.arange(n_timesteps)
+
+  for ax in axs:
+    for chain in range(n_chains):
+      ax.scatter(x_axis, chain * np.ones_like(x_axis), c="w", s=3)
+    ax.spines[["top", "right"]].set_visible(False)
+
+  # Sample full sweep
+  state = jnp.arange(n_chains)
+  states = [state]
+  for timestep in range(1, n_timesteps):
+    for i in range(n_chains - 1):
+      if rng.binomial(1, p):
+        new_state = state.at[i].set(state[i+1])
+        new_state = new_state.at[i+1].set(state[i])
+        state = new_state
+    states.append(state)
+
+  states = jnp.stack(states)
+  trajectory = _find_trajectory(states)
+  
+  ax = axs[0]
+  ax.plot(x_axis, trajectory)
+  ax.set_title("Full sweep")
+
+  # Sample SEO
+  state = jnp.arange(n_chains)
+  states = [state]
+  for timestep in range(1, n_timesteps):
+    mode = rng.binomial(1, 0.5)
+    for i in range(n_chains - 1):
+      if (i % 2 == mode) and rng.binomial(1, p):
+        new_state = state.at[i].set(state[i+1])
+        new_state = new_state.at[i+1].set(state[i])
+        state = new_state
+    states.append(state)
+
+  states = jnp.stack(states)
+  trajectory = _find_trajectory(states)
+  
+  ax = axs[1]
+  ax.plot(x_axis, trajectory)
+  ax.set_title("Reversible stochastic even-odd swaps (SEO)")
+
+  # Sample DEO
+  state = jnp.arange(n_chains)
+  states = [state]
+  for timestep in range(1, n_timesteps):
+    for i in range(n_chains - 1):
+      if (i % 2 == timestep % 2) and rng.binomial(1, p):
+        new_state = state.at[i].set(state[i+1])
+        new_state = new_state.at[i+1].set(state[i])
+        state = new_state
+    states.append(state)
+
+  states = jnp.stack(states)
+  trajectory = _find_trajectory(states)
+  
+  ax = axs[2]
+  ax.plot(x_axis, trajectory)
+  ax.set_title("Non-reversible deterministic even-odd swaps (DEO)")
+
+  fig.tight_layout()
+  return fig
+
+fig = generate_figure_momentum(p=0.8, n_chains=4, n_timesteps=20)
+```
+
+```{python}
+fig = generate_figure_momentum(p=0.9, n_chains=10, n_timesteps=50)
+```
+
+Definitely, SEO has a trouble going between the reference and the target distribution.
+On the other hand, in these simulations (which are very simplistic, though!), DEO does not show a clear advantage over the full sweep.
+Let's see, however, how to tune the annealing schedule, which has a wonderful theory outlined in Section 4 of the paper.
+
+### Annealing schedule optimisation
+
+Assuming efficient local exploration of individual components, the authors build a theory how quickly the chain can cycle between $p_0$ and $p=p_N$.
+The key quantity is the *instateneous rejection rate* function
+$$
+  \lambda(\beta) = \frac{1}{2} \mathbb E_{X, Y \sim_\mathrm{i.i.d.} p_\beta } \left[\left| \log \frac{ p(X) p_0(Y)}{ p(Y) p_0(X) } \right|\right],
+$$
+
+which depends on the annealing parameter $\beta$ (which controls the measure over which we integrate), but also on how different $p$ and $p_0$ are.
+Define
+$$
+  \Lambda(\beta) = \int_{0}^{\beta} \lambda(\beta') \,\mathrm{d}\beta'
+$$
+
+If $\tilde \Lambda = \Lambda(1)$, then for small $\max_i |\beta_i - \beta_{i+1}|$ it holds that the round-trip rate for SEO is about
+$$
+  f_\mathrm{SEO} \approx \frac{1}{2N + 2\tilde \Lambda}
+$$
+
+and for DEO
+$$
+  f_\mathrm{DEO} \approx \frac{1}{2 \cdot \left(1+\tilde \Lambda\right)}.
+$$
+
+In particular, using a large $N$ for SEO leads to diffusive behaviour with close-to-zero round-trip rate. For DEO using larger $N$ does not cause this behaviour, but the round-trip rate is controlled by the communication barrier $\tilde \Lambda$, which depends on $p_0$ and $p$.
+Hence, for large $\tilde\Lambda$ many, many iterations may be necessary to obtain enough round trips and good mixing.
+
+Interestingly, $\Lambda$ can be estimated for a fine-grained annealing schedule.
+It turns out that if $\rho(\beta, \beta')$ is the expected rejection rate of swapping the chains between $\beta$ and $\beta'$ (so that, of course, $\rho(\beta, \beta') = \rho(\beta', \beta)$), then
+$$
+  \rho(\beta, \beta') = | \Lambda(\beta) - \Lambda(\beta') | + O(|\beta - \beta'|^3).
+$$
+
+In particular,
+$$
+  \tilde \Lambda \approx \sum_{i=0}^{N-1} \rho(\beta_{i}, \beta_{i+1}),
+$$
+
+where the error is of order $O\!\left(N \cdot \max_i |\beta_i - \beta_{i+1}|\right)$.
+
+In other words, $\Lambda(\beta)$ can be estimated from the rejection probabilities.
+
+To optimise the schedule, the authors note that the round-trip rate under DEO is given by
+$$
+  f = \frac{1}{2\left(1 + \sum_{i=0}^{N-1} \frac{\rho(\beta_{i}, \beta_{i+1})}{ 1-\rho(\beta_i, \beta_{i+1}) } \right)}
+$$
+
+for any schedule. (Note that the approximation of $f_\mathrm{DEO}$ when differences $\beta_i - \beta_{i+1}$ are small, can be read from this formula: all $\rho$ are small, so we can ignore terms $1-\rho$ and then we obtain $\tilde \Lambda$).
+
+As we want to maximise $f$, we need to find a schedule minimising the denominator. On the other hand, there is a constraint that for any fine-grained schedule it holds that
+
+$$
+  \tilde \Lambda \approx \sum_{i=0}^{N-1} \rho(\beta_{i}, \beta_{i+1}),
+$$
+
+so that this is a constrained optimisation problem.
+It turns out that the optimum is attained when $\rho(\beta_i, \beta_{i+1})$ are all equal.  Using the relationship between $\rho$ and differences in $\Lambda$, we see that we should aim at
+$$
+  \Lambda(\beta_i) \approx \frac{i}{N} \tilde \Lambda.
+$$
+
+#### JAX implementation
+
+```{python}
+from scipy.interpolate import PchipInterpolator
+from scipy.optimize import bisect
+
+rejection_rates = jnp.arange(1, 6)  # n_chains: 6
+
+def estimate_lambda_values(rejection_rates, offset: float = 1e-3):
+  rejection_rates = jnp.maximum(rejection_rates, offset)
+  extended = jnp.concatenate((jnp.zeros(1), rejection_rates))
+  return jnp.cumsum(extended)
+
+
+def get_lambda_function(
+  annealing_schedule,
+  lambda_values,
+):
+  return PchipInterpolator(annealing_schedule, lambda_values)
+
+
+def annealing_optimal(
+  n_chains: int,
+  previous_schedule,
+  rejection_rates,
+  _offset: float = 1e-3,
+):
+  lambda_values = estimate_lambda_values(rejection_rates, offset=_offset)
+  lambda_fn = get_lambda_function(
+    previous_schedule,
+    lambda_values,
+  )
+
+  lambda1 = lambda_values[-1]
+
+  new_schedule = [0.0]
+
+  for k in range(1, n_chains - 1):
+    def fn(x):
+      desired_value = k * lambda1 / (n_chains - 1)
+      return lambda_fn(x) - desired_value
+    
+    new_point = bisect(
+      fn,
+      new_schedule[-1],
+      1.0,
+    )
+
+    if new_point >= 1.0:
+      raise ValueError("Encountered value 1.0.")
+
+    new_schedule.append(new_point)
+
+  new_schedule.append(1.0)
+
+  if len(new_schedule) != n_chains:
+    raise Exception("This should not happen.")
+
+  return jnp.asarray(new_schedule, dtype=float)
+
+new_sch = annealing_optimal(
+  10,
+  jnp.linspace(0, 1, 8),
+  0.1 * jnp.ones(7),
+)
+
+print(new_sch)
+
+```
+
+
+### Summary
+
+I am excited about parallel tempering. 
