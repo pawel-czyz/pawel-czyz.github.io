@@ -548,7 +548,7 @@ def controlled_swapping(X, M):
   return Y
 
 
-def deo_extended_kernel(
+def generate_deo_extended_kernel(
   log_prob,
   log_ref,
   annealing_schedule,
@@ -579,7 +579,7 @@ def deo_extended_kernel(
     n_chains = state.shape[0]
 
     idx1 = jnp.arange(n_chains-1)
-    idx2 = idx_i + 1
+    idx2 = idx1 + 1
 
     xs1 = state[idx1]
     xs2 = state[idx2]
@@ -587,10 +587,10 @@ def deo_extended_kernel(
     betas1 = annealing_schedule[idx1]
     betas2 = annealing_schedule[idx2]
 
-    log_numerators = log_p_vmap(xs1, betas2) + log_p_vmap(xs2, betas1) 
-    log_denominators = log_p_vmap(xs1, betas1) + log_p_vmap(xs2, betas2)
+    log_numerator = log_p_vmap(xs1, betas2) + log_p_vmap(xs2, betas1) 
+    log_denominator = log_p_vmap(xs1, betas1) + log_p_vmap(xs2, betas2)
     log_accept = log_numerator - log_denominator
-    accept_prob = jnp.minimum(jnp.exp(log_r), 1.0)
+    accept_prob = jnp.minimum(jnp.exp(log_accept), 1.0)
     rejection_rates = 1.0 - accept_prob
 
     # Where the swaps would be accepted through M-H
@@ -630,22 +630,26 @@ def deo_sampling_loop(
 
     return x, (x, rejection_rates)
   
-  _, (samples, rejection_rates) = jax.lax.scan(f, x0, jrandom.split(key, n_samples))
+  _, (samples, rejection_rates) = jax.lax.scan(f, x0, jnp.arange(n_samples))
   
   return samples, rejection_rates
 ```
 
 ```{python}
 
-xs_pt_all = np.empty((len(SIGMAS), len(DISTRIBUTIONS), N_SAMPLES))
+N_SAMPLES = 15_000
+
+xs_deo_all = np.empty((len(SIGMAS), len(DISTRIBUTIONS), N_SAMPLES))
 
 _REFERENCE_SCALE = 30
 
 def log_ref(x):
   return dist.Normal(0, _REFERENCE_SCALE).log_prob(x)
 
-n_chains = 10
-betas = annealing_exponential(n_chains, 1.1)
+n_chains = 30
+betas = annealing_exponential(n_chains, 1.4)
+
+rejections_deo_all = np.empty((len(SIGMAS), len(DISTRIBUTIONS), n_chains - 1))
 
 
 for d, (_, dist_factory) in enumerate(DISTRIBUTIONS.items()):
@@ -665,18 +669,22 @@ for d, (_, dist_factory) in enumerate(DISTRIBUTIONS.items()):
       params=sigmas,
     )
 
-    K_swap = generate_full_sweep_swap_kernel(
+    K_deo = generate_deo_extended_kernel(
       log_prob=log_prob,
       log_ref=log_ref,
       annealing_schedule=betas,
     )
-    K_pt = compose_kernels([K_ind, K_swap])
 
     key, subkey = jrandom.split(key)
     x0 = 0.5 * jnp.ones(n_chains)
-    xs_pt = sampling_loop(key=subkey, x0=x0, kernel=K_pt, n_samples=N_SAMPLES * 2)[N_SAMPLES:]
+    xs_pt, rejections = deo_sampling_loop(key=subkey, x0=x0, kernel_local=K_ind, kernel_deo=K_deo, n_samples=N_SAMPLES * 2)
+    
+    xs_pt = xs_pt[N_SAMPLES:]
+    rejections = rejections[N_SAMPLES:]
+    rejections = rejections.mean(axis=0)
 
-    xs_pt_all[s, d, :] = xs_pt[:, -1]
+    xs_deo_all[s, d, :] = xs_pt[:, -1]
+    rejections_deo_all[s, d, :] = rejections
 ```
 
 ```{python}
@@ -703,7 +711,7 @@ for i, sigma in enumerate(SIGMAS):
 
     ax.hist(xs_true_all[j], density=True, bins=bins, histtype="step", color="white")
 
-    ax.hist(xs_pt_all[i, j], density=True, bins=bins, histtype="stepfilled", color="C3", alpha=0.4)
+    ax.hist(xs_deo_all[i, j], density=True, bins=bins, histtype="stepfilled", color="C3", alpha=0.4)
 
 for ax in axs.ravel():
   ax.spines[["top", "left", "right"]].set_visible(False)
@@ -731,13 +739,11 @@ for i, sigma in enumerate(SIGMAS):
     if i == 0:
       ax.set_title(dist_name)
 
-    ax.plot(xs_pt_all[i, j], color="C3")
+    ax.plot(xs_deo_all[i, j], color="C3")
 
 for ax in axs.ravel():
   ax.spines[["top", "right"]].set_visible(False)
 ```
-
-
 
 ### Why non-reversible parallel tempering?
 
@@ -917,8 +923,6 @@ $$
 from scipy.interpolate import PchipInterpolator
 from scipy.optimize import bisect
 
-rejection_rates = jnp.arange(1, 6)  # n_chains: 6
-
 def estimate_lambda_values(rejection_rates, offset: float = 1e-3):
   rejection_rates = jnp.maximum(rejection_rates, offset)
   extended = jnp.concatenate((jnp.zeros(1), rejection_rates))
@@ -970,16 +974,220 @@ def annealing_optimal(
     raise Exception("This should not happen.")
 
   return jnp.asarray(new_schedule, dtype=float)
+```
 
-new_sch = annealing_optimal(
-  10,
-  jnp.linspace(0, 1, 8),
-  0.1 * jnp.ones(7),
+Let's apply these utilities to suggest better annealing schedules for the problems above.
+We can visualise the $\Lambda$ curves together with the current schedule:
+
+```{python}
+fig, axs = plt.subplots(
+  len(SIGMAS),
+  len(DISTRIBUTIONS),
+  sharex="col",
+  dpi=350,
 )
 
-print(new_sch)
+for i, sigma in enumerate(SIGMAS):
+  if sigma < 1:
+    axs[i, 0].set_ylabel(f"$\\sigma={sigma:.2f}$")
+  else:
+    axs[i, 0].set_ylabel(f"$\\sigma={int(sigma)}$")
 
+  for j, (dist_name, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+    ax = axs[i, j]
+
+    if i == 0:
+      ax.set_title(dist_name)
+
+    reject_rates = rejections_deo_all[i, j]
+
+    lambd_fn = get_lambda_function(betas, estimate_lambda_values(reject_rates))
+    x_axis = np.linspace(0.0, 1.0, 50)
+
+    ax.plot(
+      x_axis,
+      lambd_fn(x_axis)
+    )
+    for beta in betas:
+      ax.axvline(beta, c="grey", linestyle="--", linewidth=0.4)
+
+for ax in axs.ravel():
+  ax.spines[["top", "left", "right"]].set_visible(False)
+  ax.set_yticks([])
 ```
+
+Now let's estimate the optimal schedule and plot it against the current one: 
+
+```{python}
+fig, axs = plt.subplots(
+  len(SIGMAS),
+  len(DISTRIBUTIONS),
+  sharex="col",
+  sharey="col",
+  dpi=350,
+)
+
+optimal_schedules = np.empty(
+  (len(SIGMAS), len(DISTRIBUTIONS), len(betas))
+)
+
+for i, sigma in enumerate(SIGMAS):
+  if sigma < 1:
+    axs[i, 0].set_ylabel(f"$\\sigma={sigma:.2f}$")
+  else:
+    axs[i, 0].set_ylabel(f"$\\sigma={int(sigma)}$")
+
+  for j, (dist_name, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+    ax = axs[i, j]
+
+    if i == 0:
+      ax.set_title(dist_name)
+
+    reject_rates = rejections_deo_all[i, j]
+
+    lambd_fn = get_lambda_function(betas, estimate_lambda_values(reject_rates))
+    x_axis = np.linspace(0.0, 1.0, 50)
+
+    optimal_estimate = annealing_optimal(
+      n_chains=len(betas),
+      previous_schedule=betas,
+      rejection_rates=reject_rates,
+    )
+
+    optimal_schedules[i, j] = optimal_estimate
+
+    ax.plot(
+      optimal_estimate[1:],
+      optimal_estimate[1:],
+      linestyle="--",
+      color="white",
+    )
+
+    ax.plot(
+      optimal_estimate[1:],
+      betas[1:],
+    )
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+
+
+for ax in axs.ravel():
+  ax.spines[["top", "right"]].set_visible(False)
+```
+
+We have the estimates of the optimal schedules. Let's check if they improve sampling:
+
+
+```{python}
+
+N_SAMPLES = 15_000
+
+xs_deo_all = np.empty((len(SIGMAS), len(DISTRIBUTIONS), N_SAMPLES))
+
+_REFERENCE_SCALE = 30
+
+def log_ref(x):
+  return dist.Normal(0, _REFERENCE_SCALE).log_prob(x)
+
+n_chains = 30
+
+rejections_deo_all = np.empty((len(SIGMAS), len(DISTRIBUTIONS), n_chains - 1))
+
+for d, (_, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+  def log_prob(x):
+    distribution = dist_factory()
+    return distribution.log_prob(x)
+  
+  for s, sigma in enumerate(SIGMAS):
+    betas_new = optimal_schedules[s, d]
+    
+    sigmas = sigma * jnp.ones_like(betas_new)
+    sigmas = sigmas.at[0].set(_REFERENCE_SCALE)  # We know how to sample from the reference distribution 
+
+    K_ind = generate_independent_annealed_kernel(
+      log_prob=log_prob,
+      log_ref=log_ref,
+      annealing_schedule=betas_new,
+      kernel_generator=generate_kernel,
+      params=sigmas,
+    )
+
+    K_deo = generate_deo_extended_kernel(
+      log_prob=log_prob,
+      log_ref=log_ref,
+      annealing_schedule=betas_new,
+    )
+
+    key, subkey = jrandom.split(key)
+    x0 = 0.5 * jnp.ones(n_chains)
+    xs_pt, rejections = deo_sampling_loop(key=subkey, x0=x0, kernel_local=K_ind, kernel_deo=K_deo, n_samples=N_SAMPLES * 2)
+    
+    xs_pt = xs_pt[N_SAMPLES:]
+    rejections = rejections[N_SAMPLES:]
+    rejections = rejections.mean(axis=0)
+
+    xs_deo_all[s, d, :] = xs_pt[:, -1]
+    rejections_deo_all[s, d, :] = rejections
+```
+
+```{python}
+fig, axs = plt.subplots(
+  len(SIGMAS),
+  len(DISTRIBUTIONS),
+  sharex="col",
+  dpi=350,
+)
+
+for i, sigma in enumerate(SIGMAS):
+  if sigma < 1:
+    axs[i, 0].set_ylabel(f"$\\sigma={sigma:.2f}$")
+  else:
+    axs[i, 0].set_ylabel(f"$\\sigma={int(sigma)}$")
+
+  for j, (dist_name, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+    ax = axs[i, j]
+
+    if i == 0:
+      ax.set_title(dist_name)
+
+    bins = 30
+
+    ax.hist(xs_true_all[j], density=True, bins=bins, histtype="step", color="white")
+
+    ax.hist(xs_deo_all[i, j], density=True, bins=bins, histtype="stepfilled", color="C3", alpha=0.4)
+
+for ax in axs.ravel():
+  ax.spines[["top", "left", "right"]].set_visible(False)
+  ax.set_yticks([])
+```
+
+```{python}
+fig, axs = plt.subplots(
+  len(SIGMAS),
+  len(DISTRIBUTIONS),
+  sharex="col",
+  sharey="col",
+  dpi=350,
+)
+
+for i, sigma in enumerate(SIGMAS):
+  if sigma < 1:
+    axs[i, 0].set_ylabel(f"$\\sigma={sigma:.2f}$")
+  else:
+    axs[i, 0].set_ylabel(f"$\\sigma={int(sigma)}$")
+
+  for j, (dist_name, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+    ax = axs[i, j]
+
+    if i == 0:
+      ax.set_title(dist_name)
+
+    ax.plot(xs_deo_all[i, j], color="C3")
+
+for ax in axs.ravel():
+  ax.spines[["top", "right"]].set_visible(False)
+```
+
 
 
 ### Summary
