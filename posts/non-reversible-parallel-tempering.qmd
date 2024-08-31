@@ -1,0 +1,478 @@
+---
+title: "Non-reversible parallel tempering"
+description: "Let's create a basic JAX implementation of a wonderful Markov chain Monte Carlo method."
+author: "Paweł Czyż"
+date: "9/12/2024"
+# execute:
+#   freeze: true
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+Markov chain Monte Carlo is wonderful. However, it often gets trapped in a mode. Consider a simple Metropolis algorithm: $q(x'\mid x) = \mathcal N\!\left(x' \mid x, \sigma^2\right)$, which for a well-tuned $\sigma$ can sample from the standard normal distribution, but can fail for a mixture, never exploring other modes:
+```{python}
+import numpy as np
+
+import jax
+import jax.random as jrandom
+import jax.numpy as jnp
+
+import numpyro
+import numpyro.distributions as dist
+
+import matplotlib.pyplot as plt
+plt.style.use("dark_background")
+
+def mixture2_dist() -> dist.Distribution:
+  p = 0.4
+  probs = jnp.asarray([p, 1.0-p])
+  mus = jnp.asarray([-5., 5.])
+  mixing = dist.Categorical(probs=probs)
+  return dist.MixtureSameFamily(
+    mixing_distribution=mixing,
+    component_distribution=dist.Normal(mus, 1.0),
+  )
+
+def mixture3_dist() -> dist.Distribution:
+  probs = jnp.asarray([0.1, 0.3, 0.6])
+  sep = 15
+  mus = jnp.asarray([-sep, 0., sep])
+  mixing = dist.Categorical(probs=probs)
+  return dist.MixtureSameFamily(
+    mixing_distribution=mixing,
+    component_distribution=dist.Normal(mus, 1.0),
+  )
+
+DISTRIBUTIONS = {
+  "Normal": lambda: dist.Normal(0, 1),
+  "Mixture (2 comp.)": mixture2_dist,
+  "Mixture (3 comp.)": mixture3_dist,
+}
+
+
+def generate_kernel(
+  logp_fn,
+  sigma: float,
+):
+  def kernel(key, x):
+    key1, key2 = jrandom.split(key)
+    # Generate a proposal
+    x_ = x + sigma * jrandom.normal(key1, shape=x.shape)
+    
+    # Evaluate the acceptance ratio
+    log_p1 = logp_fn(x)
+    log_p2 = logp_fn(x_)
+    alpha = jnp.exp(log_p2 - log_p1)
+    
+    # Decide whether to accept the proposal
+    u = jrandom.uniform(key2)
+    return jax.lax.select(u <= alpha, x_, x)
+  
+  return kernel
+
+
+def sampling_loop(
+  key,
+  x0,
+  kernel,
+  n_samples: int,
+):
+  def f(x, k):
+    x_new = kernel(k, x)
+    return x_new, x_new
+  
+  _, samples = jax.lax.scan(f, x0, jrandom.split(key, n_samples))
+  
+  return samples
+
+
+SIGMAS = [0.01, 0.1, 1, 10, 100, 1000]
+N_SAMPLES: int = 2_000
+
+key = jrandom.PRNGKey(42)
+
+xs_true_all = np.empty((len(DISTRIBUTIONS), N_SAMPLES))
+xs_mcmc_all = np.zeros((len(SIGMAS), len(DISTRIBUTIONS), N_SAMPLES))
+
+# Sample from the ground-truth distributions
+for d, (_, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+  key, subkey = jrandom.split(key)
+  xs_true = dist_factory().sample(subkey, sample_shape=(N_SAMPLES,))
+  xs_true_all[d, :] = xs_true
+
+# Sample using MCMC
+for d, (_, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+  def logp(x):
+    distribution = dist_factory()
+    return distribution.log_prob(x)
+  
+  for s, sigma in enumerate(SIGMAS):
+    kernel = generate_kernel(
+      logp_fn=logp,
+      sigma=sigma,
+    )
+    
+    key, subkey = jrandom.split(key)
+
+    x0 = jnp.asarray(0.5)
+    xs_mcmc = sampling_loop(key=subkey, x0=x0, kernel=kernel, n_samples=N_SAMPLES * 2)[N_SAMPLES:]
+
+    xs_mcmc_all[s, d, :] = xs_mcmc
+```
+
+```{python}
+fig, axs = plt.subplots(
+  len(SIGMAS),
+  len(DISTRIBUTIONS),
+  sharex="col",
+  dpi=350,
+)
+
+for i, sigma in enumerate(SIGMAS):
+  if sigma < 1:
+    axs[i, 0].set_ylabel(f"$\\sigma={sigma:.2f}$")
+  else:
+    axs[i, 0].set_ylabel(f"$\\sigma={int(sigma)}$")
+
+  for j, (dist_name, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+    ax = axs[i, j]
+
+    if i == 0:
+      ax.set_title(dist_name)
+
+    # bins = jnp.linspace(jnp.quantile(xs_true, 0.01), jnp.quantile(xs_true, 0.99), 30)
+    bins = 30
+
+    ax.hist(xs_true_all[j], density=True, bins=bins, histtype="step", color="white")
+
+    ax.hist(xs_mcmc_all[i, j], density=True, bins=bins, histtype="stepfilled", color="C3", alpha=0.4)
+
+for ax in axs.ravel():
+  ax.spines[["top", "left", "right"]].set_visible(False)
+  ax.set_yticks([])
+```
+
+```{python}
+
+fig, axs = plt.subplots(
+  len(SIGMAS),
+  len(DISTRIBUTIONS),
+  sharex="col",
+  sharey="col",
+  dpi=350,
+)
+
+for i, sigma in enumerate(SIGMAS):
+  if sigma < 1:
+    axs[i, 0].set_ylabel(f"$\\sigma={sigma:.2f}$")
+  else:
+    axs[i, 0].set_ylabel(f"$\\sigma={int(sigma)}$")
+
+  for j, (dist_name, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+    ax = axs[i, j]
+
+    if i == 0:
+      ax.set_title(dist_name)
+
+    ax.plot(xs_mcmc_all[i, j], color="C3")
+
+for ax in axs.ravel():
+  ax.spines[["top", "right"]].set_visible(False)
+```
+
+We see that neither too small nor too large $\sigma$ explores a single mode efficiently, while only large $\sigma$ can pass through the low-probability region between the modes. A too-large $\sigma$ is, however, too inefficient with too few accepted samples, requiring increasing the length of the chain. 
+
+One way to improve the exploration is to use a sequential Monte Carlo sampler, as in the [BlackJAX sampling book](https://blackjax-devs.github.io/sampling-book/algorithms/TemperedSMC.html) or [this talk from Nicholas Chopin](https://youtu.be/mOA_IKyWdkg?feature=shared).
+Another solution is to use parallel tempering, which dates back to [a 1991 paper of Charles Geyer](https://www.stat.umn.edu/geyer/f05/8931/c.pdf), then termed $(MC)^3$, i.e., Metropolis-coupled Markov chain Monte Carlo.
+
+Today we'll focus on the latter one. 
+
+## Parallel tempering as originally designed
+
+Consider a space $\mathcal X$ with a probability distribution of interest $p$. We have a Markov kernel $K$ allowing us to explore $\mathcal X$ locally, but which has a trouble to pass through low-density regions separating distinct modes.
+This issue can be addressed by extending the original space $\mathcal X$ to a larger space $\mathcal X^{N+1} = \mathcal X \times \cdots \times \mathcal X$ and target a product distribution $\mathbf{p}(\mathbf x) =  p_0(x_1)\cdots p_{N-1}(x_{N-1}) p_{N}(x_N)$, where $p_N = p$ is the original distribution of interest and $p_0, \dotsc, p_{N-1}$ are auxiliary distributions, designed to be easier to sample from.
+The main idea is that $p_0$ should be chosen so that it is known to be easy to sample and consecutive distributions, $p_{n}$ and $p_{n+1}$, should be closely related: the separate modes of $p = p_N$ can be then "connected" by going through $p_{N-1}$, $p_{N-2}$ and other distributions up to $p_0$, which is assumed to be easy to explore.
+
+For example, a typical choice is
+$$
+  p_n(x) = \frac{1}{\mathcal Z(\beta_n)} \left(\frac{p(x)}{p_0(x)}\right)^{\beta_n} p_0(x) = \frac{1}{\mathcal Z(\beta_n)} p(x)^{\beta_n} p_0(x)^{1-\beta_n} 
+$$
+
+for a given annealing schedule $0 = \beta_0 < \beta_1 < \dotsc < \beta_N = 1$.
+Similarly as in sequential Monte Carlo samplers[^1], the schedule does matter a lot, controlling how much consecutive distributions are related.
+
+[^1]: I think Nicholas Chopin gave an excellent remark in one of his lectures (although I can't find the exact reference, so many apologies if I misquoted or misattributed this statement): parallel tempering and sequential Monte Carlo samplers are orthogonal to each other, in the sense that parallel tempering at any single time step keeps the particles at all possible temperatures, while sequential Monte Carlo keeps all the particles at the same temperature, and resamples them over time.
+
+A Markov chain is now defined on $\mathcal X^{N+1}$, with a state $\mathbf{x} = (x_0, \dotsc, x_N)$. We will consider two transitions:
+
+1. Applying Markov kernels $K_n$ to entries $x_n$, targeting distributions $\pi_n$, so that we do local exploration.
+2. Swapping entries $x_{n}$ with $x_{n+1}$, so that we can pass from $x_N$ (which is targeting $\pi$) to $x_0$ (which is easy to explore) and back.
+
+Note that if the second kind of moves were not allowed, we would have just $N+1$ independent Markov chains (each defined on the space $\mathcal X$) and targeting the $\pi_0\cdots \pi_K$ distribution "individually", although the mixing of the $K$-th chain would be very, very slow.
+However, as the chains are coupled, they are no longer individually Markov.
+In fact, we hope that they all reach the same stationary distribution!
+
+To ensure that the Markov chain on $\mathcal X^{N+1}$ explores $\mathbf{p}$ properly, Charles Geyer proposed to swap components $i$ and $j$ according to a Metropolis update. If $\mathbf{x}$ is the current state and $\mathbf{x}'$ is the state with entries $i$ and $j$ swapped, the Metropolis ratio is given by
+$$
+  r = \frac{ \mathbf{p}(\mathbf x')}{ \mathbf{p}(\mathbf x)} = \frac{ p_i(x_j) p_j(x_i)}{ p_i(x_i) p_j(x_j)}.
+$$ 
+
+Typically, adjacent indices are swapped, as for $i$ very distant from $j$ we expect that $r$ is close to zero. 
+
+Let's implement this in JAX!
+
+### JAX implementation
+
+We need to make some design choices. We keep the state $\mathbf{x} = (x_0, \dotsc, x_N)$ as a matrix $(N+1)\times (\mathrm{dim}\, \mathcal X)$. As we have access to two log-probability functions ($p = p_N$ and the reference distribution $p_0$), we need to construct intermediate log-probability functions given an annealing schedule $0 = \beta_0 < \beta_1 < \cdots < \beta_N$.
+To make everything vectorisable, let's construct the kernels $K_n = \mathcal{K}(\phi_n)$ using a function generating kernels $\mathcal{K}$ and kernel-specific parameters $\phi_n$.
+
+Hence, this implementation is not as general as possible, but it should be compatible with JAX vectorised operations.
+
+To swap the chains, we do a "full sweep", attemping to swap $x_0 \leftrightarrow x_1$, then $x_1\leftrightarrow x_2$, and up to $x_{N-1}\leftrightarrow x_N$. 
+
+```{python}
+
+def generate_independent_annealed_kernel(
+  log_prob,
+  log_ref,
+  annealing_schedule,
+  kernel_generator,
+  params,
+) -> tuple:
+  """Generates the kernels via the kernel generator given appropriate parameters.
+
+  Args:
+    log_prob: log_prob of the target distribution
+    log_ref: log_prob of the easy-to-sample reference distribution
+    annealing_schedule: annealing schedule such that `annealing_schedule[0] = 0.0` and `annealing_schedule[-1] = 1`
+    kernel_generator: `kernel_generator(log_p, param)` returns a transition kernel of signature `kernel(key, state) -> new_state`
+    params: parameters for the transition kernels. Note that `len(annealing_schedule) = len(params)`
+  """
+  if len(annealing_schedule) != len(params):
+    raise ValueError("Parameters have to be of the same length as the annealing schedule")
+  n_chains = len(annealing_schedule)
+
+  def transition_kernel(key, state, beta, param):
+    def log_p(y):
+      return beta * log_prob(y) + (1.0 - beta) * log_ref(y)
+    return kernel_generator(log_p, param)(key, state)
+
+  def kernel(key, state_joint):
+    key_vec = jrandom.split(key, n_chains)
+    return jax.vmap(transition_kernel, in_axes=(0, 0, 0, 0))(key_vec, state_joint, annealing_schedule, params)
+
+  return kernel
+
+def generate_swap_chains_decision_kernel(
+  log_prob,
+  log_ref,
+  annealing_schedule,
+):
+  def log_p(y, beta):
+    return beta * log_prob(y) + (1.0 - beta) * log_ref(y)
+
+  def swap_decision(key, state, i: int, j: int) -> bool:
+    beta1, beta2 = annealing_schedule[i], annealing_schedule[j]
+    x1, x2 = state[i], state[j]
+    log_numerator = log_p(x1, beta2) + log_p(x2, beta1) 
+    log_denominator = log_p(x1, beta1) + log_p(x2, beta2)
+    log_r = log_numerator - log_denominator
+
+    r = jnp.exp(log_r)
+    return jrandom.uniform(key) < r
+
+  return swap_decision
+
+
+def generate_full_sweep_swap_kernel(
+  log_prob,
+  log_ref,
+  annealing_schedule,
+):
+  """Applies a full sweep, attempting to swap chains 0 <-> 1, then 1 <-> 2 etc. one-after-another.
+  """
+  n_chains = len(annealing_schedule)
+
+  if n_chains < 2:
+    raise ValueError("At least two chains are needed.")
+
+  swap_decision_fn = generate_swap_chains_decision_kernel(
+    log_prob=log_prob,
+    log_ref=log_ref,
+    annealing_schedule=annealing_schedule,
+  )
+
+  def kernel(key, state):
+    def f(state, i: int):
+      subkey = jrandom.fold_in(key, i)
+      decision = swap_decision_fn(subkey, state=state, i=i, j=i+1)
+      
+      # Candidate state: we swap values at i and i+1 positions
+      swapped_state = state.at[i].set(state[i+1])
+      swapped_state = swapped_state.at[i+1].set(state[i])
+
+      new_state = jax.lax.select(decision, swapped_state, state)
+      return new_state, None
+    
+    final_state, _ = jax.lax.scan(f, state, jnp.arange(n_chains - 1))
+    return final_state
+  
+  return kernel
+
+
+def compose_kernels(kernels: list):
+  """Composes kernels, applying them in order."""
+  def kernel(key, state):
+    for ker in kernels:
+      key, subkey = jrandom.split(key)
+      state = ker(subkey, state)
+
+    return state
+
+  return kernel
+```
+
+We need also some annealing schedules:
+
+```{python}
+
+def annealing_constant(n_chains: int, base: float = 1.0):
+  """Constant annealing schedule, should be avoided."""
+  return base * jnp.ones(n_chains)
+
+def annealing_linear(n_chains: int):
+  """Linear annealing schedule, should be avoided."""
+  return jnp.linspace(0.0, 1.0, n_chains)
+
+def annealing_exponential(n_chains: int, base: float = 2.0**0.5):
+  """
+
+  Args:
+    n_chains: number of chains in the schedule
+    base: annealing base, float larger than 1
+  """
+  if base <= 1:
+    raise ValueError("Base should be larger than 1.")
+
+  if n_chains < 2:
+    raise ValueError("At least two chains are required.")
+  elif n_chains == 2:
+    return jnp.array([0.0, 1.0])
+  else:
+    x = jnp.append(jnp.power(base, -jnp.arange(n_chains - 1)), 0.0)
+    return x[::-1]
+
+
+```
+
+Now we can re-run the previous experiment, but with the usual random walk kernel being replaced with parallel tempering:
+
+```{python}
+
+xs_pt_all = np.empty((len(SIGMAS), len(DISTRIBUTIONS), N_SAMPLES))
+
+_REFERENCE_SCALE = 30
+
+def log_ref(x):
+  return dist.Normal(0, _REFERENCE_SCALE).log_prob(x)
+
+n_chains = 10
+betas = annealing_exponential(n_chains, 1.1)
+
+
+for d, (_, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+  def log_prob(x):
+    distribution = dist_factory()
+    return distribution.log_prob(x)
+  
+  for s, sigma in enumerate(SIGMAS):
+    sigmas = sigma * jnp.ones_like(betas)
+    sigmas = sigmas.at[0].set(_REFERENCE_SCALE)  # We know how to sample from the reference distribution 
+
+    K_ind = generate_independent_annealed_kernel(
+      log_prob=log_prob,
+      log_ref=log_ref,
+      annealing_schedule=betas,
+      kernel_generator=generate_kernel,
+      params=sigmas,
+    )
+
+    K_swap = generate_full_sweep_swap_kernel(
+      log_prob=log_prob,
+      log_ref=log_ref,
+      annealing_schedule=betas,
+    )
+    K_pt = compose_kernels([K_ind, K_swap])
+
+    key, subkey = jrandom.split(key)
+    x0 = 0.5 * jnp.ones(n_chains)
+    xs_pt = sampling_loop(key=subkey, x0=x0, kernel=K_pt, n_samples=N_SAMPLES * 2)[N_SAMPLES:]
+
+    xs_pt_all[s, d, :] = xs_pt[:, -1]
+```
+
+```{python}
+fig, axs = plt.subplots(
+  len(SIGMAS),
+  len(DISTRIBUTIONS),
+  sharex="col",
+  dpi=350,
+)
+
+for i, sigma in enumerate(SIGMAS):
+  if sigma < 1:
+    axs[i, 0].set_ylabel(f"$\\sigma={sigma:.2f}$")
+  else:
+    axs[i, 0].set_ylabel(f"$\\sigma={int(sigma)}$")
+
+  for j, (dist_name, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+    ax = axs[i, j]
+
+    if i == 0:
+      ax.set_title(dist_name)
+
+    bins = 30
+
+    ax.hist(xs_true_all[j], density=True, bins=bins, histtype="step", color="white")
+
+    ax.hist(xs_pt_all[i, j], density=True, bins=bins, histtype="stepfilled", color="C3", alpha=0.4)
+
+for ax in axs.ravel():
+  ax.spines[["top", "left", "right"]].set_visible(False)
+  ax.set_yticks([])
+```
+
+```{python}
+fig, axs = plt.subplots(
+  len(SIGMAS),
+  len(DISTRIBUTIONS),
+  sharex="col",
+  sharey="col",
+  dpi=350,
+)
+
+for i, sigma in enumerate(SIGMAS):
+  if sigma < 1:
+    axs[i, 0].set_ylabel(f"$\\sigma={sigma:.2f}$")
+  else:
+    axs[i, 0].set_ylabel(f"$\\sigma={int(sigma)}$")
+
+  for j, (dist_name, dist_factory) in enumerate(DISTRIBUTIONS.items()):
+    ax = axs[i, j]
+
+    if i == 0:
+      ax.set_title(dist_name)
+
+    ax.plot(xs_pt_all[i, j], color="C3")
+
+for ax in axs.ravel():
+  ax.spines[["top", "right"]].set_visible(False)
+```
+
+This looks much better! However, to obtain these results I needed to tweak the parameters quite a bit. The most important points seem to be the following:
+
+1. The reference distribution should cover a large enough area, so that the modes are covered. Using a reference distribution with a very small standard deviation resulted in non-mixing chain.  
+2. Ensuring that local exploration is somewhat efficient is very important. If I used $\sigma$ to sample from $p_0$ (rather than using random walk with an appropriate scale), I could not get a good mixing of the chain.
+3. Sometimes the base in the exponential annealing schedule could qualitatively change the results.
