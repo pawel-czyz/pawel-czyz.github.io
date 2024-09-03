@@ -3,8 +3,8 @@ title: "Non-reversible parallel tempering"
 description: "Markov chain got stuck in a single mode? Parallel tempering comes to help."
 author: "Paweł Czyż"
 date: "9/1/2024"
-# execute:
-#   freeze: true
+execute:
+  freeze: true
 format: 
   html:
     code-fold: true
