@@ -11,8 +11,8 @@
   {
     "listing": "/blog.html",
     "items": [
-      "/posts/non-reversible-parallel-tempering.html",
       "/posts/how-expressive-are-bernoulli-mixtures.html",
+      "/posts/non-reversible-parallel-tempering.html",
       "/posts/estimating-mean-vector.html",
       "/posts/distinct-ising-models.html",
       "/posts/discrete-intractable-likelihood.html",

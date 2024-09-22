@@ -1,14 +1,8 @@
 ---
 title: "How expressive are Bernoulli mixture models?"
-description: ""
+description: "Namely, a post on establishing bounds."
 author: "Paweł Czyż"
-date: "8/19/2024"
-execute:
-  freeze: true
-format: 
-  html:
-    code-fold: true
-jupyter: python3
+date: "9/22/2024"
 ---
 
 \newcommand{\nGenes}{G}
