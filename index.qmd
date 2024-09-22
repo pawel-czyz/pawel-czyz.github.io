@@ -18,8 +18,6 @@ about:
       href: mailto:pczyz@protonmail.com
 ---
 
-My name is Paweł Czyż and I am a data scientist interested in modelling complex biological data using techniques originating in probabilistic machine learning and applied Bayesian statistics.
+My name is Paweł Czyż and I model biological data using techniques originating in Bayesian statistics and probabilistic machine learning.
+Currently I am a Doctoral Fellow at the [ETH AI Center](https://ai.ethz.ch/).
 
-Currently I am a Doctoral Fellow of the [ETH AI Center](https://ai.ethz.ch/) working in [Computational Biology Group](https://bsse.ethz.ch/cbg) and [Computational Cancer Genomics Laboratory](http://boevalab.inf.ethz.ch/).
-
-Prior to starting my PhD I was an AI Resident at Microsoft Research Cambridge and studied [mathematical physics](https://en.wikipedia.org/wiki/Mathematical_physics) at University of Oxford.

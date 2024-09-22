@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Paweł Czyż">
+<meta name="dcterms.date" content="2024-09-22">
+<meta name="description" content="Namely, a post on establishing bounds.">
+
+<title>Paweł Czyż - How expressive are Bernoulli mixture models?</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Paweł Czyż</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../blog.html" rel="" target="">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../publications.html" rel="" target="">
+ <span class="menu-text">Publications</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#bernoulli-distributions" id="toc-bernoulli-distributions" class="nav-link active" data-scroll-target="#bernoulli-distributions">Bernoulli distributions</a></li>
+  <li><a href="#approximation-bounds" id="toc-approximation-bounds" class="nav-link" data-scroll-target="#approximation-bounds">Approximation bounds</a>
+  <ul class="collapse">
+  <li><a href="#total-variation-distance" id="toc-total-variation-distance" class="nav-link" data-scroll-target="#total-variation-distance">Total variation distance</a></li>
+  <li><a href="#kullback-leibler-divergence" id="toc-kullback-leibler-divergence" class="nav-link" data-scroll-target="#kullback-leibler-divergence">Kullback-Leibler divergence</a></li>
+  <li><a href="#pinskers-inequalities" id="toc-pinskers-inequalities" class="nav-link" data-scroll-target="#pinskers-inequalities">Pinsker’s inequalities</a></li>
+  <li><a href="#approximating-the-point-distributions-with-bernoulli-distribution" id="toc-approximating-the-point-distributions-with-bernoulli-distribution" class="nav-link" data-scroll-target="#approximating-the-point-distributions-with-bernoulli-distribution">Approximating the point distributions with Bernoulli distribution</a></li>
+  </ul></li>
+  <li><a href="#moving-to-the-higher-dimensions" id="toc-moving-to-the-higher-dimensions" class="nav-link" data-scroll-target="#moving-to-the-higher-dimensions">Moving to the higher dimensions</a>
+  <ul class="collapse">
+  <li><a href="#bounding-the-total-variation-distance" id="toc-bounding-the-total-variation-distance" class="nav-link" data-scroll-target="#bounding-the-total-variation-distance">Bounding the total variation distance</a></li>
+  <li><a href="#bounding-the-kl-divergences" id="toc-bounding-the-kl-divergences" class="nav-link" data-scroll-target="#bounding-the-kl-divergences">Bounding the KL divergences</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">How expressive are Bernoulli mixture models?</h1>
+</div>
+
+<div>
+  <div class="description">
+    Namely, a post on establishing bounds.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Paweł Czyż </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 22, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="bernoulli-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="bernoulli-distributions">Bernoulli distributions</h2>
+<p>Let <span class="math inline">\(p\in (0, 1)\)</span> be a parameter and <span class="math inline">\(\mathrm{Ber}(p)\)</span> be the Bernoulli distribution, with <span class="math inline">\(\mathrm{Ber}(y\mid p) = p^y(1-p)^{1-y}\)</span> for <span class="math inline">\(y\in \{0, 1\}\)</span>. Let’s define a slightly more general family of distributions, <span class="math inline">\(\overline{\mathrm{Ber}}(p)\)</span>, for <span class="math inline">\(p\in [0, 1]\)</span>, as follows: <span class="math display">\[
+  \overline{\mathrm{Ber}}(p) = p\delta_1 + (1-p)\delta_0 = \begin{cases}
+    \delta_0 &amp;\text{ if } p=0\\
+    \delta_1 &amp;\text{ if } p=1\\
+    \mathrm{Ber}(p) &amp;\text{otherwise}
+  \end{cases}
+\]</span></p>
+<p>Namely, the <span class="math inline">\(\mathrm{Ber}\)</span> distributions model a procedure where a biased (e.g., by bending) coin with two sides is tossed, but <span class="math inline">\(\overline{\mathrm{Ber}}\)</span> distributions allow tossing one-sided coins. As we have <a href="../posts/beta-bernoulli.html">already discussed</a>, <span class="math inline">\(\overline{\mathrm{Ber}}\)</span> distributions are the most general probability distributions on the space <span class="math inline">\(\{0, 1\}\)</span>. Similarly, <span class="math inline">\(\mathrm{Ber}\)</span> distributions are the most general probability distributions on <span class="math inline">\(\{0, 1\}\)</span> <em>with full support</em>, allowing for both outcomes to happen.</p>
+<p>This leads to the question: is it very problematic if we use <span class="math inline">\(\mathrm{Ber}\)</span> distributions to model a data generating process which, in fact, belongs to the <span class="math inline">\(\overline{\mathrm{Ber}}\)</span> family? We can expect that <span class="math inline">\(\mathrm{Ber}(u)\)</span> for <span class="math inline">\(u \ll 1\)</span> is rather a good model for <span class="math inline">\(\overline{\mathrm{Ber}}(0)\)</span> (and, similarly, <span class="math inline">\(\mathrm{Ber}(1-u)\)</span> should be a good model for <span class="math inline">\(\overline{\mathrm{Ber}}(1)\)</span>).</p>
+<p>Sometimes, when we program simulators, we may want to distinguish the atomic distribution <span class="math inline">\(\delta_0\)</span> from <span class="math inline">\(\mathrm{Ber}(u)\)</span> with small <span class="math inline">\(u\)</span> due to explicitly enforcing some constrains: not enforcing them can break the simulator in a specific place.</p>
+<p>However, if we think about a modelling problem, where we observe some data points <span class="math inline">\(y_1, \dotsc, y_N\)</span> and want to learn the underlying distribution, we may prefer to leave some probability that the future outcome may be non-zero, even if all the data points seen so far are zeros.</p>
+<p>Today we will focus on the second kind of problems, where we use <span class="math inline">\(\mathrm{Ber}\)</span> distributions, rather than <span class="math inline">\(\overline{\mathrm{Ber}}\)</span>, either for the reason outlined above or for convenience: <span class="math inline">\(\mathrm{Ber}\)</span> distributions never assign zero probability to any data point.</p>
+</section>
+<section id="approximation-bounds" class="level2">
+<h2 class="anchored" data-anchor-id="approximation-bounds">Approximation bounds</h2>
+<p>From now on we assume that <span class="math inline">\(\mathcal Y\)</span> is a finite space and <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> be two probability distributions on it.</p>
+<section id="total-variation-distance" class="level3">
+<h3 class="anchored" data-anchor-id="total-variation-distance">Total variation distance</h3>
+<p>The <a href="https://en.wikipedia.org/wiki/Total_variation_distance_of_probability_measures">total variation distance</a> is defined as <span class="math display">\[
+  \mathrm{TV}(P, Q) = \max_{A \subseteq \mathcal Y} |P(A) - Q(A)|.
+\]</span></p>
+<p>It’s quite interesting that <span class="math inline">\(\mathrm{TV}(P, Q)\)</span> is essentially a scaled version of the <span class="math inline">\(L_1\)</span> norm: <span class="math display">\[
+  \mathrm{TV}(P, Q) = \frac{1}{2} | P-Q |_{1} = \frac 12 \sum_{y\in \mathcal Y} | P(y) - Q(y)|.
+\]</span></p>
+<p>The proof essentially follows by defining a signed measure <span class="math inline">\(\mu = P - Q\)</span> and building the Hahn decomposition: let <span class="math inline">\(A^+ = \{y\in \mathcal Y\mid \mu \ge 0\}\)</span> and <span class="math inline">\(A^- = \mathcal Y- A^+ = \{y\in \mathcal Y\mid \mu &lt; 0\}\)</span>. We have <span class="math display">\[
+  0 = P(\mathcal Y) - Q(\mathcal Y) = \mu(\mathcal Y) = \mu(A^+) + \mu(A^-),
+\]</span></p>
+<p>so that <span class="math inline">\(\mu(A^+) = -\mu(A^-)\)</span>.</p>
+<p>Now for every <span class="math inline">\(A\subseteq \mathcal Y\)</span> we have <span class="math display">\[
+  \mu(A) = \mu(A\cap A^+) + \mu(A\cap A^-) \le \mu(A^+).
+\]</span></p>
+<p>Similarly, <span class="math inline">\(-\mu(A) \le -\mu(A^-) \le \mu(A^+)\)</span>. Hence, we see that <span class="math inline">\(A^+\)</span> can be taken as an optimal <span class="math inline">\(A\)</span> when maximising the total variation distance and <span class="math display">\[
+  \mathrm{TV}(P, Q) = \sum_{y : P(y) \ge Q(y) } \left(P(y) - Q(y)\right).
+\]</span></p>
+<p>We now have <span class="math display">\[\begin{align*}
+  \mathrm{TV}(P, Q) &amp;= \mu(A^+) \\
+  &amp;= \frac{1}{2}( \mu(A^+) - \mu(A^-) ) \\
+  &amp;= \frac{1}{2} \left( \sum_{y \in A^+ } \mu(y) + \sum_{y\in A^-} (-\mu(y))  \right) \\
+  &amp;= \frac 12 \sum_{y\in \mathcal Y} |\mu(y)| = \frac 12 |\mu|_1.
+\end{align*}
+\]</span></p>
+</section>
+<section id="kullback-leibler-divergence" class="level3">
+<h3 class="anchored" data-anchor-id="kullback-leibler-divergence">Kullback-Leibler divergence</h3>
+<p>If <span class="math inline">\(P\ll Q\)</span> (i.e., whenever <span class="math inline">\(Q(y) = 0\)</span> we have <span class="math inline">\(P(y) = 0\)</span>. It’s a very convenient condition when <span class="math inline">\(Q(y) &gt; 0\)</span> for all <span class="math inline">\(y\in \mathcal Y\)</span>), we can define also the <a href="https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence">Kullback-Leibler divergence</a>: <span class="math display">\[
+  \mathrm{KL}(P\parallel Q) = \sum_{y\in \mathcal Y} P(y) \frac{P(y)}{Q(y)},
+\]</span></p>
+<p>under the convention that <span class="math inline">\(0\log 0 = 0 \log \frac{0}{0} = 0\)</span>. If <span class="math inline">\(P \not\ll Q\)</span>, we define <span class="math inline">\(\mathrm{KL}(P\parallel Q) = +\infty\)</span>.</p>
+</section>
+<section id="pinskers-inequalities" class="level3">
+<h3 class="anchored" data-anchor-id="pinskers-inequalities">Pinsker’s inequalities</h3>
+<p><a href="https://en.wikipedia.org/wiki/Pinsker%27s_inequality">Pinsker’s inequality</a> says that for arbitrary <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> <span class="math display">\[
+  \mathrm{TV}(P, Q) \le \sqrt{\frac 12 \mathrm{KL}(P\parallel Q)}.
+\]</span></p>
+<p>This inequality also generalises to infinite and not necessarily discrete spaces. However, as we work with finite spaces, we have also the <em>inverse Pinsker’s inequality</em> (see Lemma 4.1 <a href="https://arxiv.org/abs/1801.06348">here</a> or Lemma 2 <a href="https://arxiv.org/abs/1507.02803">there</a>) at our disposal: let <span class="math inline">\(P\ll Q\)</span> and <span class="math inline">\(\alpha_Q = \min_{y\colon Q(y) &gt; 0} Q(y)\)</span>. Then, we have <span class="math display">\[
+  \mathrm{KL}(P \parallel Q) \le \frac{1}{\alpha_Q} \mathrm{TV}(P, Q)^2.
+\]</span></p>
+<p>What is important here is that <span class="math inline">\(\alpha_Q\)</span> depends on <span class="math inline">\(Q\)</span>.</p>
+</section>
+<section id="approximating-the-point-distributions-with-bernoulli-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="approximating-the-point-distributions-with-bernoulli-distribution">Approximating the point distributions with Bernoulli distribution</h3>
+<p>Let’s see how well we can compare the point distribution <span class="math inline">\(\delta_0\)</span> with <span class="math inline">\(\mathrm{Ber}(\epsilon)\)</span> for <span class="math inline">\(\epsilon &gt; 0\)</span>. We have <span class="math display">\[
+  \mathrm{TV}( \mathrm{Ber}(\epsilon), \delta_0 ) = \frac{1}{2}\left( |\epsilon| + |1 - (1-\epsilon)| \right) = \epsilon,
+\]</span></p>
+<p>meaning that this discrepancy measure can attain arbitrarily close value.</p>
+<p>When we look for maximum likelihood solution (or <a href="../posts/discrete-intractable-likelihood.html">employ Bayesian inference</a>), we are interested in <span class="math inline">\(\mathrm{KL}(\delta_0 \parallel \mathrm{Ber}(\epsilon)) &lt; \infty\)</span>, as <span class="math inline">\(\mathrm{Ber}(\epsilon)\)</span> has full support. We can calculate this quantity exactly: <span class="math display">\[
+  \mathrm{KL}(\delta_0 \parallel \mathrm{Ber}(\epsilon)) = \log \frac{1}{1-\epsilon} = -\log(1-\epsilon) =  \epsilon + \frac{\epsilon^2}2 + \frac{\epsilon^3}{3} + \cdots,
+\]</span></p>
+<p>which also can be made arbitrarily small. Namely, for every desired <span class="math inline">\(\ell &gt; 0\)</span> we can find an <span class="math inline">\(\tilde \epsilon &gt; 0\)</span> such that for all <span class="math inline">\(\epsilon &lt; \tilde \epsilon\)</span> we have <span class="math inline">\(\mathrm{KL}(\delta_0\parallel \mathrm{Ber}(\epsilon)) &lt; \ell\)</span>. This is useful for establishing the <em>KL support of the prior</em> condition, appearing in <a href="https://www.dianacai.com/blog/2021/02/14/schwartz-theorem-posterior-consistency/">Schwartz’s theorem</a>.</p>
+<p>On the other hand, we see that because <span class="math inline">\(\mathrm{Ber}(\epsilon)\not\ll \delta_0\)</span>, we have <span class="math display">\[
+  \mathrm{KL}(\mathrm{Ber}(\epsilon) \parallel \delta_0 ) = +\infty,
+\]</span></p>
+<p>meaning that variational inference with arbitrary <span class="math inline">\(\epsilon\)</span> is always an “equally bad” approximation. Intuitively and very informally speaking, variational inference encourages approximations with lighter tails than the ground-truth distribution and it’s not possible to have lighter “tails” than a point mass!</p>
+</section>
+</section>
+<section id="moving-to-the-higher-dimensions" class="level2">
+<h2 class="anchored" data-anchor-id="moving-to-the-higher-dimensions">Moving to the higher dimensions</h2>
+<p>Let’s now think about the probability distributions on the space of binary vectors, <span class="math inline">\(\mathcal Y= \{0, 1\}^G\)</span>. Similarly as above, all the distributions with full support on a finite set have to be the categorical distributions (in this case the probability vector has <span class="math inline">\(2^G\)</span> components, with <span class="math inline">\(2^G-1\)</span> free parameters due to the usual constraint of summing up to one). Removing the full support requirement we obtain a discrete distributions with at most <span class="math inline">\(2^G\)</span> atoms.</p>
+<p>Let’s consider perhaps the simplest distribution we could use to model the data points in the <span class="math inline">\(\mathcal Y\)</span> space: <span class="math display">\[
+\mathrm{Ber}^{G}(y \mid p) = \prod_{g=1}^{G} \mathrm{Ber}(y_g \mid p_g).
+\]</span></p>
+<p>In this case, we assume that each entry is the outcome of a coin toss and the coin tosses are independent (even though coins do not have to be identical. For example, we allow <span class="math inline">\(p_1 \neq p_2\)</span>).</p>
+<p>As such, this distribution is not particularly expressive and will not be suitable to model dependencies between different entries, which are very important when modelling <a href="https://en.wikipedia.org/wiki/Ising_model">spin lattices</a> or genomic data. We generally may prefer to use a more expressive distribution, such <a href="../posts/discrete-intractable-likelihood.html">energy-based models</a> (including the <a href="../posts/distinct-ising-models.html">Ising model</a>) or <a href="../posts/mixtures-and-admixtures.html">mixture</a> <a href="../posts/dirichlet-process.html">models</a>.</p>
+<p>Let’s focus on mixture models. In a model with <span class="math inline">\(K\)</span> components, we have parameters <span class="math inline">\(p\in (0, 1)^{K\times G}\)</span> and <span class="math inline">\(u \in \Delta^{K-1}\)</span> resulting in the distribution:</p>
+<p><span class="math display">\[
+  \mathrm{BerMix}(p, u) = \sum_{k=1}^K u_k\mathrm{Ber}^{G}(p_k),
+\]</span> i.e., <span class="math display">\[
+  \mathrm{BerMix}(y\mid p, u) = \sum_{k=1}^K u_k\mathrm{Ber}^{G}(y\mid p_k),
+\]</span></p>
+<p>One usually hopes to find a relatively small number of components <span class="math inline">\(K\)</span>. However, in this blog post we allow arbitrarily large <span class="math inline">\(K\)</span> and focus on the following questions: how expressive is this family of mixture models? Can it approximate arbitrary distributions well?</p>
+<p>Let’s consider the ground-truth data distribution <span class="math display">\[
+  D = \sum_{k=1}^{2^G} \pi_k \delta_{y_k},
+\]</span></p>
+<p>where <span class="math inline">\(y_k \in \mathcal Y\)</span> are all the <span class="math inline">\(2^G\)</span> possible atoms and <span class="math inline">\(\pi \in \bar \Delta^{2^G - 1}\)</span> are probabilities of observing different atoms. We allow <span class="math inline">\(\pi_k = 0\)</span> for some <span class="math inline">\(k\)</span> (i.e., we work with the closed probability simplex, rather than the open one), which result in a smaller number of observed atoms.</p>
+<p>We want to find a Bernoulli mixture which will approximate this distribution well. Of course, using models with a restriction on <span class="math inline">\(K\ll 2^G\)</span> is more interesting. However, these models also seem to be much harder to study. Let’s instead use a model with all possible <span class="math inline">\(K=2^G\)</span> components of the following form: <span class="math display">\[
+  P_\epsilon = \sum_{k=1}^{K} u(\pi_k, \epsilon) \mathrm{Ber}^{G}( s_\epsilon(y_k) ),
+\]</span></p>
+<p>where <span class="math inline">\(s_\epsilon(y) = (1-\epsilon) y + \epsilon(1-y)\)</span> are noisy versions of the atoms (and <a href="../posts/beta-bernoulli.html">can be understood</a> as actually tossing coins with biases <span class="math inline">\(\epsilon\)</span> and <span class="math inline">\(1-\epsilon\)</span>) and <span class="math inline">\(u(\pi_k, \epsilon) = \frac{ \pi_k + \epsilon }{ 1 + \epsilon K}\)</span> ensures that the mixing weights belong to the open simplex <span class="math inline">\(\Delta^{K-1}\)</span>.</p>
+<p>Informally, we expect that for <span class="math inline">\(\epsilon \approx 0\)</span> we would have <span class="math inline">\(P_\epsilon \approx D\)</span>, but let’s try to make it precise in terms of the discrepancy measures used earlier.</p>
+<section id="bounding-the-total-variation-distance" class="level3">
+<h3 class="anchored" data-anchor-id="bounding-the-total-variation-distance">Bounding the total variation distance</h3>
+<p>Recall that <span class="math inline">\(\mathrm{TV}( D, P_\epsilon )\)</span> is half of the <span class="math inline">\(L_1\)</span> norm. Let’s focus on <span class="math inline">\(y_k \in \mathcal Y\)</span>. We have <span class="math display">\[
+|P_\epsilon(y_k) - D(y_k)| \le | u(\pi_k, \epsilon) \mathrm{Ber}^{G}(y_k \mid s_\epsilon(y_k) ) - \pi_k | + \sum_{a\neq k} u(\pi_a, \epsilon) \mathrm{Ber}^{G}(y_k \mid s_\epsilon(y_a))
+\]</span></p>
+<p>We have <span class="math display">\[
+  | u(\pi_k, \epsilon) \mathrm{Ber}^{G}(y_k \mid s_\epsilon(y_k) ) - \pi_k | = \left| \frac{\pi_k + \epsilon}{1+\epsilon K} (1-\epsilon)^G - \pi_k \right|,
+\]</span></p>
+<p>which intuitively can be made arbitrarily small by appropriately <span class="math inline">\(\epsilon\)</span>. More precisely, we have a Taylor approximation (employing the <a href="https://en.wikipedia.org/wiki/Big_O_notation#Infinitesimal_asymptotics">infinitesimal notation</a> for big <span class="math inline">\(O\)</span>): <span class="math display">\[
+  \begin{align*}
+  | u(\pi_k, \epsilon) \mathrm{Ber}^{G}(y_k \mid s_\epsilon(y_k) ) - \pi_k | &amp;= \left| 1 - (2^G + G) \pi_k \right| \epsilon  + O(\epsilon^2) \\
+  &amp;= (1 + G + 2^G)\epsilon + O(\epsilon^2)
+  \end{align*}
+\]</span></p>
+<p>Now for <span class="math inline">\(a\neq k\)</span> and <span class="math inline">\(\epsilon &lt; 1/2\)</span> we have <span class="math display">\[
+  u(\pi_a, \alpha) \mathrm{Ber}^{G}(y_k \mid s_\epsilon(y_a) ) \le \mathrm{Ber}^{G}(y_k \mid s_\epsilon(y_a)) \le \epsilon (1-\epsilon)^{G-1} \le \epsilon,
+\]</span></p>
+<p>where the bound follows from the following reasoning: if <span class="math inline">\(y_k = y_a\)</span> we have the probability <span class="math inline">\((1-\epsilon)^G\)</span> of obtaining the right outcome <span class="math inline">\(y_k\)</span> by not encountering any bitflip due to the noise <span class="math inline">\(\epsilon\)</span>. However, as <span class="math inline">\(y_k\neq y_a\)</span>, there have to be <span class="math inline">\(m\ge 1\)</span> positions on which we have to use the <span class="math inline">\(\epsilon\)</span> noise to obtain the desired result <span class="math inline">\(y_k\)</span>. Hence, the probability in this case is <span class="math inline">\(\epsilon^m(1-\epsilon)^{G-m} \le \epsilon (1-\epsilon)^{G-1}\)</span> as we have <span class="math inline">\(\epsilon &lt; 1/2\)</span>.</p>
+<p>To sum up, we have <span class="math display">\[
+  | D(y_k) - P_\epsilon(y_k) | \le C \epsilon + O(\epsilon^2),
+\]</span></p>
+<p>where <span class="math inline">\(C\)</span> depends only on <span class="math inline">\(G\)</span> (and it seems that <span class="math inline">\(C=O(2^G)\)</span> is growing exponentially quickly with <span class="math inline">\(G\)</span>, so <span class="math inline">\(\epsilon\)</span> has to be very tiny). By summing up over all <span class="math inline">\(k\)</span> we have <span class="math display">\[
+  \mathrm{TV}(D, P_\epsilon) \le 2^G \cdot C \cdot \epsilon + O(\epsilon^2),
+\]</span></p>
+<p>so that it can be made arbitrarily small.</p>
+</section>
+<section id="bounding-the-kl-divergences" class="level3">
+<h3 class="anchored" data-anchor-id="bounding-the-kl-divergences">Bounding the KL divergences</h3>
+<p>Let’s think about the variational approximation with <span class="math inline">\(P_\epsilon\)</span> to <span class="math inline">\(D\)</span>. If <span class="math inline">\(D\)</span> does not have full support, then we have <span class="math inline">\(P_\epsilon \not\ll D\)</span> and <span class="math inline">\(\mathrm{KL}( P_\epsilon \parallel D) = +\infty\)</span>.</p>
+<p>However, if <span class="math inline">\(D\)</span> is supported on the whole <span class="math inline">\(\mathcal Y\)</span>, we can use the inverse Pinsker’s inequality for some <span class="math inline">\(\alpha_D &gt; 0\)</span> and obtain <span class="math display">\[
+  \mathrm{KL}( P_\epsilon \parallel D) \le \frac{1}{\alpha_D} O(\epsilon^2).
+\]</span></p>
+<p>Let’s now think about <span class="math inline">\(\mathrm{KL}(D \parallel P_\epsilon)\)</span>. In this case, we have <span class="math inline">\(\alpha_\epsilon := \alpha_{P_\epsilon}\)</span> varying with <span class="math inline">\(\epsilon\)</span>. Let’s try to bound it from below: <span class="math display">\[
+  \alpha_\epsilon \ge P_\epsilon(y_k) \ge \frac{ \pi_k + \epsilon}{1+\epsilon K} (1-\epsilon)^G,
+\]</span></p>
+<p>so that</p>
+<p><span class="math display">\[
+  \frac{1}{\alpha_\epsilon} \le \frac{(1-\epsilon)^{-G} (1+ K\epsilon) }{\pi_k + \epsilon}.
+\]</span></p>
+<p>If <span class="math inline">\(D\)</span> is fully supported, we have <span class="math inline">\(\pi_k &gt; 0\)</span> and <span class="math inline">\(\mathrm{KL}(P_\epsilon \parallel D) \le O(\epsilon^2)\)</span> should also decrease at the quadratic rate. However, if <span class="math inline">\(\pi_k = 0\)</span> for some <span class="math inline">\(k\)</span>, we still <em>seem to have</em> <span class="math inline">\(\mathrm{KL}(P_\epsilon \parallel D) \le O(\epsilon)\)</span>.</p>
+<p>Hence, it seems to me that Bernoulli mixtures (albeit with too many components to be practically useful) approximate well arbitrary distributions in terms of the total variation and forward KL divergence, while the backward KL divergence is well-approximated whenever the distribution has full support.</p>
+<p>However, I am not sure if I did not make a mistake somewhere in the calculations: if you something suspicious with this derivation, please let me know.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

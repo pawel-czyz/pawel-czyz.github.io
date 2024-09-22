@@ -18,6 +18,9 @@ We have an unlabeled data set and an imperfect classifier. Can we provide Bayesi
 
 Understanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art.
 
+## Errata
+
+- Lemma A.3 it should read $\int_{\mathcal X} \left| \sum_{y\in \mathcal{Y} } \lambda_y k_y(x) \right|$, rather than $\int_{\mathcal X} \left| \sum_{y\in \mathcal{Y} } k_y(x) \right|$.
 
 ## Links
 
