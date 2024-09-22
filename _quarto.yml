@@ -11,6 +11,11 @@ website:
         text: About
       - href: blog.qmd
       - href: publications.qmd
+  google-analytics:
+    tracking-id: "G-PZ6W6SFE14"
+    storage: "none"
+    anonymize-ip: true
+
 
 format:
   html:
