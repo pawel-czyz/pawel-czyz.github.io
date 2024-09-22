@@ -221,12 +221,32 @@ ul.task-list li input[type="checkbox"] {
 <section id="pinskers-inequalities" class="level3">
 <h3 class="anchored" data-anchor-id="pinskers-inequalities">Pinsker’s inequalities</h3>
 <p><a href="https://en.wikipedia.org/wiki/Pinsker%27s_inequality">Pinsker’s inequality</a> says that for arbitrary <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> <span class="math display">\[
-  \mathrm{TV}(P, Q) \le \sqrt{\frac 12 \mathrm{KL}(P\parallel Q)}.
+  \mathrm{TV}(P, Q) \le \sqrt{\frac 12 \mathrm{KL}(P\parallel Q)}
 \]</span></p>
+<p>or, equivalently, <span class="math display">\[
+  \mathrm{TV}(P, Q)^2 \le \frac{1}{2} \mathrm{KL}(P\parallel Q).
+\]</span></p>
+<p>This inequality also generalises to infinite and not necessarily discrete spaces and has a beautiful <a href="http://www.stat.yale.edu/~pollard/Manuscripts+Notes/Kingston-July95.pdf">proof due to David Pollard</a>.</p>
 <p>This inequality also generalises to infinite and not necessarily discrete spaces. However, as we work with finite spaces, we have also the <em>inverse Pinsker’s inequality</em> (see Lemma 4.1 <a href="https://arxiv.org/abs/1801.06348">here</a> or Lemma 2 <a href="https://arxiv.org/abs/1507.02803">there</a>) at our disposal: let <span class="math inline">\(P\ll Q\)</span> and <span class="math inline">\(\alpha_Q = \min_{y\colon Q(y) &gt; 0} Q(y)\)</span>. Then, we have <span class="math display">\[
-  \mathrm{KL}(P \parallel Q) \le \frac{1}{\alpha_Q} \mathrm{TV}(P, Q)^2.
+  \mathrm{KL}(P \parallel Q) \le \frac{4}{\alpha_Q} \mathrm{TV}(P, Q)^2.
 \]</span></p>
 <p>What is important here is that <span class="math inline">\(\alpha_Q\)</span> depends on <span class="math inline">\(Q\)</span>.</p>
+<p>It is perhaps instructive to recall an elementary proof of this result (see <a href="https://arxiv.org/abs/1507.02803">Lemma 2</a>): <span class="math display">\[
+  \begin{align*}
+  \mathrm{KL}(P\parallel Q)&amp;\le \chi^2(P\parallel Q) \\
+  &amp; := \sum_{x} \frac{ (P(x) - Q(x))^2 }{Q(x)} \\
+  &amp;\le \frac{1}{\alpha_Q} \left(\sum_x | P(x) - Q(x) |\right)^2 \\
+  &amp;= \frac{1}{\alpha_Q} |P-Q|_1^2,
+  \end{align*}
+\]</span></p>
+<p>where the inequality between KL and <span class="math inline">\(\chi^2\)</span> divergences is well-known (see e.g., <a href="https://people.ece.cornell.edu/acharya/teaching/ece6980f16/scribing/26-aug-16.pdf">here</a>): for <span class="math inline">\(x\in (0, 1]\)</span> we have <span class="math inline">\(\log x \le x-1\)</span> (which follows by evaluation at <span class="math inline">\(x=1\)</span> and comparison of the derivatives on the interval <span class="math inline">\((0, 1]\)</span>), so that <span class="math display">\[
+\begin{align*}
+\mathrm{KL}(P\parallel Q) &amp;= \sum_x P(x)\log \frac{P(x)}{Q(x)} \\&amp;\le \sum_{x} P(x) \left( \frac{P(x)}{Q(x)}-1 \right) \\
+&amp;= \sum_x \left(\frac{ P^2(x)}{Q(x)} + Q(x) - 2P(x)\right) \\
+&amp;= \sum_x \frac{ (P(x) - Q(x))^2 }{Q(x)} \\
+&amp;= \chi^2(P\parallel Q).
+\end{align*}
+\]</span></p>
 </section>
 <section id="approximating-the-point-distributions-with-bernoulli-distribution" class="level3">
 <h3 class="anchored" data-anchor-id="approximating-the-point-distributions-with-bernoulli-distribution">Approximating the point distributions with Bernoulli distribution</h3>
