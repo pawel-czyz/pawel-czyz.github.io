@@ -97,16 +97,43 @@ If $P \not\ll Q$, we define $\KL(P\parallel Q) = +\infty$.
 
 [Pinsker's inequality](https://en.wikipedia.org/wiki/Pinsker%27s_inequality) says that for arbitrary $P$ and $Q$
 $$
-  \TV(P, Q) \le \sqrt{\frac 12 \KL(P\parallel Q)}.
+  \TV(P, Q) \le \sqrt{\frac 12 \KL(P\parallel Q)}
 $$
+
+or, equivalently,
+$$
+  \TV(P, Q)^2 \le \frac{1}{2} \KL(P\parallel Q).
+$$
+
+This inequality also generalises to infinite and not necessarily discrete spaces and has a beautiful [proof due to David Pollard](http://www.stat.yale.edu/~pollard/Manuscripts+Notes/Kingston-July95.pdf).
 
 This inequality also generalises to infinite and not necessarily discrete spaces. However, as we work with finite spaces, we have also the *inverse Pinsker's inequality* (see Lemma 4.1 [here](https://arxiv.org/abs/1801.06348) or Lemma 2 [there](https://arxiv.org/abs/1507.02803)) at our disposal: let $P\ll Q$ and $\alpha_Q = \min_{y\colon Q(y) > 0} Q(y)$.
 Then, we have
 $$
-  \KL(P \parallel Q) \le \frac{1}{\alpha_Q} \TV(P, Q)^2.
+  \KL(P \parallel Q) \le \frac{4}{\alpha_Q} \TV(P, Q)^2.
 $$
 
 What is important here is that $\alpha_Q$ depends on $Q$.
+
+It is perhaps instructive to recall an elementary proof of this result (see [Lemma 2](https://arxiv.org/abs/1507.02803)):
+$$
+  \begin{align*}
+  \KL(P\parallel Q)&\le \chi^2(P\parallel Q) \\
+  & := \sum_{x} \frac{ (P(x) - Q(x))^2 }{Q(x)} \\
+  &\le \frac{1}{\alpha_Q} \left(\sum_x | P(x) - Q(x) |\right)^2 \\ 
+  &= \frac{1}{\alpha_Q} |P-Q|_1^2,
+  \end{align*}
+$$
+
+where the inequality between KL and $\chi^2$ divergences is well-known (see e.g., [here](https://people.ece.cornell.edu/acharya/teaching/ece6980f16/scribing/26-aug-16.pdf)): for $x\in (0, 1]$ we have $\log x \le x-1$ (which follows by evaluation at $x=1$ and comparison of the derivatives on the interval $(0, 1]$), so that
+$$
+ \begin{align*}
+\mathrm{KL}(P\parallel Q) &= \sum_x P(x)\log \frac{P(x)}{Q(x)} \\&\le \sum_{x} P(x) \left( \frac{P(x)}{Q(x)}-1 \right) \\
+&= \sum_x \left(\frac{ P^2(x)}{Q(x)} + Q(x) - 2P(x)\right) \\
+&= \sum_x \frac{ (P(x) - Q(x))^2 }{Q(x)} \\
+&= \chi^2(P\parallel Q).
+\end{align*}
+$$
 
 ### Approximating the point distributions with Bernoulli distribution
 
