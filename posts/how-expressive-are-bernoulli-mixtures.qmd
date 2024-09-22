@@ -11,17 +11,250 @@ format:
 jupyter: python3
 ---
 
-\newcommand\nGenes
+\newcommand{\nGenes}{G}
+\newcommand{\YSpace}{\mathcal Y}
+\newcommand{\Prob}{\mathbb P}
+\newcommand{\Ber}{\mathrm{Ber}}
+\newcommand{\Berg}{\Ber^{\nGenes}}
+\newcommand{\BarBer}{\overline{\Ber}}
 
-We have [already discussed](beta-bernoulli.qmd) that all the distributions with only two outcomes are Bernoulli distributions.
-Similarly, a distribution on a finite set has to be a categorical distribution (so, if it has the full support, it has to be in an [exponential family](https://en.wikipedia.org/wiki/Exponential_family)).
+## Bernoulli distributions 
 
-Let's now think about the probability distributions on the space of binary vectors, $\mathcal Y = \{0, 1\}^G$. The most general case is the categorical distribution mentioned above, which requires specifying a probability table with $2^G$ entries (with $2^G-1$ free parameters).
-On the other hand, we can consider a distribution with $G$ parameters, which corresponds to $G$ independent (but not necessarily identically distributed) Bernoulli trials:
+Let $p\in (0, 1)$ be a parameter and $\Ber(p)$ be the Bernoulli distribution, with $\Ber(y\mid p) = p^y(1-p)^{1-y}$ for $y\in \{0, 1\}$.
+Let's define a slightly more general family of distributions, $\BarBer(p)$, for $p\in [0, 1]$, as follows:
+$$
+  \BarBer(p) = p\delta_1 + (1-p)\delta_0 = \begin{cases}
+    \delta_0 &\text{ if } p=0\\
+    \delta_1 &\text{ if } p=1\\
+    \Ber(p) &\text{otherwise}
+  \end{cases}
+$$
 
-\newcommand\G{{\mathcal{y}}}
+Namely, the $\Ber$ distributions model a procedure where a biased (e.g., by bending) coin with two sides is tossed, but $\BarBer$ distributions allow tossing one-sided coins.
+As we have [already discussed](beta-bernoulli.qmd), $\BarBer$ distributions are the most general probability distributions on the space $\{0, 1\}$.
+Similarly, $\Ber$ distributions are the most general probability distributions on $\{0, 1\}$ *with full support*, allowing for both outcomes to happen.
+
+This leads to the question: is it very problematic if we use $\Ber$ distributions to model a data generating process which, in fact, belongs to the $\BarBer$ family?
+We can expect that $\Ber(u)$ for $u \ll 1$ is rather a good model for $\BarBer(0)$ (and, similarly, $\Ber(1-u)$ should be a good model for $\BarBer(1)$).
+
+Sometimes, when we program simulators, we may want to distinguish the atomic distribution $\delta_0$ from $\Ber(u)$ with small $u$ due to explicitly enforcing some constrains: not enforcing them can break the simulator in a specific place.
+
+However, if we think about a modelling problem, where we observe some data points $y_1, \dotsc, y_N$ and want to learn the underlying distribution, we may prefer to leave some probability that the future outcome may be non-zero, even if all the data points seen so far are zeros.
+
+Today we will focus on the second kind of problems, where we use $\Ber$ distributions, rather than $\BarBer$, either for the reason outlined above or for convenience: $\Ber$ distributions never assign zero probability to any data point.
+
+## Approximation bounds
+
+\newcommand{\TV}{\mathrm{TV}}
+\newcommand{\KL}{\mathrm{KL}}
+
+From now on we assume that $\YSpace$ is a finite space and $P$ and $Q$ be two probability distributions on it.
+
+### Total variation distance
+
+The [total variation distance](https://en.wikipedia.org/wiki/Total_variation_distance_of_probability_measures) is defined as
+$$
+  \TV(P, Q) = \max_{A \subseteq \YSpace} |P(A) - Q(A)|.
+$$
+
+It's quite interesting that $\TV(P, Q)$ is essentially a scaled version of the $L_1$ norm:
+$$
+  \TV(P, Q) = \frac{1}{2} | P-Q |_{1} = \frac 12 \sum_{y\in \YSpace} | P(y) - Q(y)|.
+$$
+
+The proof essentially follows by defining a signed measure $\mu = P - Q$ and building the Hahn decomposition: let $A^+ = \{y\in \YSpace \mid \mu \ge 0\}$ and $A^- = \YSpace - A^+ = \{y\in \YSpace \mid \mu < 0\}$. We have
+$$
+  0 = P(\YSpace) - Q(\YSpace) = \mu(\YSpace) = \mu(A^+) + \mu(A^-),
+$$
+
+so that $\mu(A^+) = -\mu(A^-)$.
+
+Now for every $A\subseteq \YSpace$ we have
+$$
+  \mu(A) = \mu(A\cap A^+) + \mu(A\cap A^-) \le \mu(A^+).
+$$
+
+Similarly, $-\mu(A) \le -\mu(A^-) \le \mu(A^+)$.
+Hence, we see that $A^+$ can be taken as an optimal $A$ when maximising the total variation distance and
+$$
+  \TV(P, Q) = \sum_{y : P(y) \ge Q(y) } \left(P(y) - Q(y)\right).
+$$
+
+We now have
+$$\begin{align*}
+  \TV(P, Q) &= \mu(A^+) \\
+  &= \frac{1}{2}( \mu(A^+) - \mu(A^-) ) \\
+  &= \frac{1}{2} \left( \sum_{y \in A^+ } \mu(y) + \sum_{y\in A^-} (-\mu(y))  \right) \\
+  &= \frac 12 \sum_{y\in \YSpace} |\mu(y)| = \frac 12 |\mu|_1.
+\end{align*}
+$$
+
+### Kullback-Leibler divergence
+
+If $P\ll Q$ (i.e., whenever $Q(y) = 0$ we have $P(y) = 0$. It's a very convenient condition when $Q(y) > 0$ for all $y\in \YSpace$), we can define also the [Kullback-Leibler divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence):
+$$
+  \KL(P\parallel Q) = \sum_{y\in \YSpace} P(y) \frac{P(y)}{Q(y)},
+$$
+
+under the convention that $0\log 0 = 0 \log \frac{0}{0} = 0$.
+If $P \not\ll Q$, we define $\KL(P\parallel Q) = +\infty$.
+
+### Pinsker's inequalities
+
+[Pinsker's inequality](https://en.wikipedia.org/wiki/Pinsker%27s_inequality) says that for arbitrary $P$ and $Q$
+$$
+  \TV(P, Q) \le \sqrt{\frac 12 \KL(P\parallel Q)}.
+$$
+
+This inequality also generalises to infinite and not necessarily discrete spaces. However, as we work with finite spaces, we have also the *inverse Pinsker's inequality* (see Lemma 4.1 [here](https://arxiv.org/abs/1801.06348) or Lemma 2 [there](https://arxiv.org/abs/1507.02803)) at our disposal: let $P\ll Q$ and $\alpha_Q = \min_{y\colon Q(y) > 0} Q(y)$.
+Then, we have
+$$
+  \KL(P \parallel Q) \le \frac{1}{\alpha_Q} \TV(P, Q)^2.
+$$
+
+What is important here is that $\alpha_Q$ depends on $Q$.
+
+### Approximating the point distributions with Bernoulli distribution
+
+Let's see how well we can compare the point distribution $\delta_0$ with $\Ber(\epsilon)$ for $\epsilon > 0$.
+We have
+$$
+  \TV( \Ber(\epsilon), \delta_0 ) = \frac{1}{2}\left( |\epsilon| + |1 - (1-\epsilon)| \right) = \epsilon,
+$$
+
+meaning that this discrepancy measure can attain arbitrarily close value.
+
+When we look for maximum likelihood solution (or [employ Bayesian inference](discrete-intractable-likelihood.qmd)), we are interested in $\KL(\delta_0 \parallel \Ber(\epsilon)) < \infty$, as $\Ber(\epsilon)$ has full support.
+We can calculate this quantity exactly:
+$$
+  \KL(\delta_0 \parallel \Ber(\epsilon)) = \log \frac{1}{1-\epsilon} = -\log(1-\epsilon) =  \epsilon + \frac{\epsilon^2}2 + \frac{\epsilon^3}{3} + \cdots,
+$$
+
+which also can be made arbitrarily small. Namely, for every desired $\ell > 0$ we can find an $\tilde \epsilon > 0$ such that for all $\epsilon < \tilde \epsilon$ we have $\KL(\delta_0\parallel \Ber(\epsilon)) < \ell$.
+This is useful for establishing the *KL support of the prior* condition, appearing in [Schwartz's theorem](https://www.dianacai.com/blog/2021/02/14/schwartz-theorem-posterior-consistency/).
+
+On the other hand, we see that because $\Ber(\epsilon)\not\ll \delta_0$, we have
+$$
+  \KL(\Ber(\epsilon) \parallel \delta_0 ) = +\infty,
+$$
+
+meaning that variational inference with arbitrary $\epsilon$ is always an "equally bad" approximation. Intuitively and very informally speaking, variational inference encourages approximations with lighter tails than the ground-truth distribution and it's not possible to have lighter "tails" than a point mass! 
+
+## Moving to the higher dimensions
+
+Let's now think about the probability distributions on the space of binary vectors, $\YSpace = \{0, 1\}^\nGenes$.
+Similarly as above, all the distributions with full support on a finite set have to be the categorical distributions (in this case the probability vector has $2^G$ components, with $2^G-1$ free parameters due to the usual constraint of summing up to one).
+Removing the full support requirement we obtain a discrete distributions with at most $2^G$ atoms.
+
+Let's consider perhaps the simplest distribution we could use to model the data points in the $\YSpace$ space: 
+$$
+\Berg(y \mid p) = \prod_{g=1}^{\nGenes} \Ber(y_g \mid p_g). 
+$$
+
+In this case, we assume that each entry is the outcome of a coin toss and the coin tosses are independent (even though coins do not have to be identical. For example, we allow $p_1 \neq p_2$).
+
+As such, this distribution is not particularly expressive and will not be suitable to model dependencies between different entries, which are very important when modelling [spin lattices](https://en.wikipedia.org/wiki/Ising_model) or genomic data.
+We generally may prefer to use a more expressive distribution, such [energy-based models](discrete-intractable-likelihood.qmd) (including the [Ising model](distinct-ising-models.qmd)) or [mixture](mixtures-and-admixtures.qmd) [models](dirichlet-process.qmd).
+
+Let's focus on mixture models. In a model with $K$ components, we have parameters $p\in (0, 1)^{K\times G}$ and $u \in \Delta^{K-1}$ resulting in the distribution:
+
+\newcommand{\BerMix}{\mathrm{BerMix}}
 
 $$
-P(y\mid )
+  \BerMix(p, u) = \sum_{k=1}^K u_k\Berg(p_k),
+$$
+i.e.,
+$$
+  \BerMix(y\mid p, u) = \sum_{k=1}^K u_k\Berg(y\mid p_k),
 $$
 
+One usually hopes to find a relatively small number of components $K$.
+However, in this blog post we allow arbitrarily large $K$ and focus on the following questions: how expressive is this family of mixture models? Can it approximate arbitrary distributions well?
+
+Let's consider the ground-truth data distribution
+$$
+  D = \sum_{k=1}^{2^G} \pi_k \delta_{y_k},
+$$
+
+where $y_k \in \YSpace$ are all the $2^G$ possible atoms and $\pi \in \bar \Delta^{2^G - 1}$ are probabilities of observing different atoms. We allow $\pi_k = 0$ for some $k$ (i.e., we work with the closed probability simplex, rather than the open one), which result in a smaller number of observed atoms.
+
+We want to find a Bernoulli mixture which will approximate this distribution well.
+Of course, using models with a restriction on $K\ll 2^G$ is more interesting. However, these models also seem to be much harder to study.
+Let's instead use a model with all possible $K=2^G$ components of the following form:
+$$
+  P_\epsilon = \sum_{k=1}^{K} u(\pi_k, \epsilon) \Berg( s_\epsilon(y_k) ),
+$$
+
+where $s_\epsilon(y) = (1-\epsilon) y + \epsilon(1-y)$ are noisy versions of the atoms (and [can be understood](beta-bernoulli.qmd) as actually tossing coins with biases $\epsilon$ and $1-\epsilon$) and $u(\pi_k, \epsilon) = \frac{ \pi_k + \epsilon }{ 1 + \epsilon K}$ ensures that the mixing weights belong to the open simplex $\Delta^{K-1}$.
+
+Informally, we expect that for $\epsilon \approx 0$ we would have $P_\epsilon \approx D$, but let's try to make it precise in terms of the discrepancy measures used earlier.
+
+### Bounding the total variation distance 
+
+Recall that $\TV( D, P_\epsilon )$ is half of the $L_1$ norm. Let's focus on $y_k \in \YSpace$. We have
+$$
+|P_\epsilon(y_k) - D(y_k)| \le | u(\pi_k, \epsilon) \Berg(y_k \mid s_\epsilon(y_k) ) - \pi_k | + \sum_{a\neq k} u(\pi_a, \epsilon) \Berg(y_k \mid s_\epsilon(y_a))
+$$
+
+We have 
+$$
+  | u(\pi_k, \epsilon) \Berg(y_k \mid s_\epsilon(y_k) ) - \pi_k | = \left| \frac{\pi_k + \epsilon}{1+\epsilon K} (1-\epsilon)^G - \pi_k \right|,
+$$
+
+which intuitively can be made arbitrarily small by appropriately $\epsilon$. More precisely, we have a Taylor approximation (employing the [infinitesimal notation](https://en.wikipedia.org/wiki/Big_O_notation#Infinitesimal_asymptotics) for big $O$):
+$$
+  \begin{align*}
+  | u(\pi_k, \epsilon) \Berg(y_k \mid s_\epsilon(y_k) ) - \pi_k | &= \left| 1 - (2^G + G) \pi_k \right| \epsilon  + O(\epsilon^2) \\
+  &= (1 + G + 2^G)\epsilon + O(\epsilon^2)
+  \end{align*}
+$$
+
+Now for $a\neq k$ and $\epsilon < 1/2$ we have
+$$
+  u(\pi_a, \alpha) \Berg(y_k \mid s_\epsilon(y_a) ) \le \Berg(y_k \mid s_\epsilon(y_a)) \le \epsilon (1-\epsilon)^{G-1} \le \epsilon,
+$$
+
+where the bound follows from the following reasoning: if $y_k = y_a$ we have the probability $(1-\epsilon)^G$ of obtaining the right outcome $y_k$ by not encountering any bitflip due to the noise $\epsilon$. 
+However, as $y_k\neq y_a$, there have to be $m\ge 1$ positions on which we have to use the $\epsilon$ noise to obtain the desired result $y_k$.
+Hence, the probability in this case is $\epsilon^m(1-\epsilon)^{G-m} \le \epsilon (1-\epsilon)^{G-1}$ as we have $\epsilon < 1/2$.
+
+To sum up, we have
+$$
+  | D(y_k) - P_\epsilon(y_k) | \le C \epsilon + O(\epsilon^2),
+$$
+
+where $C$ depends only on $G$ (and it seems that $C=O(2^G)$ is growing exponentially quickly with $G$, so $\epsilon$ has to be very tiny).
+By summing up over all $k$ we have
+$$
+  \TV(D, P_\epsilon) \le 2^G \cdot C \cdot \epsilon + O(\epsilon^2),
+$$
+
+so that it can be made arbitrarily small.
+
+### Bounding the KL divergences
+
+Let's think about the variational approximation with $P_\epsilon$ to $D$.
+If $D$ does not have full support, then we have $P_\epsilon \not\ll D$ and $\KL( P_\epsilon \parallel D) = +\infty$. 
+
+However, if $D$ is supported on the whole $\mathcal Y$, we can use the inverse Pinsker's inequality for some $\alpha_D > 0$ and obtain
+$$
+  \KL( P_\epsilon \parallel D) \le \frac{1}{\alpha_D} O(\epsilon^2).
+$$
+
+Let's now think about $\KL(D \parallel P_\epsilon)$.
+In this case, we have $\alpha_\epsilon := \alpha_{P_\epsilon}$ varying with $\epsilon$. Let's try to bound it from below: 
+$$
+  \alpha_\epsilon \ge P_\epsilon(y_k) \ge \frac{ \pi_k + \epsilon}{1+\epsilon K} (1-\epsilon)^G,
+$$
+
+so that
+
+$$
+  \frac{1}{\alpha_\epsilon} \le \frac{(1-\epsilon)^{-G} (1+ K\epsilon) }{\pi_k + \epsilon}.
+$$
+
+If $D$ is fully supported, we have $\pi_k > 0$ and $\KL(P_\epsilon \parallel D) \le O(\epsilon^2)$ should also decrease at the quadratic rate. However, if $\pi_k = 0$ for some $k$, we still *seem to have* $\KL(P_\epsilon \parallel D) \le O(\epsilon)$.
+
+Hence, it seems to me that Bernoulli mixtures (albeit with too many components to be practically useful) approximate well arbitrary distributions in terms of the total variation and forward KL divergence, while the backward KL divergence is well-approximated whenever the distribution has full support.
+
+However, I am not sure if I did not make a mistake somewhere in the calculations: if you something suspicious with this derivation, please let me know. 

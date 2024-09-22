@@ -61,6 +61,8 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -112,6 +114,7 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#premise" id="toc-premise" class="nav-link active" data-scroll-target="#premise">Premise</a></li>
   <li><a href="#abstract" id="toc-abstract" class="nav-link" data-scroll-target="#abstract">Abstract</a></li>
+  <li><a href="#errata" id="toc-errata" class="nav-link" data-scroll-target="#errata">Errata</a></li>
   <li><a href="#links" id="toc-links" class="nav-link" data-scroll-target="#links">Links</a></li>
   <li><a href="#citation" id="toc-citation" class="nav-link" data-scroll-target="#citation">Citation</a></li>
   <li><a href="#acknowledgments" id="toc-acknowledgments" class="nav-link" data-scroll-target="#acknowledgments">Acknowledgments</a></li>
@@ -149,6 +152,12 @@ ul.task-list li input[type="checkbox"] {
 <section id="abstract" class="level2">
 <h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
 <p>Understanding how different classes are distributed in an unlabeled data set is an important challenge for the calibration of probabilistic classifiers and uncertainty quantification. Approaches like adjusted classify and count, black-box shift estimators, and invariant ratio estimators use an auxiliary (and potentially biased) black-box classifier trained on a different (shifted) data set to estimate the class distribution and yield asymptotic guarantees under weak assumptions. We demonstrate that all these algorithms are closely related to the inference in a particular Bayesian model, approximating the assumed ground-truth generative process. Then, we discuss an efficient Markov Chain Monte Carlo sampling scheme for the introduced model and show an asymptotic consistency guarantee in the large-data limit. We compare the introduced model against the established point estimators in a variety of scenarios, and show it is competitive, and in some cases superior, with the state of the art.</p>
+</section>
+<section id="errata" class="level2">
+<h2 class="anchored" data-anchor-id="errata">Errata</h2>
+<ul>
+<li>Lemma A.3 it should read <span class="math inline">\(\int_{\mathcal X} \left| \sum_{y\in \mathcal{Y} } \lambda_y k_y(x) \right|\)</span>, rather than <span class="math inline">\(\int_{\mathcal X} \left| \sum_{y\in \mathcal{Y} } k_y(x) \right|\)</span>.</li>
+</ul>
 </section>
 <section id="links" class="level2">
 <h2 class="anchored" data-anchor-id="links">Links</h2>
