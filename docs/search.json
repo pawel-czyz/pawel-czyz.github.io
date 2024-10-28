@@ -1062,5 +1062,47 @@
     "title": "How expressive are Bernoulli mixture models?",
     "section": "TODO: Old results",
     "text": "TODO: Old results\nWe have seen that all the distributions with two outcomes and full support are Bernoulli distributions.\nHowever, the above considerations have a requirement: the full support."
+  },
+  {
+    "objectID": "posts/stirling-probabilistic-proof.html",
+    "href": "posts/stirling-probabilistic-proof.html",
+    "title": "A probabilistic proof of the Stirling’s formula",
+    "section": "",
+    "text": "I was looking at arXiv and I noticed a new preprint from Nils Lid Hjort and Emil Aas Stoltenberg, called Probability Proofs for Stirling (and More): the Ubiquitous Role of \\(\\sqrt{2\\pi}\\). I read many papers authored by N.L. Hjort, and they were all great, so I immediately clicked into this one.\nIt was worth it. The paper is beautiful."
+  },
+  {
+    "objectID": "posts/stirling-probabilistic-proof.html#what-is-the-stirlings-formula",
+    "href": "posts/stirling-probabilistic-proof.html#what-is-the-stirlings-formula",
+    "title": "A probabilistic proof of the Stirling’s formula",
+    "section": "What is the Stirling’s formula?",
+    "text": "What is the Stirling’s formula?\nIn a statistical physics or an algorithms class, one quickly learns about the Stirling’s approximation \\[\n  \\log(n!) \\approx n \\log n - n,\n\\]\nwhere the approximation error is about \\(O(\\log n)\\). More precisely, one has \\[\n\\lim_{n\\to \\infty} \\frac{n!}{n^{n+1/2} \\exp(-n) } = \\sqrt{2\\pi}.\n\\]\nAs Hjort and Stoltenberg (2024) note, both the \\(\\exp\\) function and the \\(\\sqrt{2\\pi}\\) constant appear also in the definition of the standard normal distribution. There is a standard normal distribution and a limit with \\(n\\to \\infty\\), so one can think whether the central limit theorem could somehow be involved. And it can!\nBelow we will sketch two proofs included in the paper – the original manuscript proves them formally, as well as many related results. There exist also variations on these two proofs in the literature, for example:\n\nR.A. Khan, A probabilistic proof of Stirling’s formula, The American Mathematical Monthly (1974).\nC.S. Wong, A note on the central limit theorem, The American Mathematical Monthly (1977).\nC.R. Blyth and P.K. Pathak, A note on easy proofs of Stirling’s theorem (1986).\nK.L.D. Gunawardena, Stirling’s formula: An application of the central limit theorem, Missouri Journal of Mathematical Sciences (1993)."
+  },
+  {
+    "objectID": "posts/stirling-probabilistic-proof.html#the-general-idea",
+    "href": "posts/stirling-probabilistic-proof.html#the-general-idea",
+    "title": "A probabilistic proof of the Stirling’s formula",
+    "section": "The general idea",
+    "text": "The general idea\nLet \\(X_i\\) be independent and identically distributed variables. We assume that the mean \\(\\mu := \\mathbb E[X_i]\\) and the standard deviation \\(\\sigma = \\sqrt{\\mathbb V[X_i]}\\) both exist.\nLet \\(Y_n = \\sum_{i=1}^n X_i\\) be a prefix sum and \\[\nZ_n = \\frac{Y_n - \\mu n}{\\sigma \\sqrt{n}}\n\\] be the standardized version of it. The central limit theorem asserts that \\(Z_n\\) converges in distribution to the standard normal.\nLet \\[\n  L_n = \\mathbb E[ Z_n  \\cdot \\mathbf{1}[Z_n \\ge 0]]\n\\]\nand\n\\[\n  L = \\mathbb E[ Z  \\cdot \\mathbf{1}[Z \\ge 0]] = \\frac{1}{\\sqrt{2\\pi}}.\n\\]\nIn this case, we have \\(L_n \\to L\\) as \\(n\\to \\infty\\)."
+  },
+  {
+    "objectID": "posts/stirling-probabilistic-proof.html#poisson-random-variables",
+    "href": "posts/stirling-probabilistic-proof.html#poisson-random-variables",
+    "title": "A probabilistic proof of the Stirling’s formula",
+    "section": "Poisson random variables",
+    "text": "Poisson random variables\nLet \\(X_i\\sim \\mathrm{Poisson}(1)\\), so that \\(\\mathbb P(X_i = k) = \\frac{e^{-1}}{k!}\\) for non-negative integers \\(k\\in \\{0, 1, 2, \\dotsc\\}\\) and \\(\\mu = \\sigma = 1\\). As \\(Y_n = X_1 + \\cdots + X_n\\), we have \\(Y_n\\sim \\mathrm{Poisson}(n)\\) and \\[\n\\mathbb P(Y_n = k) = \\frac{ e^{-n}n^k }{k!}.\n\\]\nWe have therefore \\[\n  L_n = \\sum_{k\\ge n} \\frac{k-n}{\\sqrt{n}} \\mathbb P(Y_n = k) = \\frac{e^{-n} n^{n+\\frac{1}{2}}}{n!},\n\\]\nwhich tends to \\(L = 1/\\sqrt{2\\pi}\\).\nThe last identity can be proven using a telescoping sum expansion in the paper, or by using Mathematica:\np[k_] := (Exp[-n] n^k)/Factorial[k]\nSum[(k - n)/Sqrt[n]  p[k], {k, n, \\[Infinity]}]\nThis is proof is very elegant. It is related to the proof of Wong (1977); Blyth and Pathak (1986) also provide a version of the proof employing \\(\\mathbb E[|Z_n|]\\), rather than \\(\\mathbb E[Z_n \\cdot \\mathbf 1[Z_n\\ge 0]]\\)."
+  },
+  {
+    "objectID": "posts/stirling-probabilistic-proof.html#exponential-random-variables",
+    "href": "posts/stirling-probabilistic-proof.html#exponential-random-variables",
+    "title": "A probabilistic proof of the Stirling’s formula",
+    "section": "Exponential random variables",
+    "text": "Exponential random variables\nLet \\(X_i \\sim \\mathrm{Exp}(1) = \\mathrm{Gamma}(1, 1)\\), so that \\(\\mu = \\sigma = 1\\) and \\(Y_n \\sim \\mathrm{Gamma}(n, 1)\\). The probability density function of \\(Y_n\\) is, hence, given by \\[\n  g_n(t) = \\frac{1}{\\Gamma(n)}t^{n-1}e^{-t},\n\\]\nwhere \\(\\Gamma(n) = (n-1)!\\) is the gamma function.\nWe have \\(t g_n(t) = n g_{n+1}(t)\\) and \\[\n  L_n = \\int\\limits_n^\\infty \\frac{t-n}{\\sqrt{n}} g_n(t)\\, \\mathrm{d}t = \\sqrt{n} \\int \\limits_n^\\infty \\left( g_{n+1}(t) - g_n(t) \\right)\\, \\mathrm{d}t.\n\\]\nThe last integral can be calculated in Mathematica:\ng[n_, t_] := 1/Factorial[n - 1] t^(n - 1) Exp[-t];\n\nIntegrate[g[n + 1, t] - g[n, t], {t, n, \\[Infinity]}]\nwhich evaluates to \\(e^nn^n/n!\\), which is exactly what we need.\nThis proof is the most similar to the ones from Gunawardena (1993) and, if one works with \\(|Z_n|\\), to Khan (1974)."
+  },
+  {
+    "objectID": "posts/stirling-probabilistic-proof.html#summary",
+    "href": "posts/stirling-probabilistic-proof.html#summary",
+    "title": "A probabilistic proof of the Stirling’s formula",
+    "section": "Summary",
+    "text": "Summary\nThe paper of Hjort and Stoltenberg is great! Apart from full versions of the proof sketches presented above, it also contains several other results and a nice exposition of the history of the related ideas."
   }
 ]

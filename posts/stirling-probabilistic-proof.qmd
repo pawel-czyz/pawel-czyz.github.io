@@ -1,0 +1,115 @@
+---
+title: "A probabilistic proof of the Stirling's formula"
+description: "A short note on a beautiful new preprint."
+author: "Paweł Czyż"
+date: "10/28/2024"
+---
+
+I was looking at arXiv and I noticed a new preprint from [Nils Lid Hjort](https://en.wikipedia.org/wiki/Nils_Lid_Hjort) and Emil Aas Stoltenberg, called [*Probability Proofs for Stirling (and More): the Ubiquitous Role of $\sqrt{2\pi}$*](https://arxiv.org/abs/2410.19555).
+I read many papers authored by N.L. Hjort, and they were all great, so I immediately clicked into this one.
+
+It was worth it. The paper is beautiful.
+
+## What is the Stirling's formula?
+
+In a [statistical physics](https://arxiv.org/abs/2211.11447) or an [algorithms](https://en.wikipedia.org/wiki/Comparison_sort#Number_of_comparisons_required_to_sort_a_list) class, one quickly learns about the Stirling's approximation
+$$
+  \log(n!) \approx n \log n - n,
+$$
+
+where the approximation error is about $O(\log n)$.
+More precisely, one has
+$$
+ \lim_{n\to \infty} \frac{n!}{n^{n+1/2} \exp(-n) } = \sqrt{2\pi}.
+$$
+
+As Hjort and Stoltenberg (2024) note, both the $\exp$ function and the $\sqrt{2\pi}$ constant appear also in the definition of the standard normal distribution.
+There is a standard normal distribution and a limit with $n\to \infty$, so one can think whether the [central limit theorem](https://en.wikipedia.org/wiki/Central_limit_theorem) could somehow be involved. And it can!
+
+Below we will sketch two proofs included in the paper – the original manuscript proves them formally, as well as many related results.
+There exist also variations on these two proofs in the literature, for example:
+
+  - R.A. Khan, [*A probabilistic proof of Stirling's formula*](https://www.jstor.org/stable/2318999), The American Mathematical Monthly (1974).
+  - C.S. Wong, [*A note on the central limit theorem*](https://doi.org/10.1080/00029890.1977.11994391), The American Mathematical Monthly (1977).
+  - C.R. Blyth and P.K. Pathak, [*A note on easy proofs of Stirling's theorem*](https://www.jstor.org/stable/2323600) (1986).
+  - K.L.D. Gunawardena, [*Stirling's formula: An application of the central limit theorem*](https://doi.org/10.35834/1993/0503107), Missouri Journal of Mathematical Sciences (1993).
+
+## The general idea
+
+Let $X_i$ be independent and identically distributed variables. We assume that the mean $\mu := \mathbb E[X_i]$ and the standard deviation $\sigma = \sqrt{\mathbb V[X_i]}$ both exist. 
+
+Let $Y_n = \sum_{i=1}^n X_i$ be a prefix sum and 
+$$
+Z_n = \frac{Y_n - \mu n}{\sigma \sqrt{n}}
+$$
+be the standardized version of it.
+The central limit theorem asserts that $Z_n$ converges in distribution to the standard normal.
+
+Let
+$$
+  L_n = \mathbb E[ Z_n  \cdot \mathbf{1}[Z_n \ge 0]]
+$$
+
+and
+
+$$
+  L = \mathbb E[ Z  \cdot \mathbf{1}[Z \ge 0]] = \frac{1}{\sqrt{2\pi}}.
+$$
+
+In this case, we have $L_n \to L$ as $n\to \infty$.
+
+## Poisson random variables
+Let $X_i\sim \mathrm{Poisson}(1)$, so that $\mathbb P(X_i = k) = \frac{e^{-1}}{k!}$ for non-negative integers $k\in \{0, 1, 2, \dotsc\}$ and $\mu = \sigma = 1$.
+As $Y_n = X_1 + \cdots + X_n$, we have $Y_n\sim \mathrm{Poisson}(n)$ and 
+$$
+\mathbb P(Y_n = k) = \frac{ e^{-n}n^k }{k!}.
+$$
+
+We have therefore
+$$
+  L_n = \sum_{k\ge n} \frac{k-n}{\sqrt{n}} \mathbb P(Y_n = k) = \frac{e^{-n} n^{n+\frac{1}{2}}}{n!},
+$$
+
+which tends to $L = 1/\sqrt{2\pi}$.
+
+The last identity can be proven using a telescoping sum expansion in the paper, or by using Mathematica:
+
+```Mathematica
+p[k_] := (Exp[-n] n^k)/Factorial[k]
+Sum[(k - n)/Sqrt[n]  p[k], {k, n, \[Infinity]}]
+```
+
+This is proof is very elegant. It is related to the proof of Wong (1977); Blyth and Pathak (1986) also provide a version of the proof employing $\mathbb E[|Z_n|]$, rather than $\mathbb E[Z_n \cdot \mathbf 1[Z_n\ge 0]]$.
+
+## Exponential random variables
+
+Let $X_i \sim \mathrm{Exp}(1) = \mathrm{Gamma}(1, 1)$, so that $\mu = \sigma = 1$ and $Y_n \sim \mathrm{Gamma}(n, 1)$.
+The probability density function of $Y_n$ is, hence, given by
+$$
+  g_n(t) = \frac{1}{\Gamma(n)}t^{n-1}e^{-t},
+$$
+
+where $\Gamma(n) = (n-1)!$ is the [gamma function](https://en.wikipedia.org/wiki/Gamma_function).
+
+We have $t g_n(t) = n g_{n+1}(t)$ and
+$$
+  L_n = \int\limits_n^\infty \frac{t-n}{\sqrt{n}} g_n(t)\, \mathrm{d}t = \sqrt{n} \int \limits_n^\infty \left( g_{n+1}(t) - g_n(t) \right)\, \mathrm{d}t.
+$$
+
+The last integral can be calculated in Mathematica:
+
+```Mathematica
+g[n_, t_] := 1/Factorial[n - 1] t^(n - 1) Exp[-t];
+
+Integrate[g[n + 1, t] - g[n, t], {t, n, \[Infinity]}]
+```
+
+which evaluates to $e^nn^n/n!$, which is exactly what we need.
+
+This proof is the most similar to the ones from Gunawardena (1993) and, if one works with $|Z_n|$, to Khan (1974).
+
+## Summary
+
+The paper of [Hjort and Stoltenberg](https://arxiv.org/abs/2410.19555) is great! 
+Apart from full versions of the proof sketches presented above, it also contains several other results and a nice exposition of the history of the related ideas.
+   
