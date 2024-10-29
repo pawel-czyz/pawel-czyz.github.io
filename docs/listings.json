@@ -11,6 +11,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/scrna-seq-literature.html",
       "/posts/stirling-probabilistic-proof.html",
       "/posts/how-expressive-are-bernoulli-mixtures.html",
       "/posts/non-reversible-parallel-tempering.html",
