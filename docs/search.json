@@ -1104,5 +1104,54 @@
     "title": "A probabilistic proof of the Stirling’s formula",
     "section": "Summary",
     "text": "Summary\nThe paper of Hjort and Stoltenberg is great! Apart from full versions of the proof sketches presented above, it also contains several other results and a nice exposition of the history of the related ideas."
+  },
+  {
+    "objectID": "posts/scrna-seq-literature.html",
+    "href": "posts/scrna-seq-literature.html",
+    "title": "A very subjective single-cell transcriptomics reading list",
+    "section": "",
+    "text": "I do not think that single-cell transcriptomics (scRNA-seq) is easy data to model. The signal-to-noise ratio is low. Batch effects are everywhere. Over 1700 different methods exist, but understanding when a particular method should (or should not) be used is hard to navigate.\nBelow I assembled a subjective reading list. It consists of resources which I wish I had known when I was working on the topic – perhaps it will turn out to be useful for somebody. If you think I have missed something important (and I most definitely have), let me know!"
+  },
+  {
+    "objectID": "posts/scrna-seq-literature.html#eleven-grand-challenges",
+    "href": "posts/scrna-seq-literature.html#eleven-grand-challenges",
+    "title": "A very subjective single-cell transcriptomics reading list",
+    "section": "Eleven grand challenges",
+    "text": "Eleven grand challenges\nOne of my favourite papers is the review by D. Lähnemann, et al. Eleven grand challenges in single-cell data science.\nI do not know how many times I read this paper, but whenever I open it, I see something new. I think it is an excellent starting point, showing the complexity of the problem."
+  },
+  {
+    "objectID": "posts/scrna-seq-literature.html#how-to-model-the-data",
+    "href": "posts/scrna-seq-literature.html#how-to-model-the-data",
+    "title": "A very subjective single-cell transcriptomics reading list",
+    "section": "How to model the data?",
+    "text": "How to model the data?\nRafael Irizarry gave a wonderful talk Statistical challenges in single cell RNA-seq technologies on modelling scRNA-seq data. Watching it should be complemented by reading Feature selection and dimension reduction for single-cell RNA-Seq based on a multinomial model by F.W. Townes et al. I very much like the explicit focus on modelling and model validation. This is important.\nA great review of statistical models for high-dimensional data is in Kevin Murphy’s Probabilistic Machine Learning book (vol. 2, chapter 28). I think reading this chapter (and then re-reading it. And again, but this time reading also the references) is a great method to build some intuition about good modeling strategies, which can work on a particular data set.\nI always appreciate when people see the models as building blocks and can adjust or expand them as needed for a particular problems. These methods are closely connected and understanding underlying assumptions and mathematical structure is important to develop principled model expansions.\nTo give another source for learning about different models, I very much enjoyed reading the material from Jeff Miller’s Bayesian Methodology in Biostatistics course."
+  },
+  {
+    "objectID": "posts/scrna-seq-literature.html#the-double-dipping-problem",
+    "href": "posts/scrna-seq-literature.html#the-double-dipping-problem",
+    "title": "A very subjective single-cell transcriptomics reading list",
+    "section": "The double dipping problem",
+    "text": "The double dipping problem\nThe double dipping problem is a common mistakes is single-cell analyses, resulting in arguably false discoveries. There is an excellent talk from Daniela Witten on the topic. It can be complemented by reading many associated papers."
+  },
+  {
+    "objectID": "posts/scrna-seq-literature.html#beware-when-interpreting-clusters-and-latent-factors",
+    "href": "posts/scrna-seq-literature.html#beware-when-interpreting-clusters-and-latent-factors",
+    "title": "A very subjective single-cell transcriptomics reading list",
+    "section": "Beware when interpreting clusters and latent factors",
+    "text": "Beware when interpreting clusters and latent factors\nLatent variable models are great to look at the data. However, they are also easy to overinterpret and can lead to wrong conclusions. After all, exploratory data analysis is about looking at the data from many perspectives and building some understanding, perhaps formalised in terms of related scientific hypotheses. We should remember that many patterns found can be just artifacts of the model or noise in the data.\nI think that this topic deserves a separate blog post. For now I’ll just link to several excellent blog posts, written by Cosma Shalizi, Frank E. Harrell, Darren Dahly. For a longer read, there is this excellent article by D.J. Lawson et al. A tutorial on how not to over-interpret STRUCTURE and ADMIXTURE bar plots."
+  },
+  {
+    "objectID": "posts/scrna-seq-literature.html#simulating-the-data",
+    "href": "posts/scrna-seq-literature.html#simulating-the-data",
+    "title": "A very subjective single-cell transcriptomics reading list",
+    "section": "Simulating the data",
+    "text": "Simulating the data\nTo understand how a particular statistical procedure performs, it is good to have some data sets for which the ground-truth answers are known. One way of obtaining such data is through simulation.\nEven though I think this is a great way to develop intuition about particular problems, it is important to remember that scRNA-seq are very high-dimensional and the available simulators are not perfect, as shown in the benchmark by H.L. Crowell et al., The shaky foundations of simulating single-cell RNA sequencing data."
+  },
+  {
+    "objectID": "posts/scrna-seq-literature.html#statistics-is-hard",
+    "href": "posts/scrna-seq-literature.html#statistics-is-hard",
+    "title": "A very subjective single-cell transcriptomics reading list",
+    "section": "Statistics is hard",
+    "text": "Statistics is hard\nFinally, a periodic reminder which I get from data, whenever I analyse them. I think I’ll mention these two posts from Frank E. Harrell on problems encountered in data analysis."
   }
 ]

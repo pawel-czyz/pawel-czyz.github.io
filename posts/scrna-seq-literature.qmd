@@ -1,0 +1,57 @@
+---
+title: "A very subjective single-cell transcriptomics reading list"
+description: "I have barely done any research on single cells, but sometimes people ask me about literature recommendations. Here it is."
+author: "Paweł Czyż"
+date: "10/29/2024"
+---
+
+I do not think that single-cell transcriptomics (scRNA-seq) is easy data to model.
+The signal-to-noise ratio is low. Batch effects are everywhere. Over [1700 different methods](https://www.scrna-tools.org/) exist, but understanding when a particular method should (or should not) be used is hard to navigate.
+
+Below I assembled a subjective reading list. It consists of resources which I wish I had known when I was working on the topic – perhaps it will turn out to be useful for somebody. If you think I have missed something important (and I most definitely have), let me know! 
+
+## Eleven grand challenges
+
+One of my favourite papers is the review by D. Lähnemann, et al. [*Eleven grand challenges in single-cell data science*](https://doi.org/10.1186/s13059-020-1926-6).
+
+I do not know how many times I read this paper, but whenever I open it, I see something new. 
+I think it is an excellent starting point, showing the complexity of the problem. 
+
+## How to model the data?
+
+Rafael Irizarry gave a wonderful talk [*Statistical challenges in single cell RNA-seq technologies*](https://youtu.be/Avjr8pzSfGs?feature=shared) on modelling scRNA-seq data.
+Watching it should be complemented by reading [*Feature selection and dimension reduction for single-cell RNA-Seq based on a multinomial model*](https://doi.org/10.1186/s13059-019-1861-6) by F.W. Townes et al.
+I very much like the explicit focus on modelling and model validation. This is important.
+
+A great review of statistical models for high-dimensional data is in Kevin Murphy's [*Probabilistic Machine Learning*](https://probml.github.io/pml-book/book2.html) book (vol. 2, chapter 28). 
+I think reading this chapter (and then re-reading it. And again, but this time reading also the references) is a great method to build some intuition about good modeling strategies, which can work on a particular data set.
+
+I always appreciate when people see the models as building blocks and can adjust or expand them as needed for a particular problems.
+These methods are closely connected and understanding underlying assumptions and mathematical structure is important to develop principled model expansions.
+
+To give another source for learning about different models, I very much enjoyed reading the material from Jeff Miller's [*Bayesian Methodology in Biostatistics*](https://jwmi.github.io/BMB/index.html) course.
+
+
+## The double dipping problem
+
+The double dipping problem is a common mistakes is single-cell analyses, resulting in arguably false discoveries. There is an [excellent talk from Daniela Witten](https://youtu.be/0x_0uHu1JlM?feature=shared) on the topic. It can be complemented by reading [many](https://www.jmlr.org/papers/v25/23-0446.html) [associated](https://arxiv.org/abs/2303.12931) [papers](https://arxiv.org/abs/2307.12985).
+
+
+## Beware when interpreting clusters and latent factors
+
+Latent variable models are great to look at the data. However, they are also easy to overinterpret and can lead to wrong conclusions. After all, exploratory data analysis is about looking at the data from many perspectives and building some understanding, perhaps formalised in terms of related scientific hypotheses. We should remember that many patterns found can be just artifacts of the model or noise in the data.
+
+I think that this topic deserves a separate blog post. For now I'll just link to several excellent blog posts, written by [Cosma Shalizi](http://bactra.org/weblog/523.html), [Frank E. Harrell](https://www.fharrell.com/post/cluster/), [Darren Dahly](https://darrendahly.github.io/post/cluster/).
+For a longer read, there is this excellent article by D.J. Lawson et al. [*A tutorial on how not to over-interpret STRUCTURE and ADMIXTURE bar plots*](https://doi.org/10.1038/s41467-018-05257-7).
+
+## Simulating the data
+
+To understand how a particular statistical procedure performs, it is good to have some data sets for which the ground-truth answers are known.
+One way of obtaining such data is [through simulation](https://statmodeling.stat.columbia.edu/2019/03/23/yes-i-really-really-really-like-fake-data-simulation-and-i-cant-stop-talking-about-it/).
+
+Even though I think this is a great way to develop intuition about particular problems, it is important to remember that scRNA-seq are very high-dimensional and the available simulators are not perfect, as shown in the benchmark by H.L. Crowell et al., [*The shaky foundations of simulating single-cell RNA sequencing data*](https://doi.org/10.1186/s13059-023-02904-1). 
+
+## Statistics is hard
+
+Finally, a periodic reminder which I get from data, whenever I analyse them.
+I think I'll mention these [two](https://www.fharrell.com/post/errmed/) [posts](https://www.fharrell.com/post/badb/) from Frank E. Harrell on problems encountered in data analysis.
