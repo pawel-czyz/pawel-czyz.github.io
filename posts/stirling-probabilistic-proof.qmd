@@ -112,4 +112,21 @@ This proof is the most similar to the ones from Gunawardena (1993) and, if one w
 
 The paper of [Hjort and Stoltenberg](https://arxiv.org/abs/2410.19555) is great! 
 Apart from full versions of the proof sketches presented above, it also contains several other results and a nice exposition of the history of the related ideas.
-   
+
+
+## Addendum: how large is the approximation error?
+
+We know to expect
+$$
+  n! \approx \sqrt{2\pi n} \left(\frac{n}{e}\right)^n,
+$$
+
+but how large is the approximation error? As explained in a [Wikipedia entry](https://en.wikipedia.org/wiki/Stirling%27s_approximation#Speed_of_convergence_and_error_estimates), [this MathSE answer](https://math.stackexchange.com/a/1276832/551592) or the paper [*A remark on Stirling's formula*](https://doi.org/10.2307/2308012) published by H. Robbins in 1955, this approximation is really, really good: for $n\ge 1$ we have
+
+$$
+  n! = \sqrt{2\pi n} \left(\frac{n}{e}\right)^n \cdot R_n,
+$$
+
+where $\exp\!\left(\frac 1{12n+1} \right) = \sqrt[12n+1]{e} < R_n < \sqrt[12n]{e} = \exp\!\left(\frac 1{12n} \right)$.
+
+We see that $R_n > 1$, but it cannot be too far: the sequence $n \mapsto \exp\!\left(\frac 1{12n} \right)$ is decreasing and we have $R_5 < 1.02$, $R_{10} < 1.01$ (the relative error is about 1% already here!), $R_{100} < 1.001$, and $R_{1000} < 1.0001$.

@@ -1153,5 +1153,12 @@
     "title": "A very subjective single-cell transcriptomics reading list",
     "section": "Statistics is hard",
     "text": "Statistics is hard\nFinally, a periodic reminder which I get from data, whenever I analyse them. I think I’ll mention these two posts from Frank E. Harrell on problems encountered in data analysis."
+  },
+  {
+    "objectID": "posts/stirling-probabilistic-proof.html#addendum-how-large-is-the-approximation-error",
+    "href": "posts/stirling-probabilistic-proof.html#addendum-how-large-is-the-approximation-error",
+    "title": "A probabilistic proof of the Stirling’s formula",
+    "section": "Addendum: how large is the approximation error?",
+    "text": "Addendum: how large is the approximation error?\nWe know to expect \\[\n  n! \\approx \\sqrt{2\\pi n} \\left(\\frac{n}{e}\\right)^n,\n\\]\nbut how large is the approximation error? As explained in a Wikipedia entry, this MathSE answer or the paper A remark on Stirling’s formula published by H. Robbins in 1955, this approximation is really, really good: for \\(n\\ge 1\\) we have\n\\[\n  n! = \\sqrt{2\\pi n} \\left(\\frac{n}{e}\\right)^n \\cdot R_n,\n\\]\nwhere \\(\\exp\\!\\left(\\frac 1{12n+1} \\right) = \\sqrt[12n+1]{e} &lt; R_n &lt; \\sqrt[12n]{e} = \\exp\\!\\left(\\frac 1{12n} \\right)\\).\nWe see that \\(R_n &gt; 1\\), but it cannot be too far: the sequence \\(n \\mapsto \\exp\\!\\left(\\frac 1{12n} \\right)\\) is decreasing and we have \\(R_5 &lt; 1.02\\), \\(R_{10} &lt; 1.01\\) (the relative error is about 1% already here!), \\(R_{100} &lt; 1.001\\), and \\(R_{1000} &lt; 1.0001\\)."
   }
 ]
