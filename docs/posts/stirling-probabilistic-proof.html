@@ -153,6 +153,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#poisson-random-variables" id="toc-poisson-random-variables" class="nav-link" data-scroll-target="#poisson-random-variables">Poisson random variables</a></li>
   <li><a href="#exponential-random-variables" id="toc-exponential-random-variables" class="nav-link" data-scroll-target="#exponential-random-variables">Exponential random variables</a></li>
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#addendum-how-large-is-the-approximation-error" id="toc-addendum-how-large-is-the-approximation-error" class="nav-link" data-scroll-target="#addendum-how-large-is-the-approximation-error">Addendum: how large is the approximation error?</a></li>
   </ul>
 </nav>
     </div>
@@ -260,6 +261,18 @@ Z_n = \frac{Y_n - \mu n}{\sigma \sqrt{n}}
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
 <p>The paper of <a href="https://arxiv.org/abs/2410.19555">Hjort and Stoltenberg</a> is great! Apart from full versions of the proof sketches presented above, it also contains several other results and a nice exposition of the history of the related ideas.</p>
+</section>
+<section id="addendum-how-large-is-the-approximation-error" class="level2">
+<h2 class="anchored" data-anchor-id="addendum-how-large-is-the-approximation-error">Addendum: how large is the approximation error?</h2>
+<p>We know to expect <span class="math display">\[
+  n! \approx \sqrt{2\pi n} \left(\frac{n}{e}\right)^n,
+\]</span></p>
+<p>but how large is the approximation error? As explained in a <a href="https://en.wikipedia.org/wiki/Stirling%27s_approximation#Speed_of_convergence_and_error_estimates">Wikipedia entry</a>, <a href="https://math.stackexchange.com/a/1276832/551592">this MathSE answer</a> or the paper <a href="https://doi.org/10.2307/2308012"><em>A remark on Stirling’s formula</em></a> published by H. Robbins in 1955, this approximation is really, really good: for <span class="math inline">\(n\ge 1\)</span> we have</p>
+<p><span class="math display">\[
+  n! = \sqrt{2\pi n} \left(\frac{n}{e}\right)^n \cdot R_n,
+\]</span></p>
+<p>where <span class="math inline">\(\exp\!\left(\frac 1{12n+1} \right) = \sqrt[12n+1]{e} &lt; R_n &lt; \sqrt[12n]{e} = \exp\!\left(\frac 1{12n} \right)\)</span>.</p>
+<p>We see that <span class="math inline">\(R_n &gt; 1\)</span>, but it cannot be too far: the sequence <span class="math inline">\(n \mapsto \exp\!\left(\frac 1{12n} \right)\)</span> is decreasing and we have <span class="math inline">\(R_5 &lt; 1.02\)</span>, <span class="math inline">\(R_{10} &lt; 1.01\)</span> (the relative error is about 1% already here!), <span class="math inline">\(R_{100} &lt; 1.001\)</span>, and <span class="math inline">\(R_{1000} &lt; 1.0001\)</span>.</p>
 
 
 </section>
