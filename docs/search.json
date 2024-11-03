@@ -4,7 +4,7 @@
     "href": "publications.html",
     "title": "Publications",
     "section": "",
-    "text": "Order By\n       Default\n         \n          Title\n        \n         \n          Author\n        \n         \n          Publication\n        \n         \n          Year\n        \n     \n  \n    \n      \n      \n    \n\n\n  \n    Bayesian quantification with black-box estimators\n    A. Ziegler, P. Czyż\n    Transactions on Machine Learning Research\n    (2024)\n    \n      Details\n    \n    \n       Publication\n    \n    \n       Code\n    \n  \n  \n    Beyond normal: on the evaluation of mutual information estimators\n    P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx\n    NeurIPS\n    (2023)\n    \n      Details\n    \n    \n       Publication\n    \n    \n       Code\n    \n  \n  \n    On the properties and estimation of pointwise mutual information profiles\n    P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx\n    Preprint, submitted\n    (2023)\n    \n      Details\n    \n    \n       Preprint\n    \n    \n       Code\n    \n  \n  \n    Limits to the rate of information transmission through the MAPK pathway\n    F. Grabowski, P. Czyż, M. Kochańczyk, T. Lipniacki\n    Journal of The Royal Society Interface\n    (2019)\n    \n      Details\n    \n    \n       Publication\n    \n    \n       Code\n    \n  \n\n\nNo matching items\n\n\n\nThis page was created using the following template."
+    "text": "Order By\n       Default\n         \n          Title\n        \n         \n          Author\n        \n         \n          Publication\n        \n         \n          Year\n        \n     \n  \n    \n      \n      \n    \n\n\n  \n    Bayesian modeling of mutual exclusivity in cancer mutations\n    P. Czyż, N. Beerenwinkel\n    Preprint, submitted\n    (2024)\n    \n      Details\n    \n    \n       Preprint\n    \n    \n       Code\n    \n  \n  \n    Bayesian quantification with black-box estimators\n    A. Ziegler, P. Czyż\n    Transactions on Machine Learning Research\n    (2024)\n    \n      Details\n    \n    \n       Publication\n    \n    \n       Code\n    \n  \n  \n    Beyond normal: on the evaluation of mutual information estimators\n    P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx\n    NeurIPS\n    (2023)\n    \n      Details\n    \n    \n       Publication\n    \n    \n       Code\n    \n  \n  \n    On the properties and estimation of pointwise mutual information profiles\n    P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx\n    Preprint, submitted\n    (2023)\n    \n      Details\n    \n    \n       Preprint\n    \n    \n       Code\n    \n  \n  \n    Limits to the rate of information transmission through the MAPK pathway\n    F. Grabowski, P. Czyż, M. Kochańczyk, T. Lipniacki\n    Journal of The Royal Society Interface\n    (2019)\n    \n      Details\n    \n    \n       Publication\n    \n    \n       Code\n    \n  \n\n\nNo matching items\n\n\n\nThis page was created using the following template."
   },
   {
     "objectID": "private/prezenty.html",
@@ -1160,5 +1160,40 @@
     "title": "A probabilistic proof of the Stirling’s formula",
     "section": "Addendum: how large is the approximation error?",
     "text": "Addendum: how large is the approximation error?\nWe know to expect \\[\n  n! \\approx \\sqrt{2\\pi n} \\left(\\frac{n}{e}\\right)^n,\n\\]\nbut how large is the approximation error? As explained in a Wikipedia entry, this MathSE answer or the paper A remark on Stirling’s formula published by H. Robbins in 1955, this approximation is really, really good: for \\(n\\ge 1\\) we have\n\\[\n  n! = \\sqrt{2\\pi n} \\left(\\frac{n}{e}\\right)^n \\cdot R_n,\n\\]\nwhere \\(\\exp\\!\\left(\\frac 1{12n+1} \\right) = \\sqrt[12n+1]{e} &lt; R_n &lt; \\sqrt[12n]{e} = \\exp\\!\\left(\\frac 1{12n} \\right)\\).\nWe see that \\(R_n &gt; 1\\), but it cannot be too far: the sequence \\(n \\mapsto \\exp\\!\\left(\\frac 1{12n} \\right)\\) is decreasing and we have \\(R_5 &lt; 1.02\\), \\(R_{10} &lt; 1.01\\) (the relative error is about 1% already here!), \\(R_{100} &lt; 1.001\\), and \\(R_{1000} &lt; 1.0001\\)."
+  },
+  {
+    "objectID": "publications/mutual-exclusivity.html",
+    "href": "publications/mutual-exclusivity.html",
+    "title": "Bayesian modeling of mutual exclusivity in cancer mutations",
+    "section": "",
+    "text": "When exploring the data to build scientific hypotheses about the mutual exclusivity patterns, can we go from hypothesis testing to iterative Bayesian modeling?"
+  },
+  {
+    "objectID": "publications/mutual-exclusivity.html#premise",
+    "href": "publications/mutual-exclusivity.html#premise",
+    "title": "Bayesian modeling of mutual exclusivity in cancer mutations",
+    "section": "",
+    "text": "When exploring the data to build scientific hypotheses about the mutual exclusivity patterns, can we go from hypothesis testing to iterative Bayesian modeling?"
+  },
+  {
+    "objectID": "publications/mutual-exclusivity.html#abstract",
+    "href": "publications/mutual-exclusivity.html#abstract",
+    "title": "Bayesian modeling of mutual exclusivity in cancer mutations",
+    "section": "Abstract",
+    "text": "Abstract\nWhen cancer develops, gene mutations do not occur independently, prompting researchers to pose scientific hypotheses about their interactions. Synthetic lethal interactions, which result in mutually exclusive mutations, have received considerable attention as they may inform about the structure of aberrant biological pathways in cancer cells and suggest therapeutic targets. However, finding patterns of mutually exclusive genes is a challenging task due to small available sample sizes, sequencing noise, and confounders present in observational studies. Here, we leverage recent advancements in probabilistic programming to propose a fully Bayesian framework for modeling mutual exclusivity based on a family of constrained Bernoulli mixture models. By forming continuous model expansion within the iterative Bayesian workflow, we quantify the uncertainty resulting from small sample sizes and perform careful model criticism. Our analysis indicates that alterations in the EGFR and IDH1 genes may exhibit mutual exclusivity in glioblastoma multiforme tumors. We argue that Bayesian analysis offers a conceptual, systematic, and computationally feasible approach to model building, complementing the findings obtained from classical hypothesis testing approaches."
+  },
+  {
+    "objectID": "publications/mutual-exclusivity.html#links",
+    "href": "publications/mutual-exclusivity.html#links",
+    "title": "Bayesian modeling of mutual exclusivity in cancer mutations",
+    "section": "Links",
+    "text": "Links\n\nThis paper looks at the models introduced by E. Szczurek and N. Beerenwinkel in Modeling Mutual Exclusivity of Cancer Mutations (2014) through the lens of Bayesian workflow."
+  },
+  {
+    "objectID": "publications/mutual-exclusivity.html#citation",
+    "href": "publications/mutual-exclusivity.html#citation",
+    "title": "Bayesian modeling of mutual exclusivity in cancer mutations",
+    "section": "Citation",
+    "text": "Citation\n@article {Bayesian-modeling-mutual-exclusivity,\n    author = {Czy{\\.z}, Pawe{\\l} and Beerenwinkel, Niko},\n    title = {Bayesian modeling of mutual exclusivity in cancer mutations},\n    elocation-id = {2024.10.29.620937},\n    year = {2024},\n    doi = {10.1101/2024.10.29.620937},\n    publisher = {Cold Spring Harbor Laboratory},\n    URL = {https://www.biorxiv.org/content/early/2024/11/02/2024.10.29.620937},\n    eprint = {https://www.biorxiv.org/content/early/2024/11/02/2024.10.29.620937.full.pdf},\n    journal = {bioRxiv}\n}"
   }
 ]
