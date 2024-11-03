@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://pawel-czyz.github.io/publications.html</loc>
-    <lastmod>2024-09-22T20:22:37.713Z</lastmod>
+    <lastmod>2024-11-03T14:12:59.712Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/private/prezenty.html</loc>
@@ -142,14 +142,18 @@
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/blog.html</loc>
-    <lastmod>2024-10-30T15:52:50.056Z</lastmod>
+    <lastmod>2024-11-03T14:12:54.420Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/stirling-probabilistic-proof.html</loc>
-    <lastmod>2024-10-30T15:52:49.408Z</lastmod>
+    <lastmod>2024-11-03T14:12:53.829Z</lastmod>
   </url>
   <url>
     <loc>https://pawel-czyz.github.io/posts/scrna-seq-literature.html</loc>
     <lastmod>2024-10-30T15:32:24.083Z</lastmod>
+  </url>
+  <url>
+    <loc>https://pawel-czyz.github.io/publications/mutual-exclusivity.html</loc>
+    <lastmod>2024-11-03T14:13:04.825Z</lastmod>
   </url>
 </urlset>

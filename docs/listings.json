@@ -2,6 +2,7 @@
   {
     "listing": "/publications.html",
     "items": [
+      "/publications/mutual-exclusivity.html",
       "/publications/bayesian-quantification.html",
       "/publications/beyond-normal.html",
       "/publications/pmi-profiles.html",

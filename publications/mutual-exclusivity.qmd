@@ -1,0 +1,38 @@
+---
+title: "Bayesian modeling of mutual exclusivity in cancer mutations"
+type: "article"
+author: "P. Czyż, N. Beerenwinkel"
+year: "2024"
+venue: "Preprint, submitted"
+preprint: "https://doi.org/10.1101/2024.10.29.620937"
+code: "https://github.com/cbg-ethz/jnotype"
+toc: true
+---
+
+## Premise
+
+When exploring the data to build scientific hypotheses about the mutual exclusivity patterns, can we go from hypothesis testing to iterative Bayesian modeling?
+
+## Abstract
+When cancer develops, gene mutations do not occur independently, prompting researchers to pose scientific hypotheses about their interactions. Synthetic lethal interactions, which result in mutually exclusive mutations, have received considerable attention as they may inform about the structure of aberrant biological pathways in cancer cells and suggest therapeutic targets. However, finding patterns of mutually exclusive genes is a challenging task due to small available sample sizes, sequencing noise, and confounders present in observational studies. Here, we leverage recent advancements in probabilistic programming to propose a fully Bayesian framework for modeling mutual exclusivity based on a family of constrained Bernoulli mixture models. By forming continuous model expansion within the iterative Bayesian workflow, we quantify the uncertainty resulting from small sample sizes and perform careful model criticism. Our analysis indicates that alterations in the EGFR and IDH1 genes may exhibit mutual exclusivity in glioblastoma multiforme tumors. We argue that Bayesian analysis offers a conceptual, systematic, and computationally feasible approach to model building, complementing the findings obtained from classical hypothesis testing approaches.
+
+
+## Links
+
+- This paper looks at the models introduced by E. Szczurek and N. Beerenwinkel in [*Modeling Mutual Exclusivity of Cancer Mutations* (2014)](https://doi.org/10.1371/journal.pcbi.1003503) through the lens of [Bayesian workflow](https://arxiv.org/abs/2011.01808).
+
+
+## Citation
+```
+@article {Bayesian-modeling-mutual-exclusivity,
+	author = {Czy{\.z}, Pawe{\l} and Beerenwinkel, Niko},
+	title = {Bayesian modeling of mutual exclusivity in cancer mutations},
+	elocation-id = {2024.10.29.620937},
+	year = {2024},
+	doi = {10.1101/2024.10.29.620937},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2024/11/02/2024.10.29.620937},
+	eprint = {https://www.biorxiv.org/content/early/2024/11/02/2024.10.29.620937.full.pdf},
+	journal = {bioRxiv}
+}
+```
