@@ -1,0 +1,105 @@
+---
+title: "Intransitive dice"
+description: "Let's start the New Year with a counterintuitive result from probability theory."
+author: "Paweł Czyż"
+date: "1/5/2025"
+execute:
+  freeze: true
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+"Achilles, would you like to play a game", Turtle asked.
+
+"Sure, what are the rules?"
+
+"I have a few dice. You pick one, I pick one, and then we throw them. If you get a higher number, I will give you one peanut. Otherwise, you will give me a peanut."
+
+"Can I pick the die first?", asked Achilles and looked at the dice one by one.
+
+"Sure, go ahead.", Turtle encouraged him to do so.
+
+After several rounds Achilles observed:
+
+"You seem to win more frequently than I do! I think you took the best die: can I use it now?"
+
+"Sure, you can have it... Let me pick another one from the remaining ones, then..."
+
+After a few rounds Achilles noticed:
+
+"You are winning again! This wasn't the best die: let me take a closer look at them and pick another one."
+
+Achilles changed the die several times, in the end playing a few rounds with each of them, but at the end he lost all the peanuts.
+
+"I don't know how, but whatever die I choose, you always seem to pick a better one! What kind of trickery is that do you do that?"
+
+"Let me tell you about intransitive dice..."
+
+## Intransitive dice
+
+How did the Turtle do that? Let the dice be independent discrete random variables $X_1, \dotsc, X_n$. We say that die $a$ beats die $b$ if $P(X_a > X_b) > 50\%$. In this case, we write $a\succ b$.
+
+The key property of the prepared dice is that the relation $a\succ b$ is not transitive: we want to have $1\prec 2$, $2\prec 3$, $\dotsc$, $n-1 \prec n$, as well as $n\prec 1$.
+
+Note that the common [rock, paper, scissors game](https://en.wikipedia.org/wiki/Rock_paper_scissors) is intransitive: rock beats scissors, but is beaten by paper. The paper is, however, beaten by scissors.
+The intransitive dice work in a similar manner, but with two differences.
+First, Achilles chooses his option first (so that in rock, paper, scissors with such a rule Turtle would always win). Second, the dice are probabilistic, so that one has to play long enough to see that indeed some die beats another.   
+
+
+TODO: Pomyśl o tym {🪨, 📰, ✂}
+TODO: Zerknij na te pracę: https://aimath.org/~morrison/Research/IntransitiveDice.pdf
+TODO: Zerknij na https://arxiv.org/abs/2310.17083
+
+TODO: Opisz cykl Hamiltona.
+TODO: Opisz rezultat dla trzech zmiennych losowych.
+
+TODO: Finkelstein o konstrukcji dowolnie długich cykli: https://www.math.uci.edu/~mfinkels/dice9.pdf
+TODO: Wspomnij o tym jak to się łączy z twierdzeniem Arrowa, o paradoksach wyborów. https://sites.lafayette.edu/traldil/files/2010/06/tridice.pdf
+
+## How do intransitive dice work?
+
+TODO: Przepisz to na bardziej czytelną ideę.
+
+The above game can be formalised as:
+
+1. We have a set of dice $X_1, \dotsc, X_n$, modelled as independent discrete random variables.
+2. At each round, Achilles chooses a die, say the $a$-th one for some $a \in \{1, \dotsc, n\}$.
+3. Then, basing on the Achilles' choice, the Turtle chooses another one, $t(a) \in \{1, \dotsc, n\} \setminus \{a\}$.
+4. We have $P(X_{t(a)} > X_a) > 50\%$ for every $a \in \{1, \dotsc, n\}$. 
+
+Note that there is no best die: for every die we can find another one, which beats it with probability larger than $50\%$.
+This can remind one of (a probabilistic version of) 
+
+ where each beats some choices and loses to the others.  
+
+In particular, we see that one needs $n > 2$ dice.
+
+### Examples
+
+Let's take a look at 
+
+
+In particular, if we draw a graph with dice as nodes and place an edge $a\to b$ whenever $b$ beats $a$, this graph needs to have a cycle.
+
+
+## Does expected value matter?
+
+As a reminder why 
+
+
+## First section
+
+See the footnote[^1].
+
+[^1]: It's here.
+
+$$
+a = b
+$$
+
+```{python}
+import numpy as np
+```
+
