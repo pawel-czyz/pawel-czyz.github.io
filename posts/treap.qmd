@@ -1,0 +1,27 @@
+---
+title: "Treap"
+description: "A binary search tree, which is also a heap."
+author: "Paweł Czyż"
+date: "MONTH/DAY/2025"
+execute:
+  freeze: true
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+There is a great [post](http://coldattic.info/post/4/) on treaps in *A Foo Walks into a Bar* blog, together with a C++ implementation.
+
+## Etymology
+
+*Treap* originates from *tree* and *heap*. In Polish, it is translated into *drzewiec* (obtained from *drzewo* (tree) and *kopiec* (heap)).
+This name is recognised by all J.R.R. Tolkien fans in Poland!
+
+Around 1958–1963, [Maria Skibniewska](https://en.wikipedia.org/wiki/Maria_Skibniewska) (who was an accomplished translator with a rich and complex biography of a Red Cross member, a II World War survivor and  ), worked on a translation of *The Lord of the Rings*.
+Her translation has been recognised as a masterpiece and was praised in letters to Tolkien by [Przemysław Mroczkowski](https://pl.wikipedia.org/wiki/Przemys%C5%82aw_Mroczkowski)!
+In particular, Polish literature will always owe to her the translation of *dwarf* into *krasnolud*, which has become the canonical translation since then.
+
+*Drzewiec* is there the name of [Treebeard](https://lotr.fandom.com/wiki/Treebeard), the oldest of the ents.
+
+

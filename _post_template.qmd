@@ -2,10 +2,7 @@
 title: "TITLE"
 description: "DESCRIPTION"
 author: "Paweł Czyż"
-date: "MONTH/DAY/2024"
-categories:
-  - Category 1
-  - Category 2
+date: "MONTH/DAY/2025"
 execute:
   freeze: true
 format: 
