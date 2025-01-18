@@ -3,7 +3,7 @@ title: "Bayesian modeling of mutual exclusivity in cancer mutations"
 type: "article"
 author: "P. Czyż, N. Beerenwinkel"
 year: "2024"
-venue: "Preprint, submitted"
+venue: "Preprint"
 preprint: "https://doi.org/10.1101/2024.10.29.620937"
 code: "https://github.com/cbg-ethz/jnotype"
 toc: true

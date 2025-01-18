@@ -2,9 +2,10 @@
 title: "On the properties and estimation of pointwise mutual information profiles"
 type: "article"
 author: "P. Czyż, F. Grabowski, J.E. Vogt, N. Beerenwinkel, A. Marx"
-year: "2023"
-venue: "Preprint, submitted"
-preprint: "https://arxiv.org/abs/2310.10240"
+year: "2025"
+venue: "Transactions on Machine Learning Research"
+# preprint: "https://arxiv.org/abs/2310.10240"
+publication: "https://openreview.net/forum?id=LdflD41Gn8"
 code: "https://github.com/cbg-ethz/bmi"
 toc: true
 ---
@@ -37,6 +38,6 @@ Finally, we show how Bend and Mix Models can be used to obtain model-based Bayes
 
 ## Behind the scenes
 
-- The full story has been described on the [blog](../posts/on-beyond-normal.qmd).
-- The first version of this manuscript was titled *The mixtures and the critics: on the pointwise mutual information profiles of fine distributions*. This is, of course, named after J.R.R. Tolkien's [*The monsters and the critics*](https://en.wikipedia.org/wiki/Beowulf:_The_Monsters_and_the_Critics). I was very stubborn on keeping this, but after weeks of discussions I was eventually convinced that the new title is informative about the content.
-
+- The final version has been published in TMLR and we are thankful to the Reviewers and the Action Editor for many great suggestions. Similarly, this paper has benefitted from comments obtained during the [reviews at AABI 2024](https://openreview.net/forum?id=cRtZ4sx3cU), which was a great event to participate in. Finally, we would like to thank Paweł Nałęcz-Jawecki and Julia Kostin, who carefully read the paper and provided wonderful feedback. 
+- The full story of the project has been described on the [blog](../posts/on-beyond-normal.qmd).
+- The first version of this manuscript was titled *The mixtures and the critics: on the pointwise mutual information profiles of fine distributions*. This is, of course, named after J.R.R. Tolkien's [*The monsters and the critics*](https://en.wikipedia.org/wiki/Beowulf:_The_Monsters_and_the_Critics). I was very stubborn on keeping this, but after weeks of discussions I was eventually convinced that the new title is more informative about the content.
