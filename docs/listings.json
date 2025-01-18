@@ -2,10 +2,10 @@
   {
     "listing": "/publications.html",
     "items": [
+      "/publications/pmi-profiles.html",
       "/publications/mutual-exclusivity.html",
       "/publications/bayesian-quantification.html",
       "/publications/beyond-normal.html",
-      "/publications/pmi-profiles.html",
       "/publications/limits-mapk.html"
     ]
   },
