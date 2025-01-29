@@ -1,0 +1,54 @@
+---
+title: "Blogs I read"
+description: "A list of blogs that I read"
+author: "Paweł Czyż"
+date: "1/28/2024"
+---
+
+From time to time I have to recall where I saw a great blog post on the topic of my interest. Hence, it'd be good to formalize the list of blogs which I check semi-regularly to learn new things.
+
+
+## Statistical modeling and machine learning
+
+  - Andrew Gelman et al.: [Statistical Modeling, Causal Inference, and Social Science](https://statmodeling.stat.columbia.edu/)
+  - Frank Harrell: [Statistical Thinking](https://www.fharrell.com/)
+  - Richard McElreath: [Elements of Evolutionary Anthropology](https://elevanth.org/blog/)
+  - Michael Betancourt: [Case studies](https://betanalpha.github.io/writing/)
+  - Dan Simpson: [Un garçon pas comme les autres (Bayes)](https://dansblog.netlify.app/)
+  - Christian Robert: [Xi'an's Og](https://xianblog.wordpress.com/)
+  - John Cook: [Website](https://www.johndcook.com/blog/)
+  - Ryan Giordano: [Statistician](https://rgiordan.github.io/)
+  - Stephen Senn: [Blog](http://www.senns.uk/Blogs.html)
+  - Deborah Mayo: [Error Statistics Philosophy](https://errorstatistics.com/)
+  - Patrick Kidger: [Thoughts](https://kidger.site/thoughts/)
+  - Juan Camilo Orduz: [https://juanitorduz.github.io/](https://juanitorduz.github.io/)
+  - Piotr Midał: [Blog](https://p.migdal.pl/blog/)
+  - Darren Dahly: [StatsEpi](https://statsepi.substack.com/) and [Blog](https://darrendahly.github.io/#posts)
+  - Simon Dirmeier: [Etudes](https://dirmeier.github.io/etudes/causal_structure_learning.html); GitHub [repository](https://github.com/dirmeier/etudes)
+  - Tim Morris: [Statistical Methodology Meanderings](https://tpmorris.substack.com/)
+
+
+## Computational biology and bioinformatics
+
+  - Lior Pachter: [Bits of DNA](https://liorpachter.wordpress.com/)
+
+## Programming
+
+  - Paul Shved: [Cold Attic](http://coldattic.info/post/)
+  - Ragnar Groot Koerkamp: [Curious Coding](https://curiouscoding.nl/)
+
+## Mathematical physics
+
+  - John Baez: [This Week's Finds](https://math.ucr.edu/home/baez/twf.html)
+  - Peter Woit: [Not Even Wrong](https://www.math.columbia.edu/~woit/wordpress/)
+
+
+## Comics
+
+  - Randall Munroe: [XKCD](https://xkcd.com/)
+
+
+## Misc
+
+And here is a list of blogs from Statistical Modeling, Causal Inference, and Social Science blog: [link](https://statmodeling.stat.columbia.edu/blogs-i-read/), which I should probably start reading.
+
