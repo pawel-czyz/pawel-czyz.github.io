@@ -2,7 +2,7 @@
 title: "Blogs I read"
 description: "A list of blogs that I read"
 author: "Paweł Czyż"
-date: "1/28/2024"
+date: "1/30/2025"
 ---
 
 From time to time I have to recall where I saw a great blog post on the topic of my interest. Hence, it'd be good to formalize the list of blogs which I check semi-regularly to learn new things.
