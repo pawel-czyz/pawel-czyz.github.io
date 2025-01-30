@@ -12,6 +12,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/blogs-i-read.html",
       "/posts/scrna-seq-literature.html",
       "/posts/stirling-probabilistic-proof.html",
       "/posts/how-expressive-are-bernoulli-mixtures.html",
@@ -29,7 +30,6 @@
       "/posts/setting-up-repository.html",
       "/posts/regression-to-the-mean-bias-rejoinder.html",
       "/posts/small-power.html",
-      "/posts/blogs-i-read.html",
       "/posts/strict-linear-independence-measures.html",
       "/posts/kernel-regression-transformer.html",
       "/posts/em-gibbs-quantification.html",
