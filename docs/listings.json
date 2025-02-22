@@ -12,6 +12,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/bernoulli-inequality.html",
       "/posts/blogs-i-read.html",
       "/posts/scrna-seq-literature.html",
       "/posts/stirling-probabilistic-proof.html",

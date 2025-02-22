@@ -1,0 +1,175 @@
+---
+title: "Bernoulli's inequality"
+description: "One of the classical mathematical inequalities with applications to probability and information theory and its friends."
+author: "Paweł Czyż"
+date: "2/22/2025"
+---
+
+Bernoulli trials appeared on the blog several times, for example [here](beta-bernoulli.qmd) or [there](almost-binomial-markov-chain.qmd).
+Today we are going to do something slightly different.
+
+[Bernoulli's inequality](https://en.wikipedia.org/wiki/Bernoulli%27s_inequality) is one of the classic inequalities encountered during maths classes to teach mathematical induction.
+Namely, if $n\ge 1$ is an integer and $x\ge -1$, then
+$$
+(1+x)^n \ge 1 + nx.
+$$
+
+The inequality is strict for $n\ge 2$ and $x\neq 0$. The proof by induction is simple, where the inductive step is based on
+$$\begin{align*}
+  (1 + x)^{n+1} 
+  &= (1+x) \cdot (1+x)^n \\
+  &\ge (1+x)(1+nx) \\
+  &= 1 + (n+1)x + nx^2.
+\end{align*}
+$$
+
+In fact, this is not the strongest form of the inequality, with the [Wikipedia article](https://en.wikipedia.org/wiki/Bernoulli%27s_inequality) listing many variants of it.
+
+Today I wanted to discuss a few applications of this inequality.
+
+## Probability of (no) event occurring
+
+Imagine that we observe a process which fails with probability $p$ many times, say $n$.
+If the failures occur independently, what is the probability of having only successes? The probability of having only successes is $(1 - p)^n \ge 1 - pn$.
+The probability of observing at least one failure is then $1 - (1-p)^n \le np$. We can therefore bound the probability of failures by controlling $p$.
+
+In fact, we can say more, as explained [here](https://math.stackexchange.com/a/3025960/551592).
+Because of the Bernoulli's inequality, we have
+$$
+  (1 + x/n)^n \ge 1 + x,
+$$
+which gives (by passing to the limit $n\to \infty$) the inequality $e^x\ge 1 + x$ (note that for $x < -1$ it, in fact, also holds, as the right-hand-side is negative. To prove that the left-hand-side is positive, one can use [Archimedean property](https://en.wikipedia.org/wiki/Archimedean_property) of real numbers to show that for all large enough $n$ we have $x / n > -1$).
+
+Then,
+$$
+  e^{-pn} = ( e^{-p} )^n \ge (1 - p)^n \ge 1 - pn,
+$$
+
+which bounds $(1-p)^n$ from both sides.
+
+### Monte Carlo estimators
+
+This shows why Monte Carlo methods used to calculate volumes can fail in high dimensions.
+For example, the volume of a unit $m$-ball, $D_m = \{ ||x|| < 1 \mid x \in [-1, 1]^m \}$ is given by
+$$
+V_m = \begin{cases}
+  2 & \text{ if } m = 1\\
+  \pi &\text { if } m = 2\\
+  \frac{2\pi}{m} V_{m-2} &\text{ otherwise} 
+\end{cases}
+$$
+
+If we sample from the uniform distribution over the cube $[-1, 1]^m$, the probability of a sample landing inside the ball is $p = V_m / 2^m$, which is tiny for large $m$.
+
+If we collect $n$ Monte Carlo samples, the probability that we see any sample inside the ball (and our estimate is not $0$) is then smaller than $pm$.
+In other words, in $m=100$ dimensions even if we collect million of samples, there is a very high probability that we return $0$ (so that the relative error of the Monte Carlo estimate is then 100\%).
+
+### Popoviciu's inequality
+
+We see that with large probability our estimate for $p$ (and, in turn $V_m$) is $0$.
+The relative error is hence 100\% with large probability. However, what can we say about the absolute error? In this case $p$ is very tiny, so that returning $0$ perhaps is not bad.
+The variance of the Monte Carlo estimator for $n$ samples is $p(1-p) / n$. Note that
+$$
+  \sqrt{p(1-p)} \le \frac{p + (1-p)}{2} = 1/2,
+$$
+
+so that the variance of the Monte Carlo estimator is bounded from above by $1/4n$.
+Of course, it can still be unacceptably large to obtain small relative errors, but this gives us some assurance about the absolute error.
+
+More generally, [Popoviciu's inequality](https://en.wikipedia.org/wiki/Popoviciu%27s_inequality_on_variances) can be used here.
+It says that for a real-valued random variable bounded between $[L, U]$, its variance cannot exceed $(U-L)^2 / 4$.
+
+As the variance does not change when the variable is shifted, we can move the variable to $[0, U-L]$, and then rescale it by $U - L$ to the interval $[0, 1]$ (which scales the variance quadratically).
+Hence, it suffices to prove that for a random variable defined on the interval $[0, 1]$, its variance cannot exceed $1/4$ (which is the value attained for the Bernoulli random variable, assigning all the probability mass equally to the boundary of the interval).
+
+Using the proof of the [Bhatia-Davis inequality](https://en.wikipedia.org/wiki/Bhatia%E2%80%93Davis_inequality), we get
+
+$$
+  0\le \mathbb E[ X (1-X) ] = \mathbb E[X] - \mathbb E[X^2].
+$$
+
+We see that $\mathbb E[X^2] \le \mathbb E[X]$.
+Let $p = \mathbb E[X] \in [0, 1]$.
+Consequently, we have
+$$
+  \mathbb E[X^2] - \mathbb E[X]^2 \le p - p^2 = p(1-p) \le 1/4  
+$$
+
+as above.
+
+## Generalized inequality
+
+Similarly by induction, it is [possible to prove](https://en.wikipedia.org/wiki/Bernoulli%27s_inequality#Generalization_of_base) that for $n$ numbers $x_1, \dotsc, x_n$ such that:
+ 
+  - all $x_i > -1$,
+  - all $x_i$ are of the same sign,
+
+we have
+
+$$
+(1+x_1)(1+x_2) \cdots (1+x_n) \ge 1 + x_1 + x_2 +\cdots + x_n. 
+$$
+
+Of course, the original inequality is obtained from the case $x_1 = x_2 = \cdots = x_n$.
+
+I think this is an important inequality.
+
+### The variance of the pointwise mutual information profile
+
+In our [pointwise mutual information paper](../publications/pmi-profiles.qmd), we wanted to prove the bounds on the variance of the pointwise mutual information profile for the multivariate normal distribution, under the constraint that the mutual information is fixed at some pre-specified value.
+
+We had to prove an inequality:
+$$
+a_1 a_2\cdots a_n + (n-1) \ge a_1 + a_2 + \cdots + a_n
+$$
+
+for any numbers $a_i \in (0, 1]$.
+
+As I did not know the generalized form of Bernoulli's inequality back then, the proof in the appendix was done by induction.
+However, this could have been done in (essentially) one line!
+
+Write $x_i = a_i - 1$, so that we have $x_i \in (-1, 0]$.
+All the numbers are larger than $-1$ and of the same sign.
+The Bernoulli's inequality gives then:
+
+$$\begin{align*}
+a_1 a_2\cdots a_n
+&= (1 + x_1)(1+x_2)\cdots (1+x_n) \\
+&\ge 1 + x_1 + x_2 + \cdots + x_n \\
+&=  1 + (a_1 - 1) + (a_2 - 1) + \cdots + (a_n - 1) \\
+&= a_1 + a_2 + \cdots + a_n - (n - 1).
+\end{align*}
+$$
+
+### Events (not) occurring (again)
+
+Let $y_i = \mathbb P(Y_i)$ for some events $Y_1, \dotsc, Y_n$. All the numbers are in the set $[0, 1]$, so that $x_i := -y_i \in [-1, 0]$.
+The Bernoulli's inequality says then that
+
+$$
+  \prod_{i=1}^n (1 - y_i) \ge 1 - \sum_{i} y_i, 
+$$
+
+which is
+$$
+  \prod_{i=1}^n \mathbb P( Y_i' ) \ge 1 - \sum_{i=1}^n \mathbb P(Y_i).
+$$
+
+where $Y'$ is the complement of the event $Y$. Swapping $Y_i$ with $Y_i'$ gives also
+$$
+  \prod_{i=1}^n \mathbb P( Y_i ) \ge 1 - \sum_{i=1}^n \mathbb P(Y_i').
+$$
+
+This inequality has an easy interpretation when all $Y_i$ are independent.
+But to see it, we have to discuss [Boole's inequality](https://en.wikipedia.org/wiki/Boole%27s_inequality), which says that for all events $Y_1, \dots, Y_n$ we have
+
+$$
+\mathbb P\!\left(\bigcup_{i=1}^n Y_i\right) \le \sum_{i=1}^n \mathbb P(Y_i).
+$$
+
+(In fact, here we can event take countably many events, as measures are $\sigma$-sub-additive. But let's talk about the finite case here.)
+
+If $Y_i$ are all independent, the inequality we have seen above reduces to
+$$
+  \prod_{i=1}^n \mathbb P(Y_i) = \mathbb P\!\left(\bigcap_{i=1}^n Y_i\right) = 1 - \mathbb P\!\left( \bigcup_{i=1}^n Y_i' \right) \ge 1 - \sum_{i=1}^n \mathbb P(Y_i').
+$$
