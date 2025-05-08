@@ -1,0 +1,131 @@
+---
+title: "Markov's inequality"
+description: "Another classic inequality in probability theory."
+author: "Paweł Czyż"
+date: "5/8/2024"
+---
+
+## Markov's inequality
+
+Let $\mathbb R^+_a = [a, +\infty) = \{ x\in \mathbb R \mid x\ge a \}$ be the set of real numbers greater or equal to $a$. In particular, $\mathbb R^+_0$ is the set of real non-negative numbers.
+
+Consider a situation with the following data:
+
+  - $\mu$ is a probability measure on $\mathbb R$.
+  - $a \in \mathbb R$ is any real number.
+  - $f\colon \mathbb R\to \mathbb R_0^+$ is a measurable function that is non-decreasing on $\mathbb R^+_a$.
+
+Then, we have
+$$
+\mathbb E_\mu[f] \ge f(a)\cdot \mu(\mathbb R^+_a).
+$$
+
+The proof is quite simple. Define $g(x) = \min(f(x), f(a))$.
+This function is also non-negative and measurable.   
+As $f$ is non-decreasing, we have $g(x) = f(a)$ for all $x\in \mathbb R^+_a$. Then,
+$$
+\mathbb E_\mu [f] \ge \mathbb E_\mu[g] \ge \int_{\mathbb R^+_a} g \,\mathrm{d}\mu = f(a) \cdot \mu(\mathbb R^+_a).
+$$
+
+Let $X\colon \Omega\to \mathbb R$ be a real-valued random variable.
+If $\mathbb P$ is the probability measure on $\Omega$, then $\mathbb P(X\ge a) = (X_\sharp\mathbb P) (\mathbb R^+_a)$,
+where $X_\sharp \mathbb P(A) = \mathbb P(X^{-1}(A))$ defines the pushforward measure being just the law (probability distribution) of $X$. 
+We now have
+$$
+    \mathbb E_{\mathbb P}[ f\circ X] = \mathbb E_{X_\sharp \mathbb P}[f],
+$$
+
+which is nothing else than change of variables formula or [the law of of the unconcious statistician](https://en.wikipedia.org/wiki/Law_of_the_unconscious_statistician#Measure-theoretic_formulation).
+
+In particular, the equality above takes the form
+$$
+    \mathbb E[f(X)] \ge f(a) \cdot \mathbb P( X\ge a)
+$$
+
+and is a variant of the [Markov's inequality](https://en.wikipedia.org/wiki/Markov%27s_inequality).
+
+The classical version is obtained by applying the above inequality to the random variable $Y=|X|$ and $f(y) = \max(0, y)$.
+Then
+$$
+    \mathbb E[|X|] \ge a\cdot \mathbb P(|X|\ge a).
+$$
+
+Typically, this inequality is presented for $a > 0$ (note that otherwise it is trivial) and transformed into a bound on the tail probability:
+$$
+    \mathbb P(|X|\ge a) \le \frac{\mathbb E[|X|]}{a} . 
+$$
+
+Similarly, for $a > 0$, $n\ge 1$ and $f(y) = \max(0, y)^n$, we obtain from the general inequality above
+$$
+    \mathbb P(|X|\ge a) \le \frac{\mathbb E[|X|^n]}{a^n} . 
+$$
+
+## Relative inequality 
+
+Is it possible that most university students have grades higher than average?
+Yes: imagine a test given to a class of 20 students, where 19 students score 100\% and the last one scores 80\%.
+However, is it possible that most students get five times as many points as the average?  
+
+Let $X$ be the non-negative number of points scored and $a > 0$.
+We have a bound
+$$
+    \mathbb P(X \ge  a \mathbb E[X] ) \le \frac{\mathbb E[X]}{a\mathbb E[X]} = \frac{1}{a}.
+$$
+
+Hence, the probability of getting $a = 5$ times as many points as an average student is at most 20\%.
+
+Similarly, if I were to think about a hypothetical investment (hypothetical – this post does not contain any investment or financial advice. It is just a story to illustrate a mathematical fact), where I would have to pay an upfront cost of $c$ and obtain in return $X$ (which can be also $0$ or smaller than $c$), could I expect becoming very rich?
+Probably I couldn't: the chance  at least 100 times larger than the invested amount is
+$$
+    \mathbb P(X\ge 100c) \le \frac{\mathbb E[X]}{100c}.
+$$
+
+Even if $\mathbb E[X] = 2c$, we see that the chance of becoming extremely-wealthy on executing such a kind of investment once is rather small.
+
+
+For more examples [see this book](https://bookdown.org/kevin_davisross/probsim-book/probability-inequalitlies.html).
+
+
+## Chebyshev's inequality
+
+Let $Y = |X - \mathbb E[X]|^2$. Take any $a > 0$. Then, for every $b = a^2$, we have
+$$
+    \mathbb P(Y \ge b) \le \frac{\mathbb E[Y]}{b},
+$$
+
+which can be rewritten as
+$$
+    \mathbb P( |X - \mathbb E[X]| \ge a ) \le \frac{\mathrm{Var}(X)}{a}.
+$$
+
+
+
+
+## Randomized inequality
+
+A. Ramdas and T. Manole wrote an [amazing paper](https://arxiv.org/abs/2304.02611) with stronger bounds.
+Assume that $X$ non-negative and that $U \sim \mathrm{Uniform}([0, 1])$ is independent of $X$.
+Then,
+$$
+    \mathbb P(X\ge aU) \le \frac{\mathbb E[X]}{a}.
+$$
+
+The proof follows from the [law of total expectation](https://en.wikipedia.org/wiki/Law_of_total_expectation):
+$$\begin{align*}
+    \mathbb P(X\ge aU) &= \mathbb E[\mathbf 1[X\ge aU]] \\
+    &= \mathbb E[ \mathbb E[\mathbf 1[X\ge aU]  \mid X ]] \\
+    &= \mathbb E[ \mathbb P(X\ge aU \mid X ) ] \\
+    &= \mathbb E[ \mathbb P(U\le X/a \mid X)] \\
+    &= \mathbb E[ \min(X/a, 1)] \\ 
+    &\le \mathbb E[X/a] \\
+    &= \mathbb E[X] / a.
+\end{align*}
+$$
+
+
+## Links
+
+  - [Wikipedia entry](https://en.wikipedia.org/wiki/Markov%27s_inequality)
+  - [The chapter with inequalities in the mentioned book](https://bookdown.org/kevin_davisross/probsim-book/probability-inequalitlies.html).
+  - [The mentioned article](https://arxiv.org/abs/2304.02611).
+  - [A book on inequalities](https://link.springer.com/book/10.1007/978-3-642-05261-3).

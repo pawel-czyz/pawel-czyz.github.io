@@ -1237,5 +1237,61 @@
     "title": "Blog",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nSee this link for a difference. I maintain my digital garden in Obsidian. Please, let me know if you know a good way of integrating Obsidian with Quarto!↩︎"
+  },
+  {
+    "objectID": "posts/markovs-inequality.html",
+    "href": "posts/markovs-inequality.html",
+    "title": "Markov’s inequality",
+    "section": "",
+    "text": "Let \\(\\mathbb R^+_a = [a, +\\infty) = \\{ x\\in \\mathbb R \\mid x\\ge a \\}\\) be the set of real numbers greater or equal to \\(a\\). In particular, \\(\\mathbb R^+_0\\) is the set of real non-negative numbers.\nConsider a situation with the following data:\n\n\\(\\mu\\) is a probability measure on \\(\\mathbb R\\).\n\\(a \\in \\mathbb R\\) is any real number.\n\\(f\\colon \\mathbb R\\to \\mathbb R_0^+\\) is a measurable function that is non-decreasing on \\(\\mathbb R^+_a\\).\n\nThen, we have \\[\n\\mathbb E_\\mu[f] \\ge f(a)\\cdot \\mu(\\mathbb R^+_a).\n\\]\nThe proof is quite simple. Define \\(g(x) = \\min(f(x), f(a))\\). This function is also non-negative and measurable.\nAs \\(f\\) is non-decreasing, we have \\(g(x) = f(a)\\) for all \\(x\\in \\mathbb R^+_a\\). Then, \\[\n\\mathbb E_\\mu [f] \\ge \\mathbb E_\\mu[g] \\ge \\int_{\\mathbb R^+_a} g \\,\\mathrm{d}\\mu = f(a) \\cdot \\mu(\\mathbb R^+_a).\n\\]\nLet \\(X\\colon \\Omega\\to \\mathbb R\\) be a real-valued random variable. If \\(\\mathbb P\\) is the probability measure on \\(\\Omega\\), then \\(\\mathbb P(X\\ge a) = (X_\\sharp\\mathbb P) (\\mathbb R^+_a)\\), where \\(X_\\sharp \\mathbb P(A) = \\mathbb P(X^{-1}(A))\\) defines the pushforward measure being just the law (probability distribution) of \\(X\\). We now have \\[\n    \\mathbb E_{\\mathbb P}[ f\\circ X] = \\mathbb E_{X_\\sharp \\mathbb P}[f],\n\\]\nwhich is nothing else than change of variables formula or the law of of the unconcious statistician.\nIn particular, the equality above takes the form \\[\n    \\mathbb E[f(X)] \\ge f(a) \\cdot \\mathbb P( X\\ge a)\n\\]\nand is a variant of the Markov’s inequality.\nThe classical version is obtained by applying the above inequality to the random variable \\(Y=|X|\\) and \\(f(y) = \\max(0, y)\\). Then \\[\n    \\mathbb E[|X|] \\ge a\\cdot \\mathbb P(|X|\\ge a).\n\\]\nTypically, this inequality is presented for \\(a &gt; 0\\) (note that otherwise it is trivial) and transformed into a bound on the tail probability: \\[\n    \\mathbb P(|X|\\ge a) \\le \\frac{\\mathbb E[|X|]}{a} .\n\\]\nSimilarly, for \\(a &gt; 0\\), \\(n\\ge 1\\) and \\(f(y) = \\max(0, y)^n\\), we obtain from the general inequality above \\[\n    \\mathbb P(|X|\\ge a) \\le \\frac{\\mathbb E[|X|^n]}{a^n} .\n\\]"
+  },
+  {
+    "objectID": "posts/markovs-inequality.html#markovs-inequality",
+    "href": "posts/markovs-inequality.html#markovs-inequality",
+    "title": "Markov’s inequality",
+    "section": "",
+    "text": "Let \\(\\mathbb R^+_a = [a, +\\infty) = \\{ x\\in \\mathbb R \\mid x\\ge a \\}\\) be the set of real numbers greater or equal to \\(a\\). In particular, \\(\\mathbb R^+_0\\) is the set of real non-negative numbers.\nConsider a situation with the following data:\n\n\\(\\mu\\) is a probability measure on \\(\\mathbb R\\).\n\\(a \\in \\mathbb R\\) is any real number.\n\\(f\\colon \\mathbb R\\to \\mathbb R_0^+\\) is a measurable function that is non-decreasing on \\(\\mathbb R^+_a\\).\n\nThen, we have \\[\n\\mathbb E_\\mu[f] \\ge f(a)\\cdot \\mu(\\mathbb R^+_a).\n\\]\nThe proof is quite simple. Define \\(g(x) = \\min(f(x), f(a))\\). This function is also non-negative and measurable.\nAs \\(f\\) is non-decreasing, we have \\(g(x) = f(a)\\) for all \\(x\\in \\mathbb R^+_a\\). Then, \\[\n\\mathbb E_\\mu [f] \\ge \\mathbb E_\\mu[g] \\ge \\int_{\\mathbb R^+_a} g \\,\\mathrm{d}\\mu = f(a) \\cdot \\mu(\\mathbb R^+_a).\n\\]\nLet \\(X\\colon \\Omega\\to \\mathbb R\\) be a real-valued random variable. If \\(\\mathbb P\\) is the probability measure on \\(\\Omega\\), then \\(\\mathbb P(X\\ge a) = (X_\\sharp\\mathbb P) (\\mathbb R^+_a)\\), where \\(X_\\sharp \\mathbb P(A) = \\mathbb P(X^{-1}(A))\\) defines the pushforward measure being just the law (probability distribution) of \\(X\\). We now have \\[\n    \\mathbb E_{\\mathbb P}[ f\\circ X] = \\mathbb E_{X_\\sharp \\mathbb P}[f],\n\\]\nwhich is nothing else than change of variables formula or the law of of the unconcious statistician.\nIn particular, the equality above takes the form \\[\n    \\mathbb E[f(X)] \\ge f(a) \\cdot \\mathbb P( X\\ge a)\n\\]\nand is a variant of the Markov’s inequality.\nThe classical version is obtained by applying the above inequality to the random variable \\(Y=|X|\\) and \\(f(y) = \\max(0, y)\\). Then \\[\n    \\mathbb E[|X|] \\ge a\\cdot \\mathbb P(|X|\\ge a).\n\\]\nTypically, this inequality is presented for \\(a &gt; 0\\) (note that otherwise it is trivial) and transformed into a bound on the tail probability: \\[\n    \\mathbb P(|X|\\ge a) \\le \\frac{\\mathbb E[|X|]}{a} .\n\\]\nSimilarly, for \\(a &gt; 0\\), \\(n\\ge 1\\) and \\(f(y) = \\max(0, y)^n\\), we obtain from the general inequality above \\[\n    \\mathbb P(|X|\\ge a) \\le \\frac{\\mathbb E[|X|^n]}{a^n} .\n\\]"
+  },
+  {
+    "objectID": "posts/markovs-inequality.html#section",
+    "href": "posts/markovs-inequality.html#section",
+    "title": "Markov’s inequality",
+    "section": "",
+    "text": "Is it possible that most people have grades higher than average? Yes: imagine a test given to a class of 20 students, where 19 students score 100% and the last one scores 80%.\nAssume that \\(X\\) is non-negative and \\(a &gt; 0\\). We have a bound \\[\n    \\mathbb P(X \\ge  a \\mathbb E[X] ) \\le \\frac{\\mathbb E[X]}{a\\mathbb E[X]} = \\frac{1}{a}.\n\\]\nFor example, the probability of getting \\(a = 2\\) times as many points as an average student is smaller than 50%."
+  },
+  {
+    "objectID": "posts/markovs-inequality.html#chebyshevs-inequality",
+    "href": "posts/markovs-inequality.html#chebyshevs-inequality",
+    "title": "Markov’s inequality",
+    "section": "Chebyshev’s inequality",
+    "text": "Chebyshev’s inequality\nLet \\(Y = |X - \\mathbb E[X]|^2\\). Take any \\(a &gt; 0\\). Then, for every \\(b = a^2\\), we have \\[\n    \\mathbb P(Y \\ge b) \\le \\frac{\\mathbb E[Y]}{b},\n\\]\nwhich can be rewritten as \\[\n    \\mathbb P( |X - \\mathbb E[X]| \\ge a ) \\le \\frac{\\mathrm{Var}(X)}{a}.\n\\]"
+  },
+  {
+    "objectID": "posts/markovs-inequality.html#relative-inequality",
+    "href": "posts/markovs-inequality.html#relative-inequality",
+    "title": "Markov’s inequality",
+    "section": "Relative inequality",
+    "text": "Relative inequality\nIs it possible that most university students have grades higher than average? Yes: imagine a test given to a class of 20 students, where 19 students score 100% and the last one scores 80%. However, is it possible that most students get five times as many points as the average?\nLet \\(X\\) be the non-negative number of points scored and \\(a &gt; 0\\). We have a bound \\[\n    \\mathbb P(X \\ge  a \\mathbb E[X] ) \\le \\frac{\\mathbb E[X]}{a\\mathbb E[X]} = \\frac{1}{a}.\n\\]\nHence, the probability of getting \\(a = 5\\) times as many points as an average student is at most 20%.\nSimilarly, if I were to think about a hypothetical investment (hypothetical – this post does not contain any investment or financial advice. It is just a story to illustrate a mathematical fact), where I would have to pay an upfront cost of \\(c\\) and obtain in return \\(X\\) (which can be also \\(0\\) or smaller than \\(c\\)), could I expect becoming very rich? Probably I couldn’t: the chance at least 100 times larger than the invested amount is \\[\n    \\mathbb P(X\\ge 100c) \\le \\frac{\\mathbb E[X]}{100c}.\n\\]\nEven if \\(\\mathbb E[X] = 2c\\), we see that the chance of becoming extremely-wealthy on executing such a kind of investment once is rather small.\nFor more examples see this book."
+  },
+  {
+    "objectID": "posts/markovs-inequality.html#randomized-inequality",
+    "href": "posts/markovs-inequality.html#randomized-inequality",
+    "title": "Markov’s inequality",
+    "section": "Randomized inequality",
+    "text": "Randomized inequality\nA. Ramdas and T. Manole wrote an amazing paper with stronger bounds. Assume that \\(X\\) non-negative and that \\(U \\sim \\mathrm{Uniform}([0, 1])\\) is independent of \\(X\\). Then, \\[\n    \\mathbb P(X\\ge aU) \\le \\frac{\\mathbb E[X]}{a}.\n\\]\nThe proof follows from the law of total expectation: \\[\\begin{align*}\n    \\mathbb P(X\\ge aU) &= \\mathbb E[\\mathbf 1[X\\ge aU]] \\\\\n    &= \\mathbb E[ \\mathbb E[\\mathbf 1[X\\ge aU]  \\mid X ]] \\\\\n    &= \\mathbb E[ \\mathbb P(X\\ge aU \\mid X ) ] \\\\\n    &= \\mathbb E[ \\mathbb P(U\\le X/a \\mid X)] \\\\\n    &= \\mathbb E[ \\min(X/a, 1)] \\\\\n    &\\le \\mathbb E[X/a] \\\\\n    &= \\mathbb E[X] / a.\n\\end{align*}\n\\]"
+  },
+  {
+    "objectID": "posts/markovs-inequality.html#footnotes",
+    "href": "posts/markovs-inequality.html#footnotes",
+    "title": "Markov’s inequality",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nThis post does not contain any investment or financial advice. It is just a story to illustrate a mathematical fact.↩︎"
+  },
+  {
+    "objectID": "posts/markovs-inequality.html#links",
+    "href": "posts/markovs-inequality.html#links",
+    "title": "Markov’s inequality",
+    "section": "Links",
+    "text": "Links\n\nWikipedia entry\nThe chapter with inequalities in the mentioned book.\nThe mentioned article.\nA book on inequalities."
   }
 ]
