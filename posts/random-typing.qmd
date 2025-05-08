@@ -1,0 +1,239 @@
+---
+title: "Random typing"
+description: "Can I generate random bits better than coin tosses?"
+author: "Paweł Czyż"
+date: "5/1/2025"
+# execute:
+#   freeze: true
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+When I was in the high school, one of the homeworks was to take a coin and toss it a hundred times.
+Interestingly, the teacher could take the results and tell some students that they did not toss the coin, but rather simply wrote down the results just before the lesson started!
+
+I was very surprised when I learned that coming up with random numbers is not that easy.
+For example, it may be counter-intuitive to write down a sequence of several consecutive equal outcomes ("00000" or "11111"), while in reality this is quite common:
+
+```{python}
+import numpy as np
+import numpy.random as random
+
+def chance_consecutive(
+  rng,
+  n_consecutive: int,
+  length: int,
+  n_simul: int,
+) -> float:
+  cnt = 0
+  for i in range(n_simul):
+    x = rng.binomial(1, p=0.5, size=(100,))
+    cs = np.cumsum(x)
+    cs = np.concatenate([[0], cs])  # Prepend artifical 0 to the cumulative sums
+    window_sums = cs[n_consecutive:] - cs[:-n_consecutive]
+    cnt += (np.any(window_sums == 0) | np.any(window_sums == n_consecutive))
+  return cnt / n_simul
+
+rng = random.default_rng(42)
+for k in range(4, 7): 
+    print(f"Chance that a sequence of equal outcomes of length {k} appears in 100 throws: {100 * chance_consecutive(rng, k, 100, 5000)}%")
+```
+
+When I told this story to David, he sent me a link to the [Aaronson Oracle](https://people.ischool.berkeley.edu/~nick/aaronson-oracle/), which is described on [Scott Aaronson's blog](https://scottaaronson.blog/?p=2756).
+This is was a lot of fun and there is a very short and readable [JavaScript implementation](https://github.com/elsehow/aaronson-oracle), which uses a 5-bit sequence to predict the next bit.
+
+## The autoregressive model
+
+Let's try to understand the algorithm in terms of probabilistic inference in an autoregressive model.
+We assume that the model should use only the last $L$ bits to predict the next one:
+$$
+P(X_1, \dots, X_n \mid \theta) = P(X_1, \dots, X_L \mid \theta)\cdot \prod_{k=L+1}^n P( X_{k} \mid X_{k-L}, \dots, X_{k-1}, \theta).
+$$
+
+In this model we need to parameterize the distribution over the first $L$ bits, $P(X_1, \dots, X_L\mid \theta)$, which is a distribution over the space $\{0, 1\}^L$ (we can parameterize it by a probability vector over $2^L$ classes, which has positive entries and is subject to the constraint $\nu_1 + \dots + \nu_{2^L} = 1$) and then the conditional distributions $\eta_{x_1, \dots, x_L} =  P(X_k = 1\mid X_{k-L}=x_1, \dots, X_{k-L}=x_L, \theta)$ for different $x_1, \dots, x_L$, which results in additional $2^L$ parameters in the model.  
+
+We can rewrite the likelihood for $\theta = (\nu, \eta)$ as
+$$
+P(X_1, \dots, X_n \mid \theta) = \mathrm{Categorical}( (X_1, \dots, X_l) \mid \nu) \times \prod_{k=L+1}^N \mathrm{Bernoulli}(X_k \mid \eta_{ X_{k-L}, \dots, X_{k-1}} ),
+$$
+
+which makes it easy to see that the maximum likelihood solution is based on counting different possibilities that have occurred in the data.
+For $N\ge L$ we can predict the next symbol using
+$$
+P(X_{N+1} = 1\mid \hat \theta, X_1, \dots, X_N) = P(X_{N+1} \mid \hat \theta, X_{N+1 - L}, \dots, X_N) = \hat \eta_{X_{N+1 - L}, \dots, X_N}.
+$$
+
+This yields the algorithm implemented in JavaScript, which predicts the most likely outcome using the maximum likelihood estimate $\hat\eta$.
+
+
+Note also that we can easily update this model to the Bayesian framework by using conjugate priors, $\nu \sim \mathrm{Dirichlet}(\alpha_1, \dots, \alpha_{2^L})$ and $\nu_{\bullet}\sim \mathrm{Beta}(a, b)$.
+The posterior is, again, given by counting the occurrences in the data.
+The predictive distribution, however, is in this case given by integration.
+For $N\ge L$ we have
+$$\begin{align*}
+P(X_{N+1} = 1\mid X_1, \dots, X_N) &= P(X_{N+1} \mid, X_{N+1 - L}, \dots, X_N) \\ 
+&= \int P(X_{N+1}=1 \mid X_{N+1 - L}, \dots, X_{N}, \eta)  P(\eta \mid X_1, \dots, X_N) \,\mathrm{d}\eta \\
+&= \int \eta_{X_{N+1-L}, \dots, X_N}  P(\eta_{X_{N+1-L}, \dots, X_N} \mid X_1, \dots, X_N) \, \mathrm{d}\eta \\
+&= \mathbb E_{\eta\sim \mathrm{Beta}(a + \#_1, b + \#_0)}[\eta]\\
+&= \frac{ a + \#_1 }{(a + b) + \#_1 + \#_0},
+\end{align*}
+$$
+
+where $\#_1$ is the number of $k$ such that $X_{k} = 1$ when the sequence $X_{k-L}, \dots, X_{k-1}$ was equal to $X_{N+1 - L}, \dots, X_N$ (and similarly for $\#_0$). 
+Note that for $(a, b)\to (0, 0)$ we obtain the same answer as for the maximum likelihood solution.
+
+## The data
+
+I have manually typed a few sequences of varying lengths:  
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+sequences = """
+0110000011010001011001100111000010010001101111011101001
+100101110010111100101111011011001110110000011001110
+00110101101001000110011001011101011100011001101011100010110
+1101001100110001101111001110011110011111000011011111101000001
+110100101101001100110011000110010110011111101001110111010011100011101
+00101100110011000101110000111001011100011100001100011000110111011101110
+0100001011010000111011110101111000111010010101101000101
+110011101011100100011011100111001100101110010000111101000011
+1001100100100111100111011001001110010110010111011011000110
+100110001101110010010011101011001001100110010111000001011100100100101
+100111001001011101001000100101110011001000000111000010110011001
+100100010011011100111110000000110000011111100101101110001
+11001101001110100011011011110010011000001010110011001101001
+10001100110010011000000101100100110010010011001100110010000100
+001000110001001100010110001100111100011100001111000001111000011110001
+100011000111001110001110001110001111000011110000011100011000011001111
+0011001100100101101110000111110010000100000100000010001011110
+11001001110011110111001001110010001101011110010111000111100111110001110
+110010111000111000111000111100011100001111000011111000110011001001011001110
+010010110011100100101001010110011000111100011001100010110011100100100010
+0111001000010110000101111000100011000111011110111110110100010110
+11110100101101001100110010011110011100001111100001000010110010
+10101001011001100010110001100011000110100011011001110001100011001
+110001010001100110000011000010000100001011001100011100011001
+0110001100111010011010010001110011100000101111001110101011000100110
+01011000110010110010110011001100010010100101000110001010110001010110001011100011000110101010
+111001001010101100010110001011000101001010010101100010101100101
+00101001011101010111001101110101110010110101100010111000111001010111001
+001011100111000100001111010110100011010111000101110001010010101100111000100101
+11010010001010100100101100101110101100101110101110010101110
+00101011100010111001011100010101110001011100101111001011100101000101110010
+110100101100011000110101110010010111100011111001111110010001011100101
+100010111001011100100101000110010111001010111001011100101110001010
+000101110001010111000100010111000101110001001011010101110010101110010
+0001011101010101110100101101010101101010010101110010010110001010111001010111101010111010
+110101000101011100101001010111001010001010111010101111110010101010001001
+011100010111000101110010111000001000101010111000101011100010101011100101011100010101
+11010001001010110000101010111000101011100101011101000101011110010101110001010101000
+100010111001100010101100111100101100100010101100101110
+00100111000110011100010111000010101100101011100010101100010101
+000001010110010101011001010111001010110010110101011001010111000101
+000101011010110110101110101011100010101110001010110010101110001010111000101
+000101011100101110101010111001010110010101110010010100001000010011101010110101
+11010110001010111001011100101011100001010110001010111001001
+11000101011000101110001011101011100010111000101011000101110001011100010111001010
+00101110001011001011000101011000101010110011110101011010101100101011001010101100101
+10010110001010111001001001110010111000101011100101101010110010101100010001001
+00000010010011100010100010100100100101110010101110001010111000100101100010101100010101
+00101101010111000101011100010101011100010111000101100010111000101
+10010101110001011001010111000101011100010101110001010110001010101100010101100101
+11001001110001011001010110010111100101011100010111001010111000101
+11001010001010011000100101110001010110001011100010111010010110010101
+11001011100101011100010100010010101011100100100100001001110001001011100
+11001001110000100101110010101110101010111001001001001001001011001
+001110010110001011100010100101001100010111000100100000000101110010010010
+11010011000101110001011100010111000100111000101011010101110010101
+1101010001010101100010100111010101011100010101110001010110
+110001010111001001011001000101010101010101010101011100010111001001
+000100000100110010111000101010001110010111100111000010111000010111000001
+110001000001001110011100010101111000001010011100010111000010110001011000101001
+"""
+sequences = sequences.strip().split("\n")
+
+plt.style.use("dark_background")
+fig, ax = plt.subplots()
+sequence_lengths = np.asarray([len(seq) for seq in sequences])
+ax.hist(sequence_lengths, bins=np.arange(sequence_lengths.min() - 0.5, sequence_lengths.max() + 1.5))
+ax.spines[["top", "right"]].set_visible(False)
+ax.set_title(f"Total number of sequences: {len(sequences)}")
+ax.set_xlabel("Sequence lengths")
+ax.set_ylabel("Number of occurrences")
+```
+
+There are multiple sequences, rather a single one: between typing the sequences, I tried to take a break to make them a bit more independent.
+On the other hand, in reality I did look at the generated data during the breaks (and, during the typing, I occasionally looked at the sequences to check if the lengths are somewhat similar to each other).
+
+There are several models we can try to fit: we could try merging them into one long sequence (this implicitly assumes that the start of the next sequence should be more similar to the end of the previous sequence, rather than the start of it) or we could try to treat them as i.i.d. Or build a hierarchical model, with $\eta$ estimated on a per-sequence basis. Or try to incorporate the dependency between sequences.
+
+## The simplest model
+
+Let's try something trivial: a model without any memory, assuming $L=0$.
+
+```{python}
+def wald_interval(n: int, x: int):
+  z = 1.96
+  p = x / n
+  std_err = z * (p * (1 - p) / n)**0.5
+  return p - std_err, p + std_err
+
+def wilson_interval(n: int, x: int):
+  z = 1.96
+  center = (x + 0.5 * z**2) / (n + z**2)
+  halfwidth = (0.25 * z**2 + x*(n-x)/n)**0.5 * z / (n + z**2)
+  return center - halfwidth, center + halfwidth
+```
+
+
+```{python}
+for seq in sequences:
+  s = list(map(int, [c for c in seq]))
+  n = len(s)
+  x = np.sum(s)
+  p = np.mean(s)
+  print(f"{p:.3f}  ({wald_interval(n, x)})  ({wilson_interval(n, x)})")
+```
+
+```{python}
+from itertools import product
+
+rng = np.random.default_rng(101)
+sequences = [rng.binomial(1, p=0.5, size=4_000)]
+
+L = 6
+
+s = []
+for seq in sequences:
+  s += list(map(int, [c for c in seq]))[L:]
+
+for _ in range(1):
+  N = len(s)
+
+  vals = {x: [0, 1] for x in product([0, 1], repeat=L)}
+
+  for i in range(L, N):
+    prev = s[i-L:i]
+    assert len(prev) == L
+
+    current = s[i]
+    vals[tuple(prev)][current] += 1
+
+  for prev, v in vals.items():
+    x = v[1]
+    n = v[1] + v[0]
+    if n >= 50:
+      sq = "".join(map(str, prev))
+      lower, upper = wilson_interval(n, x)
+      print(f"{sq} (observed {n} times): P(next = 1) = {x / n:.2f}  ({lower:.2f} – {upper:.2f})")
+```
+
+
+## Links
+
+  - An autoregressive model with $L=1$ is a Markov chain, which in fact we have already discussed in [a previous blog post](./almost-binomial-markov-chain.qmd).
+  - I think the idea of forecasting $X_{N+1}$ given $X_1, \dots, X_N$ is a very interesting topic. The predictive motivations of Bayesian statistics for such problems date back to Bruno de Finetti's work (and his eponymous theorem for exchangeable sequences). More generally, there is Philip Dawid's prequential analysis (see e.g., [*Statistical theory: the prequential approach*](https://doi.org/10.2307/2981683) or this [reading list](https://www.statslab.cam.ac.uk/~apd/preqpubs.pdf)), which is a very well-developed statistical theory, although I do not know as much about it as I would like to. More recently, Stephen Walker and Chris Holmes started building a theory based on martingales, with in [their 2023 paper](https://doi.org/10.1098/rsta.2022.0143) and, together with Edwin Fong, in [*Martingale posterior distributions*](https://doi.org/10.1093/jrsssb/qkad005). There is also the line of work from Patrizia Berti and colleagues (see [*Bayesian predictive inference without a prior*](https://doi.org/10.1093/jrsssb/qkad005) and the references therein). Looks like a lot of reading for me!
+
