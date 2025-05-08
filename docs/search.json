@@ -1264,14 +1264,14 @@
     "href": "posts/markovs-inequality.html#chebyshevs-inequality",
     "title": "Markov’s inequality",
     "section": "Chebyshev’s inequality",
-    "text": "Chebyshev’s inequality\nLet \\(Y = |X - \\mathbb E[X]|^2\\). Take any \\(a &gt; 0\\). Then, for every \\(b = a^2\\), we have \\[\n    \\mathbb P(Y \\ge b) \\le \\frac{\\mathbb E[Y]}{b},\n\\]\nwhich can be rewritten as \\[\n    \\mathbb P( |X - \\mathbb E[X]| \\ge a ) \\le \\frac{\\mathrm{Var}(X)}{a}.\n\\]"
+    "text": "Chebyshev’s inequality\nLet \\(Y = |X - \\mathbb E[X]|^2\\). Take any \\(a &gt; 0\\). Then, for every \\(b = a^2\\), we have \\[\n    \\mathbb P(Y \\ge b) \\le \\frac{\\mathbb E[Y]}{b},\n\\]\nwhich can be rewritten as \\[\n    \\mathbb P( |X - \\mathbb E[X]| \\ge a ) \\le \\frac{\\mathrm{Var}(X)}{a^2}.\n\\]\nIf we write \\(\\sigma^2 = \\mathrm{Var}(X)\\), so that \\(\\sigma &gt; 0\\) is the standard deviation and use \\(a = k \\sigma\\), we obtain \\[\n    \\mathbb P( |X - \\mathbb E[X]| \\ge k\\sigma ) \\le \\frac{1}{k^2}.\n\\]\nThis bound is impressive in the aspect that it does not require us to make any assumptions other than the existence of the two first moments on a distribution. On the other hand, for specific families we know better bounds, e.g., for the Gaussian distributions."
   },
   {
     "objectID": "posts/markovs-inequality.html#relative-inequality",
     "href": "posts/markovs-inequality.html#relative-inequality",
     "title": "Markov’s inequality",
     "section": "Relative inequality",
-    "text": "Relative inequality\nIs it possible that most university students have grades higher than average? Yes: imagine a test given to a class of 20 students, where 19 students score 100% and the last one scores 80%. However, is it possible that most students get five times as many points as the average?\nLet \\(X\\) be the non-negative number of points scored and \\(a &gt; 0\\). We have a bound \\[\n    \\mathbb P(X \\ge  a \\mathbb E[X] ) \\le \\frac{\\mathbb E[X]}{a\\mathbb E[X]} = \\frac{1}{a}.\n\\]\nHence, the probability of getting \\(a = 5\\) times as many points as an average student is at most 20%.\nSimilarly, if I were to think about a hypothetical investment (hypothetical – this post does not contain any investment or financial advice. It is just a simple story to illustrate a mathematical inequality, which is the topic of this post), where I would have to pay an upfront cost of \\(c\\) and obtain in return \\(X\\) (which can be also \\(0\\) or smaller than \\(c\\)), could I expect becoming very rich? Probably I couldn’t: the chance at least 100 times larger than the invested amount is \\[\n    \\mathbb P(X\\ge 100c) \\le \\frac{\\mathbb E[X]}{100c}.\n\\]\nEven if \\(\\mathbb E[X] = 2c\\), we see that the chance of becoming extremely wealthy by executing such a kind of investment once is rather small.\nFor more examples see this book."
+    "text": "Relative inequality\nIs it possible that most university students have grades higher than average? Yes: imagine a test given to a class of 20 students, where 19 students score 100% and the last one scores 80%. However, is it possible that most students get five times as many points as the average?\nLet \\(X\\) be the non-negative number of points scored and \\(a &gt; 0\\). We have a bound \\[\n    \\mathbb P(X \\ge  a \\mathbb E[X] ) \\le \\frac{\\mathbb E[X]}{a\\mathbb E[X]} = \\frac{1}{a}.\n\\]\nHence, the probability of getting \\(a = 5\\) times as many points as an average student is at most 20%.\nSimilarly, if I were to think about a hypothetical investment (hypothetical. I’m not a financial advisor and this post does not contain any investment or financial advice. It is just a simple story to illustrate a mathematical inequality, which is the topic of this post), where I would have to pay an upfront cost of \\(c\\) and obtain in return \\(X\\) (which can be also \\(0\\) or smaller than \\(c\\)), could I expect becoming very rich? Probably I couldn’t: the chance of \\(X\\) being very large (say at least \\(k\\) times larger than the invested amount) is \\[\n    \\mathbb P(X\\ge kc) \\le \\frac{\\mathbb E[X]}{kc}.\n\\]\nEven if \\(\\mathbb E[X] = 2c\\), but I would like to have \\(k = 100\\), then we see that the probability is rather small.\nFor more examples see this book."
   },
   {
     "objectID": "posts/markovs-inequality.html#randomized-inequality",
@@ -1292,6 +1292,6 @@
     "href": "posts/markovs-inequality.html#links",
     "title": "Markov’s inequality",
     "section": "Links",
-    "text": "Links\n\nWikipedia entry\nThe chapter with inequalities in the mentioned book.\nThe mentioned article.\nA book on inequalities."
+    "text": "Links\n\nWikipedia entry\nThe chapter with inequalities in the mentioned book.\nThe mentioned article.\nA book on inequalities.\nWe discussed the Bernoulli inequality here."
   }
 ]
