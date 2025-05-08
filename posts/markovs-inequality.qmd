@@ -2,7 +2,7 @@
 title: "Markov's inequality"
 description: "Another classic inequality in probability theory."
 author: "Paweł Czyż"
-date: "5/8/2024"
+date: "5/8/2025"
 ---
 
 ## Markov's inequality
@@ -74,13 +74,13 @@ $$
 
 Hence, the probability of getting $a = 5$ times as many points as an average student is at most 20\%.
 
-Similarly, if I were to think about a hypothetical investment (hypothetical – this post does not contain any investment or financial advice. It is just a story to illustrate a mathematical fact), where I would have to pay an upfront cost of $c$ and obtain in return $X$ (which can be also $0$ or smaller than $c$), could I expect becoming very rich?
+Similarly, if I were to think about a hypothetical investment (hypothetical – this post does not contain any investment or financial advice. It is just a simple story to illustrate a mathematical inequality, which is the topic of this post), where I would have to pay an upfront cost of $c$ and obtain in return $X$ (which can be also $0$ or smaller than $c$), could I expect becoming very rich?
 Probably I couldn't: the chance  at least 100 times larger than the invested amount is
 $$
     \mathbb P(X\ge 100c) \le \frac{\mathbb E[X]}{100c}.
 $$
 
-Even if $\mathbb E[X] = 2c$, we see that the chance of becoming extremely-wealthy on executing such a kind of investment once is rather small.
+Even if $\mathbb E[X] = 2c$, we see that the chance of becoming extremely wealthy by executing such a kind of investment once is rather small.
 
 
 For more examples [see this book](https://bookdown.org/kevin_davisross/probsim-book/probability-inequalitlies.html).
@@ -107,8 +107,9 @@ A. Ramdas and T. Manole wrote an [amazing paper](https://arxiv.org/abs/2304.0261
 Assume that $X$ non-negative and that $U \sim \mathrm{Uniform}([0, 1])$ is independent of $X$.
 Then,
 $$
-    \mathbb P(X\ge aU) \le \frac{\mathbb E[X]}{a}.
+    \mathbb P(X\ge aU) \le \frac{\mathbb E[X]}{a}
 $$
+for every $a > 0$.
 
 The proof follows from the [law of total expectation](https://en.wikipedia.org/wiki/Law_of_total_expectation):
 $$\begin{align*}

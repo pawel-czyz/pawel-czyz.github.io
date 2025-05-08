@@ -12,6 +12,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/markovs-inequality.html",
       "/posts/bernoulli-inequality.html",
       "/posts/blogs-i-read.html",
       "/posts/scrna-seq-literature.html",
@@ -23,7 +24,6 @@
       "/posts/discrete-intractable-likelihood.html",
       "/posts/adjoint-group-homomorphisms.html",
       "/posts/invariance-mi-pmi-profile.html",
-      "/posts/markovs-inequality.html",
       "/posts/mixtures-and-admixtures.html",
       "/posts/irrational-pi-and-e.html",
       "/posts/clustering-exponential-family-softmax.html",
