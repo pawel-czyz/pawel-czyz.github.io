@@ -74,14 +74,13 @@ $$
 
 Hence, the probability of getting $a = 5$ times as many points as an average student is at most 20\%.
 
-Similarly, if I were to think about a hypothetical investment (hypothetical – this post does not contain any investment or financial advice. It is just a simple story to illustrate a mathematical inequality, which is the topic of this post), where I would have to pay an upfront cost of $c$ and obtain in return $X$ (which can be also $0$ or smaller than $c$), could I expect becoming very rich?
-Probably I couldn't: the chance  at least 100 times larger than the invested amount is
+Similarly, if I were to think about a hypothetical investment (hypothetical. I'm not a financial advisor and this post does not contain any investment or financial advice. It is just a simple story to illustrate a mathematical inequality, which is the topic of this post), where I would have to pay an upfront cost of $c$ and obtain in return $X$ (which can be also $0$ or smaller than $c$), could I expect becoming very rich?
+Probably I couldn't: the chance of $X$ being very large (say at least $k$ times larger than the invested amount) is
 $$
-    \mathbb P(X\ge 100c) \le \frac{\mathbb E[X]}{100c}.
+    \mathbb P(X\ge kc) \le \frac{\mathbb E[X]}{kc}.
 $$
 
-Even if $\mathbb E[X] = 2c$, we see that the chance of becoming extremely wealthy by executing such a kind of investment once is rather small.
-
+Even if $\mathbb E[X] = 2c$, but I would like to have $k = 100$, then we see that the probability is rather small.
 
 For more examples [see this book](https://bookdown.org/kevin_davisross/probsim-book/probability-inequalitlies.html).
 
@@ -95,10 +94,16 @@ $$
 
 which can be rewritten as
 $$
-    \mathbb P( |X - \mathbb E[X]| \ge a ) \le \frac{\mathrm{Var}(X)}{a}.
+    \mathbb P( |X - \mathbb E[X]| \ge a ) \le \frac{\mathrm{Var}(X)}{a^2}.
 $$
 
+If we write $\sigma^2 = \mathrm{Var}(X)$, so that $\sigma > 0$ is the standard deviation and use $a = k \sigma$, we obtain
+$$
+    \mathbb P( |X - \mathbb E[X]| \ge k\sigma ) \le \frac{1}{k^2}.
+$$
 
+This bound is impressive in the aspect that it does not require us to make any assumptions other than the existence of the two first moments on a distribution.
+On the other hand, for specific families we know better bounds, e.g., for the [Gaussian distributions](https://en.wikipedia.org/wiki/68%E2%80%9395%E2%80%9399.7_rule). 
 
 
 ## Randomized inequality
@@ -130,3 +135,4 @@ $$
   - [The chapter with inequalities in the mentioned book](https://bookdown.org/kevin_davisross/probsim-book/probability-inequalitlies.html).
   - [The mentioned article](https://arxiv.org/abs/2304.02611).
   - [A book on inequalities](https://link.springer.com/book/10.1007/978-3-642-05261-3).
+  - We discussed the Bernoulli inequality [here](bernoulli-inequality.qmd).
