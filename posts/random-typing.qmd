@@ -2,7 +2,7 @@
 title: "Random typing"
 description: "Can I generate random bits better than coin tosses?"
 author: "Paweł Czyż"
-date: "5/1/2025"
+date: "5/15/2025"
 # execute:
 #   freeze: true
 format: 
@@ -12,7 +12,7 @@ jupyter: python3
 ---
 
 When I was in the high school, one of the homeworks was to take a coin and toss it a hundred times.
-Interestingly, the teacher could take the results and tell some students that they did not toss the coin, but rather simply wrote down the results just before the lesson started!
+Interestingly, the teacher could look at the results and tell some students that they did not toss the coin, but rather simply wrote down the results just before the lesson started!
 
 I was very surprised when I learned that coming up with random numbers is not that easy.
 For example, it may be counter-intuitive to write down a sequence of several consecutive equal outcomes ("00000" or "11111"), while in reality this is quite common:
@@ -20,6 +20,7 @@ For example, it may be counter-intuitive to write down a sequence of several con
 ```{python}
 import numpy as np
 import numpy.random as random
+import jax.version
 
 def chance_consecutive(
   rng,
@@ -158,7 +159,7 @@ sequences = sequences.strip().split("\n")
 plt.style.use("dark_background")
 fig, ax = plt.subplots()
 sequence_lengths = np.asarray([len(seq) for seq in sequences])
-ax.hist(sequence_lengths, bins=np.arange(sequence_lengths.min() - 0.5, sequence_lengths.max() + 1.5))
+ax.hist(sequence_lengths, bins=10)
 ax.spines[["top", "right"]].set_visible(False)
 ax.set_title(f"Total number of sequences: {len(sequences)}")
 ax.set_xlabel("Sequence lengths")
@@ -173,6 +174,7 @@ There are several models we can try to fit: we could try merging them into one l
 ## The simplest model
 
 Let's try something trivial: a model without any memory, assuming $L=0$.
+It simply counts the number of $1$ characters within each sequence and, treating them as independent and identically distributed, estimates the probability of typing $1$.
 
 ```{python}
 def wald_interval(n: int, x: int):
@@ -186,23 +188,109 @@ def wilson_interval(n: int, x: int):
   center = (x + 0.5 * z**2) / (n + z**2)
   halfwidth = (0.25 * z**2 + x*(n-x)/n)**0.5 * z / (n + z**2)
   return center - halfwidth, center + halfwidth
-```
 
+ps = []
+intervals_wald = []
+intervals_wils = []
+total_counts = []
+n_ones = []
 
-```{python}
 for seq in sequences:
   s = list(map(int, [c for c in seq]))
   n = len(s)
   x = np.sum(s)
+  total_counts.append(n)
+  n_ones.append(x)
+  
   p = np.mean(s)
-  print(f"{p:.3f}  ({wald_interval(n, x)})  ({wilson_interval(n, x)})")
+  ps.append(p)
+  wald_int = wald_interval(n, x)
+  wils_int = wilson_interval(n, x)
+  intervals_wald.append(wald_int)
+  intervals_wils.append(wils_int)
+
+total_counts = np.asarray(total_counts)
+n_ones = np.asarray(n_ones)
+
+fig, axs = plt.subplots(2, sharex=True, sharey=True)
+
+for ax, ints, name in zip(axs.ravel(), [intervals_wald, intervals_wils], ["Wald", "Wilson"]):
+  xs = np.arange(1, len(ps) + 1)
+  ps_ = np.asarray(ps)
+  ints_ = np.array(ints).T
+  ints_ = np.abs(ints_ - ps_[None, :])
+  ax.errorbar(xs, ps, yerr=ints_)
+  ax.set_title(f"{name} confidence intervals")
+  ax.set_xlabel("Sequence number")
+  ax.set_ylabel("Probability estimate")
+  ax.axhline(0.5, linestyle="--", color="white")
+
+fig.tight_layout()
 ```
+import jax
+If we look at the individual sequences, it may seem that I sometimes depart from the probability of 50%, however the confidence intervals are still quite wide and include the 50% value.
+Drawing the point estimates (which is itself dubious practice, as they are quite noisy) also shows that they are around 50%:
+```{python}
+fig, ax = plt.subplots()
+ax.hist(ps, bins=10)
+ax.set_xlabel("Estimate $\\hat p$")
+ax.axvline(0.5, linestyle="--", color="white")
+```
+
+A better way would be to build a hierarchical model.
+Say, this one, where we draw the probabilities from a beta distribution with unknown parameters:
+```{python}
+import jax
+import jax.numpy as jnp
+import numpyro
+import numpyro.distributions as dist
+from numpyro.infer import MCMC, NUTS
+
+
+def bag_of_coins(ns, xs):
+    # weakly-informative log-normal hyperpriors
+    alpha_raw = numpyro.sample("alpha_raw", dist.Normal(0., 1.))
+    beta_raw  = numpyro.sample("beta_raw",  dist.Normal(0., 1.))
+    alpha = numpyro.deterministic("alpha", jnp.exp(alpha_raw))
+    beta  = numpyro.deterministic("beta",  jnp.exp(beta_raw))
+
+    # BetaBinomial already integrates over p_i
+    numpyro.sample(
+        "x",
+        dist.BetaBinomial(concentration1=alpha,
+                          concentration0=beta,
+                          total_count=ns),
+        obs=xs
+    )
+
+
+rng_key   = jax.random.key(0)
+nuts      = NUTS(bag_of_coins)
+num_samples = 1000
+mcmc      = MCMC(nuts, num_warmup=num_samples, num_samples=num_samples, progress_bar=True)
+mcmc.run(rng_key, ns=total_counts, xs=n_ones)
+
+def f(key, sample):
+  return jax.random.beta(key, sample["alpha"], sample["beta"])
+
+predicted_ps = jax.vmap(f)(jax.random.split(rng_key, num_samples), mcmc.get_samples())
+
+fig, ax = plt.subplots()
+ax.hist(predicted_ps, density=True, bins=20)
+ax.axvline(0.5, linestyle="--", color="white")
+ax.set_xlabel("Inferred probabilities")
+```
+
+Right. It seems that the frequencies of both 0 and 1 are quite similar.
+Let's move to actual autoregressive models, which model the dependencies.
+
+## Autoregressive model
 
 ```{python}
 from itertools import product
 
 rng = np.random.default_rng(101)
-sequences = [rng.binomial(1, p=0.5, size=4_000)]
+# sequences = [rng.binomial(1, p=0.5, size=4_000)]
 
 L = 6
 
