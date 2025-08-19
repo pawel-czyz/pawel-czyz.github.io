@@ -1,0 +1,229 @@
+---
+title: "Mutual information of overlapping squares"
+description: "Let's calculate mutual information in a family of mixture distributions."
+author: "Paweł Czyż"
+date: "8/2/2025"
+#execute:
+#  freeze: true
+format: 
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+In our [paper on pointwise mutual information profiles and the mixture models](../publications/pmi-profiles.qmd), we consider an example in which two distributions – each with zero mutual information – are mixed to obtain a distribution with one bit of information.
+
+Let's generalize this example.
+
+Let $\mathcal U(a, b)$ be the uniform distribution over the interval $(a, b)\subset \mathbb R$.
+Similarly, by $\mathcal U^2(a, b)$ we denote the uniform probability distribution over a square $(a, b)^2 := (a, b)\times (a, b) \subset \mathbb R^2$.
+
+We are interested in the mixture distribution:
+
+$$
+  \mathcal M(s, \epsilon, w) = (1 - w)\, \mathcal U^2(0, 1) + w\, \mathcal U^2(1 - \epsilon, 1 - \epsilon + s). 
+$$
+
+Namely, we have a uniform distribution over a square $(0, 1)\times (0, 1)$ and we mix it with a uniform distribution over another square with side $s > 0$, which can overlap with the first one.
+The degree of overlap is controlled by parameter $\epsilon \in (-\infty, 1)$ (and, when $\epsilon > 0$, by the side length $s$).
+The mixing weight corresponds to the parameter $w\in [0, 1]$, with $w=0$ being only the initial unit square.
+
+Assume $(X, Y) \sim \mathcal M(s, \epsilon, w)$. We have
+$$\begin{align*}
+p_{XY}(x, y) &= (1-w)\, \mathbf 1[0 < x < 1]\cdot \mathbf 1[0 < y < 1] \\
+&+ \frac{w}{s^2}\, \mathbf 1[1-\epsilon < x < 1 - \epsilon + s] \cdot \mathbf 1[1-\epsilon < y < 1 - \epsilon + s]
+\end{align*}
+$$
+and
+$$
+p_{X}(t) = p_Y(t) = (1-w)\, \mathbf 1[0 < t < 1]
++ \frac{w}{s}\, \mathbf 1[1-\epsilon < t < 1 - \epsilon + s]
+$$
+
+How should the mutual information $\mathbf{I}(X; Y) = f(s, \epsilon, w)$ behave?
+
+## Disjoint squares
+
+For $\epsilon \le 0$, the squares are disjoint.
+
+In this case, we have $\mathbf{I}(X; Y) = -(w\log w + (1-w) \log(1-w) )$, which is exactly [the entropy of the binary distribution](https://en.wikipedia.org/wiki/Binary_entropy_function), $\mathbf{H}(Z)$, where $Z\sim \mathrm{Bernoulli}(w)$.
+
+This can be derived in two manners. First, directly. Let $r(x, y) = p_{XY}(x, y) / p_X(x) p_Y(y)$ and write $S_1$ for the unit square $(0, 1)^2 = (0, 1)\times (0, 1)$ and $S_2$ for the square $(1-\epsilon, 1-\epsilon + s)^2$.
+
+On the unit square, $S_1$, we have $r\vert_{S_1}(x, y) = (1-w) / (1-w)^2 = 1/(1-w)$. Similarly, $r\vert_{S_2}(x, y) = (w/s^2) / (w/s)^2 = 1/w$.
+Now the mutual information is equal to
+$$
+\mathbf{I}(X; Y) = (1-w) \log\frac{1}{1-w} + s^2\cdot \frac{w}{s^2}\cdot \log\frac{1}{w}.
+$$
+
+Another, arguably a bit smarter explanation is to use $Z$ to label the component of the mixture from which the points were chosen.
+Then, we can [use the identity](https://en.wikipedia.org/wiki/Conditional_mutual_information#Some_identities):
+$$
+\mathbf{I}(X; Y\mid Z) = \mathbf{I}(X; Y) + \mathbf{H}(Z\mid X) + \mathbf{H}(Z\mid Y) - \mathbf{H}(Z\mid X, Y) - \mathbf{H}(Z).
+$$
+
+The conditional mutual information $\mathbf{I}(X; Y\mid Z)$ is zero, as it is a weighted sum of mutual information within each component (see e.g., the proof of Proposition 10 in [our paper](../publications/pmi-profiles.qmd)).
+Given $X$ or $Y$ (or $(X, Y)$), the component $Z$ is fully determined, so that the conditional entropy terms are zero as well.
+Hence,
+$$
+0 = \mathbf{I}(X; Y) - \mathbf{H}(Z).
+$$
+
+### Summary
+
+In this case, the mutual information depends solely on $w$, being the [entropy of the corresponding Bernoulli variable](https://en.wikipedia.org/wiki/Binary_entropy_function):
+
+$$
+\mathbf{I}(X; Y) = (1-w) \log\frac{1}{1-w} + s^2\cdot \frac{w}{s^2}\cdot \log\frac{1}{w}.
+$$
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+plt.style.use("dark_background")
+
+fig, ax = plt.subplots()
+ws = np.linspace(1e-9, 1-1e-9, 81)
+mi = -( (1-ws) * np.log(1-ws) + ws * np.log(ws) )
+
+ax.plot(ws, mi)
+ax.spines[["top", "right"]].set_visible(False)
+ax.set_xlabel("Mixture weight $w$")
+ax.set_ylabel("Mutual information")
+```
+
+
+## Non-disjoint squares, $\epsilon + s \ge 1$
+
+A much more interesting case is when the squares are overlapping.
+Remember that we constrain $\epsilon \in (-\infty, 1)$, so that the additional square is "around the upper" corner of the standard one.
+
+In this case, we additionally assume that $\epsilon + s \ge 1$.
+We can visualize this by adapting [this script](https://github.com/cbg-ethz/bmi/blob/main/scripts/Mixtures/plot_appearing_and_vanishing_mi.py):
+```{python}
+from typing import NamedTuple, Literal
+
+
+def plot_density(ax: plt.Axes, array: np.ndarray, title: str = "", _max_val: float=2) -> None:
+    """Plots density in `array` on `ax`."""
+    ax.imshow(array, origin="lower", extent=[0, _max_val, 0, _max_val], cmap="Blues", vmin=0, vmax=1)
+    # ax.set_xticks([])
+    # ax.set_yticks([])
+    ax.set_xlabel("$x$")
+    ax.set_ylabel("$y$")
+    if title:
+      ax.set_title(title)
+
+class DensityInformation(NamedTuple):
+  x: np.ndarray
+  y: np.ndarray
+  X_mesh: np.ndarray
+  Y_mesh: np.ndarray
+  joint_density: np.ndarray
+  margin_product: np.ndarray
+  margin_values: np.ndarray
+
+
+def get_density(epsilon: float, w: float, s: float, n_points: int = 30) -> DensityInformation:
+  if s <= 0:
+    raise ValueError("Side length has to be positive.")
+
+  if w < 0 or w > 1:
+    raise ValueError("Mixture weight has to be in [0, 1].")
+
+  if epsilon > 1:
+    raise NotImplementedError("We allow epsilon <= 1")
+
+  max_val = max(1.0, 1 - epsilon + s)
+
+  x = np.linspace(0, max_val, n_points)
+  y = np.linspace(0, max_val, n_points)
+
+  def m(T):
+    a = (1 - w) * (0 < T) * (T < 1)
+    b = (w / s) * (1-epsilon < T) * (T < 1-epsilon + s)
+    return a + b
+
+  X, Y = np.meshgrid(x, y)
+
+  mask1 = (0 < X) & (X < 1) & (0 < Y) & (Y < 1)
+  mask2 = (1 - epsilon < X) & (X < 1 - epsilon + s) & (1 - epsilon < Y) & (Y < 1 - epsilon + s)
+  
+  density = np.zeros_like(X, dtype=float)
+  density[mask1] = 1 - w
+  density[mask2] += (w/s**2)
+
+  return DensityInformation(
+    x=x,
+    y=y,
+    X_mesh=X,
+    Y_mesh=Y,
+    joint_density=density,
+    margin_values=m(x),
+    margin_product=m(X) * m(Y),
+  )
+
+
+def visualize(ax: plt.Axes, epsilon: float, w: float, s: float, n_points: int = 20, plot_type: Literal["j", "m", "r"] = "j"):
+  dens = get_density(epsilon=epsilon, w=w, s=s, n_points=n_points)
+
+  max_val = 1.1 * (np.max(dens.x) + 0.1)
+  
+  if plot_type == "j":
+    arr = dens.joint_density
+  elif plot_type == "m":
+    arr = dens.margin_product
+  elif plot_type == "r":
+    arr = dens.joint_density / dens.margin_product
+  
+  plot_density(ax, arr, _max_val=max_val)
+
+fig, ax = plt.subplots()
+visualize(ax, epsilon=0.3, w=0.1, s=0.5)
+```
+
+In this case, we see that there are three regions, each with a different value of $p_{XY}(x, y)$.
+However, this is not everything! We should remember about the $p_X(x)\cdot p_Y(y)$ term on the square $(0, 1 - \epsilon + s)^2$.
+This gives us $3\cdot 3 = 9$ regions to be considered :
+
+```{python}
+def plot_three(epsilon, w, s):
+  fig, axs = plt.subplots(1, 3, sharex=True, sharey=True)
+
+  ax = axs[0]
+  visualize(ax, epsilon=epsilon, w=w, s=s, plot_type="j")
+  ax.set_title("Joint")
+
+  ax = axs[1]
+  visualize(ax, epsilon=epsilon, w=w, s=s, plot_type="m")
+  ax.set_title("Margin product")
+
+  ax = axs[2]
+  visualize(ax, epsilon=epsilon, w=w, s=s, plot_type="r")
+  ax.set_title("Ratio")
+  
+  fig.tight_layout()
+  return fig
+
+plot_three(epsilon=0.3, w=0.2, s=0.5)
+None
+```
+
+Let's calculate the densities on each of them. We will label them with coordinates $(x, y) \in \{0, 1, 2\}^2$.
+
+Region $(0, 0)$: this is a square $(0, 1-\epsilon)^2$. In this region, we have $p_{XY} = 1 - w$, $p_X = p_Y = 1-w$. Hence, the ratio is $1/(1-w)$. The contribution to overall mutual information is
+$$
+I_{00} = -(1-w) \cdot (1-\epsilon)^2 \cdot \log(1-w). 
+$$
+
+Region $(1, 1)$: this is a square $(1-\epsilon, 1)^2$.
+Here, $p_{XY} = (1 - w) + w/s^2$. We have $p_{X} = p_Y = (1-w) + w/s$. Hence, the ratio is equal to
+$\frac{w + s^2(1 - w)}{(s + w -sw)^2}$ and the overall contribution of this region is
+$$
+I_{11} =  
+$$
+
+
+
+Region $(2, 2)$: this is a  square $(1, 1-\epsilon + s)$.
+
