@@ -62,6 +62,48 @@ It runs on push to `main` (or manual trigger), renders the site, and deploys Pag
 - Keep unfinished posts in `_drafts/` (or set `draft: true` in front matter) so they are not published from `posts/`.
 - The default template [`_post_template.qmd`](_post_template.qmd) sets `draft: true`. Remove it only when publishing.
 
+## uv Environments and Per-Post Kernels
+
+Use one default `uv` environment for most posts and optional dedicated environments for selected posts.
+
+Default environment:
+
+1. Create/sync default environment (example):
+   `uv venv && uv sync`
+2. Register default kernel:
+   `make default-kernel`
+3. In posts that should use default environment, set:
+
+```yaml
+jupyter: quarto-default
+```
+
+Per-post environment:
+
+```bash
+make post-env POST=<slug> [PYTHON=3.12] [PACKAGES='pkg1 pkg2']
+```
+
+Examples:
+
+```bash
+make post-env POST=kernel-regression-transformer
+make post-env POST=kernel-regression-transformer PYTHON=3.12 PACKAGES='jax equinox'
+```
+
+This creates `.venvs/posts/<slug>`, installs `jupyter` and `ipykernel` (plus optional packages), and registers kernel:
+
+`quarto-post-<slug>`
+
+Then set in that post front matter:
+
+```yaml
+jupyter: quarto-post-<slug>
+```
+
+Helper script:
+- [`scripts/new-post-env.sh`](scripts/new-post-env.sh)
+
 ## Blog Listing Hygiene
 
 - If a dead row appears in blog listing/search (for example placeholder `TITLE` / `DESCRIPTION`), regenerate listing artifacts:
