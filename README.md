@@ -60,3 +60,14 @@ It runs on push to `main` (or manual trigger), renders the site, and deploys Pag
 ## Drafts
 
 - Keep unfinished posts in `_drafts/` (or set `draft: true` in front matter) so they are not published from `posts/`.
+- The default template [`_post_template.qmd`](_post_template.qmd) sets `draft: true`. Remove it only when publishing.
+
+## Blog Listing Hygiene
+
+- If a dead row appears in blog listing/search (for example placeholder `TITLE` / `DESCRIPTION`), regenerate listing artifacts:
+
+```bash
+quarto render blog.qmd
+```
+
+- This updates `docs/blog.html`, `docs/listings.json`, `docs/search.json`, and `docs/sitemap.xml` without recomputing all analyses.
