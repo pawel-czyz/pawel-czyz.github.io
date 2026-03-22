@@ -18,6 +18,8 @@ about:
       href: mailto:pczyz@protonmail.com
 ---
 
+::: {.text-start}
+
 My name is Paweł Czyż, and I am a Bayesian statistician and machine learning researcher focused on modeling complex data.
 
 I enjoy working on:
@@ -29,4 +31,6 @@ I enjoy working on:
 Beyond my core research, I am interested in connections between category theory, algebraic topology, differential geometry, and mathematical physics.
 
 I hold a Doctor of Sciences degree from ETH Zurich and a Master’s in Mathematical and Theoretical Physics from the University of Oxford.
+
+:::
 

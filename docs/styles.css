@@ -1,1 +1,16 @@
 /* css styles */
+
+/* Force left alignment */
+body, p, li {
+  text-align: left;
+}
+
+/* Ensure main content is left-aligned */
+main {
+  text-align: left;
+}
+
+/* Fix Quarto container if centered */
+.quarto-container {
+  text-align: left;
+}
