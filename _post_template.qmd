@@ -3,6 +3,7 @@ title: "TITLE"
 description: "DESCRIPTION"
 author: "Paweł Czyż"
 date: "MONTH/DAY/2024"
+draft: true
 categories:
   - Category 1
   - Category 2
@@ -27,4 +28,3 @@ $$
 ```{python}
 import numpy as np
 ```
-

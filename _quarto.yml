@@ -2,6 +2,10 @@ project:
   type: website
   output-dir: docs
 
+execute:
+  freeze: true
+  cache: true
+
 website:
   title: "Paweł Czyż"
   site-url: "https://pawel-czyz.github.io/"
@@ -17,6 +21,5 @@ format:
     theme: darkly
     css: styles.css
     toc: true
-
 
 
